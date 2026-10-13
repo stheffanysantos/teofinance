@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "python3 .claude/hooks/scripts/guard_architecture.py" },
+          { "type": "command", "command": "python3 .claude/hooks/scripts/guard_riverpod_pattern.py" },
+          { "type": "command", "command": "python3 .claude/hooks/scripts/guard_design_tokens.py" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "python3 .claude/hooks/scripts/pre_commit_gate.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          { "type": "command", "command": "python3 .claude/hooks/scripts/post_write_reminder.py" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "python3 .claude/hooks/scripts/session_start_briefing.py" }
+        ]
+      }
+    ]
+  }
+}

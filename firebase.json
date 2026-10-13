@@ -1,0 +1,27 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "teofinance-142e3",
+          "appId": "1:511066993815:android:4115d81b2a7dcd288f25d2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "teofinance-142e3",
+          "configurations": {
+            "android": "1:511066993815:android:4115d81b2a7dcd288f25d2",
+            "ios": "1:511066993815:ios:f88627192aa9aa3a8f25d2",
+            "web": "1:511066993815:web:2c4e546faf1233b48f25d2"
+          }
+        }
+      }
+    }
+  }
+}

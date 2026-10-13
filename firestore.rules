@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Cada usuário só lê/escreve os próprios dados. Estrutura: toda coleção
+// financeira vive sob users/{uid}/..., então o isolamento é feito pela
+// própria hierarquia de documentos, reforçado pela checagem de auth.uid.
+// Ver `.claude/rules/security.md`.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      allow read, write: if isOwner(uid);
+
+      match /{document=**} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // Nenhuma outra coleção é permitida por padrão.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
