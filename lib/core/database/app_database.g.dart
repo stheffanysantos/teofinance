@@ -106,6 +106,65 @@ class $TransactionsTableTable extends TransactionsTable
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _parcelamentoIdMeta = const VerificationMeta(
+    'parcelamentoId',
+  );
+  @override
+  late final GeneratedColumn<String> parcelamentoId = GeneratedColumn<String>(
+    'parcelamento_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _numeroParcelaMeta = const VerificationMeta(
+    'numeroParcela',
+  );
+  @override
+  late final GeneratedColumn<int> numeroParcela = GeneratedColumn<int>(
+    'numero_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _valorParcelaMeta = const VerificationMeta(
+    'valorParcela',
+  );
+  @override
+  late final GeneratedColumn<double> valorParcela = GeneratedColumn<double>(
+    'valor_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ehParcelaMeta = const VerificationMeta(
+    'ehParcela',
+  );
+  @override
+  late final GeneratedColumn<bool> ehParcela = GeneratedColumn<bool>(
+    'eh_parcela',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("eh_parcela" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _statusParcelaMeta = const VerificationMeta(
+    'statusParcela',
+  );
+  @override
+  late final GeneratedColumn<String> statusParcela = GeneratedColumn<String>(
+    'status_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -117,6 +176,11 @@ class $TransactionsTableTable extends TransactionsTable
     needsCategory,
     syncStatus,
     updatedAt,
+    parcelamentoId,
+    numeroParcela,
+    valorParcela,
+    ehParcela,
+    statusParcela,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -188,6 +252,48 @@ class $TransactionsTableTable extends TransactionsTable
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('parcelamento_id')) {
+      context.handle(
+        _parcelamentoIdMeta,
+        parcelamentoId.isAcceptableOrUnknown(
+          data['parcelamento_id']!,
+          _parcelamentoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('numero_parcela')) {
+      context.handle(
+        _numeroParcelaMeta,
+        numeroParcela.isAcceptableOrUnknown(
+          data['numero_parcela']!,
+          _numeroParcelaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('valor_parcela')) {
+      context.handle(
+        _valorParcelaMeta,
+        valorParcela.isAcceptableOrUnknown(
+          data['valor_parcela']!,
+          _valorParcelaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('eh_parcela')) {
+      context.handle(
+        _ehParcelaMeta,
+        ehParcela.isAcceptableOrUnknown(data['eh_parcela']!, _ehParcelaMeta),
+      );
+    }
+    if (data.containsKey('status_parcela')) {
+      context.handle(
+        _statusParcelaMeta,
+        statusParcela.isAcceptableOrUnknown(
+          data['status_parcela']!,
+          _statusParcelaMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -235,6 +341,26 @@ class $TransactionsTableTable extends TransactionsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      parcelamentoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parcelamento_id'],
+      ),
+      numeroParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_parcela'],
+      ),
+      valorParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor_parcela'],
+      ),
+      ehParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}eh_parcela'],
+      )!,
+      statusParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status_parcela'],
+      ),
     );
   }
 
@@ -258,6 +384,22 @@ class TransactionsTableData extends DataClass
   final bool needsCategory;
   final SyncStatus syncStatus;
   final DateTime updatedAt;
+
+  /// Parcelamento: campos adicionados na v5 (Sprint 02)
+  /// FK → ParcelamentoTable (nulo se não é parcela)
+  final String? parcelamentoId;
+
+  /// Número da parcela: 1, 2, 3... (nulo se não é parcela)
+  final int? numeroParcela;
+
+  /// Valor da parcela individual (nulo se não é parcela)
+  final double? valorParcela;
+
+  /// true se é transação-filha de um parcelamento, false caso contrário
+  final bool ehParcela;
+
+  /// Status da parcela: 'pendente' | 'pago' | 'atrasado' (nulo se não é parcela)
+  final String? statusParcela;
   const TransactionsTableData({
     required this.id,
     this.remoteId,
@@ -268,6 +410,11 @@ class TransactionsTableData extends DataClass
     required this.needsCategory,
     required this.syncStatus,
     required this.updatedAt,
+    this.parcelamentoId,
+    this.numeroParcela,
+    this.valorParcela,
+    required this.ehParcela,
+    this.statusParcela,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -287,6 +434,19 @@ class TransactionsTableData extends DataClass
       );
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || parcelamentoId != null) {
+      map['parcelamento_id'] = Variable<String>(parcelamentoId);
+    }
+    if (!nullToAbsent || numeroParcela != null) {
+      map['numero_parcela'] = Variable<int>(numeroParcela);
+    }
+    if (!nullToAbsent || valorParcela != null) {
+      map['valor_parcela'] = Variable<double>(valorParcela);
+    }
+    map['eh_parcela'] = Variable<bool>(ehParcela);
+    if (!nullToAbsent || statusParcela != null) {
+      map['status_parcela'] = Variable<String>(statusParcela);
+    }
     return map;
   }
 
@@ -303,6 +463,19 @@ class TransactionsTableData extends DataClass
       needsCategory: Value(needsCategory),
       syncStatus: Value(syncStatus),
       updatedAt: Value(updatedAt),
+      parcelamentoId: parcelamentoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parcelamentoId),
+      numeroParcela: numeroParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(numeroParcela),
+      valorParcela: valorParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valorParcela),
+      ehParcela: Value(ehParcela),
+      statusParcela: statusParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statusParcela),
     );
   }
 
@@ -323,6 +496,11 @@ class TransactionsTableData extends DataClass
         serializer.fromJson<int>(json['syncStatus']),
       ),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      parcelamentoId: serializer.fromJson<String?>(json['parcelamentoId']),
+      numeroParcela: serializer.fromJson<int?>(json['numeroParcela']),
+      valorParcela: serializer.fromJson<double?>(json['valorParcela']),
+      ehParcela: serializer.fromJson<bool>(json['ehParcela']),
+      statusParcela: serializer.fromJson<String?>(json['statusParcela']),
     );
   }
   @override
@@ -340,6 +518,11 @@ class TransactionsTableData extends DataClass
         $TransactionsTableTable.$convertersyncStatus.toJson(syncStatus),
       ),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'parcelamentoId': serializer.toJson<String?>(parcelamentoId),
+      'numeroParcela': serializer.toJson<int?>(numeroParcela),
+      'valorParcela': serializer.toJson<double?>(valorParcela),
+      'ehParcela': serializer.toJson<bool>(ehParcela),
+      'statusParcela': serializer.toJson<String?>(statusParcela),
     };
   }
 
@@ -353,6 +536,11 @@ class TransactionsTableData extends DataClass
     bool? needsCategory,
     SyncStatus? syncStatus,
     DateTime? updatedAt,
+    Value<String?> parcelamentoId = const Value.absent(),
+    Value<int?> numeroParcela = const Value.absent(),
+    Value<double?> valorParcela = const Value.absent(),
+    bool? ehParcela,
+    Value<String?> statusParcela = const Value.absent(),
   }) => TransactionsTableData(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -363,6 +551,17 @@ class TransactionsTableData extends DataClass
     needsCategory: needsCategory ?? this.needsCategory,
     syncStatus: syncStatus ?? this.syncStatus,
     updatedAt: updatedAt ?? this.updatedAt,
+    parcelamentoId: parcelamentoId.present
+        ? parcelamentoId.value
+        : this.parcelamentoId,
+    numeroParcela: numeroParcela.present
+        ? numeroParcela.value
+        : this.numeroParcela,
+    valorParcela: valorParcela.present ? valorParcela.value : this.valorParcela,
+    ehParcela: ehParcela ?? this.ehParcela,
+    statusParcela: statusParcela.present
+        ? statusParcela.value
+        : this.statusParcela,
   );
   TransactionsTableData copyWithCompanion(TransactionsTableCompanion data) {
     return TransactionsTableData(
@@ -381,6 +580,19 @@ class TransactionsTableData extends DataClass
           ? data.syncStatus.value
           : this.syncStatus,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      parcelamentoId: data.parcelamentoId.present
+          ? data.parcelamentoId.value
+          : this.parcelamentoId,
+      numeroParcela: data.numeroParcela.present
+          ? data.numeroParcela.value
+          : this.numeroParcela,
+      valorParcela: data.valorParcela.present
+          ? data.valorParcela.value
+          : this.valorParcela,
+      ehParcela: data.ehParcela.present ? data.ehParcela.value : this.ehParcela,
+      statusParcela: data.statusParcela.present
+          ? data.statusParcela.value
+          : this.statusParcela,
     );
   }
 
@@ -395,7 +607,12 @@ class TransactionsTableData extends DataClass
           ..write('occurredAt: $occurredAt, ')
           ..write('needsCategory: $needsCategory, ')
           ..write('syncStatus: $syncStatus, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parcelamentoId: $parcelamentoId, ')
+          ..write('numeroParcela: $numeroParcela, ')
+          ..write('valorParcela: $valorParcela, ')
+          ..write('ehParcela: $ehParcela, ')
+          ..write('statusParcela: $statusParcela')
           ..write(')'))
         .toString();
   }
@@ -411,6 +628,11 @@ class TransactionsTableData extends DataClass
     needsCategory,
     syncStatus,
     updatedAt,
+    parcelamentoId,
+    numeroParcela,
+    valorParcela,
+    ehParcela,
+    statusParcela,
   );
   @override
   bool operator ==(Object other) =>
@@ -424,7 +646,12 @@ class TransactionsTableData extends DataClass
           other.occurredAt == this.occurredAt &&
           other.needsCategory == this.needsCategory &&
           other.syncStatus == this.syncStatus &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.parcelamentoId == this.parcelamentoId &&
+          other.numeroParcela == this.numeroParcela &&
+          other.valorParcela == this.valorParcela &&
+          other.ehParcela == this.ehParcela &&
+          other.statusParcela == this.statusParcela);
 }
 
 class TransactionsTableCompanion
@@ -438,6 +665,11 @@ class TransactionsTableCompanion
   final Value<bool> needsCategory;
   final Value<SyncStatus> syncStatus;
   final Value<DateTime> updatedAt;
+  final Value<String?> parcelamentoId;
+  final Value<int?> numeroParcela;
+  final Value<double?> valorParcela;
+  final Value<bool> ehParcela;
+  final Value<String?> statusParcela;
   final Value<int> rowid;
   const TransactionsTableCompanion({
     this.id = const Value.absent(),
@@ -449,6 +681,11 @@ class TransactionsTableCompanion
     this.needsCategory = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.parcelamentoId = const Value.absent(),
+    this.numeroParcela = const Value.absent(),
+    this.valorParcela = const Value.absent(),
+    this.ehParcela = const Value.absent(),
+    this.statusParcela = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsTableCompanion.insert({
@@ -461,6 +698,11 @@ class TransactionsTableCompanion
     this.needsCategory = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.parcelamentoId = const Value.absent(),
+    this.numeroParcela = const Value.absent(),
+    this.valorParcela = const Value.absent(),
+    this.ehParcela = const Value.absent(),
+    this.statusParcela = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -477,6 +719,11 @@ class TransactionsTableCompanion
     Expression<bool>? needsCategory,
     Expression<int>? syncStatus,
     Expression<DateTime>? updatedAt,
+    Expression<String>? parcelamentoId,
+    Expression<int>? numeroParcela,
+    Expression<double>? valorParcela,
+    Expression<bool>? ehParcela,
+    Expression<String>? statusParcela,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -489,6 +736,11 @@ class TransactionsTableCompanion
       if (needsCategory != null) 'needs_category': needsCategory,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (parcelamentoId != null) 'parcelamento_id': parcelamentoId,
+      if (numeroParcela != null) 'numero_parcela': numeroParcela,
+      if (valorParcela != null) 'valor_parcela': valorParcela,
+      if (ehParcela != null) 'eh_parcela': ehParcela,
+      if (statusParcela != null) 'status_parcela': statusParcela,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -503,6 +755,11 @@ class TransactionsTableCompanion
     Value<bool>? needsCategory,
     Value<SyncStatus>? syncStatus,
     Value<DateTime>? updatedAt,
+    Value<String?>? parcelamentoId,
+    Value<int?>? numeroParcela,
+    Value<double?>? valorParcela,
+    Value<bool>? ehParcela,
+    Value<String?>? statusParcela,
     Value<int>? rowid,
   }) {
     return TransactionsTableCompanion(
@@ -515,6 +772,11 @@ class TransactionsTableCompanion
       needsCategory: needsCategory ?? this.needsCategory,
       syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
+      parcelamentoId: parcelamentoId ?? this.parcelamentoId,
+      numeroParcela: numeroParcela ?? this.numeroParcela,
+      valorParcela: valorParcela ?? this.valorParcela,
+      ehParcela: ehParcela ?? this.ehParcela,
+      statusParcela: statusParcela ?? this.statusParcela,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -551,6 +813,21 @@ class TransactionsTableCompanion
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (parcelamentoId.present) {
+      map['parcelamento_id'] = Variable<String>(parcelamentoId.value);
+    }
+    if (numeroParcela.present) {
+      map['numero_parcela'] = Variable<int>(numeroParcela.value);
+    }
+    if (valorParcela.present) {
+      map['valor_parcela'] = Variable<double>(valorParcela.value);
+    }
+    if (ehParcela.present) {
+      map['eh_parcela'] = Variable<bool>(ehParcela.value);
+    }
+    if (statusParcela.present) {
+      map['status_parcela'] = Variable<String>(statusParcela.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -569,6 +846,11 @@ class TransactionsTableCompanion
           ..write('needsCategory: $needsCategory, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('parcelamentoId: $parcelamentoId, ')
+          ..write('numeroParcela: $numeroParcela, ')
+          ..write('valorParcela: $valorParcela, ')
+          ..write('ehParcela: $ehParcela, ')
+          ..write('statusParcela: $statusParcela, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2489,6 +2771,552 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
   }
 }
 
+class $ParcelamentoTableTable extends ParcelamentoTable
+    with TableInfo<$ParcelamentoTableTable, ParcelamentoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ParcelamentoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _transacaoOriginalIdMeta =
+      const VerificationMeta('transacaoOriginalId');
+  @override
+  late final GeneratedColumn<String> transacaoOriginalId =
+      GeneratedColumn<String>(
+        'transacao_original_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _totalOriginalMeta = const VerificationMeta(
+    'totalOriginal',
+  );
+  @override
+  late final GeneratedColumn<double> totalOriginal = GeneratedColumn<double>(
+    'total_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numeroParcelasMeta = const VerificationMeta(
+    'numeroParcelas',
+  );
+  @override
+  late final GeneratedColumn<int> numeroParcelas = GeneratedColumn<int>(
+    'numero_parcelas',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataPrimeiraParcMeta = const VerificationMeta(
+    'dataPrimeiraParc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dataPrimeiraParc =
+      GeneratedColumn<DateTime>(
+        'data_primeira_parc',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: Constant(SyncStatus.pendingCreate.index),
+      ).withConverter<SyncStatus>($ParcelamentoTableTable.$convertersyncStatus);
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    transacaoOriginalId,
+    totalOriginal,
+    numeroParcelas,
+    dataPrimeiraParc,
+    syncStatus,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'parcelamento_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ParcelamentoTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('transacao_original_id')) {
+      context.handle(
+        _transacaoOriginalIdMeta,
+        transacaoOriginalId.isAcceptableOrUnknown(
+          data['transacao_original_id']!,
+          _transacaoOriginalIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_transacaoOriginalIdMeta);
+    }
+    if (data.containsKey('total_original')) {
+      context.handle(
+        _totalOriginalMeta,
+        totalOriginal.isAcceptableOrUnknown(
+          data['total_original']!,
+          _totalOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_totalOriginalMeta);
+    }
+    if (data.containsKey('numero_parcelas')) {
+      context.handle(
+        _numeroParcelasMeta,
+        numeroParcelas.isAcceptableOrUnknown(
+          data['numero_parcelas']!,
+          _numeroParcelasMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_numeroParcelasMeta);
+    }
+    if (data.containsKey('data_primeira_parc')) {
+      context.handle(
+        _dataPrimeiraParcMeta,
+        dataPrimeiraParc.isAcceptableOrUnknown(
+          data['data_primeira_parc']!,
+          _dataPrimeiraParcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dataPrimeiraParcMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ParcelamentoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParcelamentoTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      transacaoOriginalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transacao_original_id'],
+      )!,
+      totalOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_original'],
+      )!,
+      numeroParcelas: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_parcelas'],
+      )!,
+      dataPrimeiraParc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_primeira_parc'],
+      )!,
+      syncStatus: $ParcelamentoTableTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ParcelamentoTableTable createAlias(String alias) {
+    return $ParcelamentoTableTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const EnumIndexConverter<SyncStatus>(SyncStatus.values);
+}
+
+class ParcelamentoTableData extends DataClass
+    implements Insertable<ParcelamentoTableData> {
+  final String id;
+  final String? remoteId;
+  final String transacaoOriginalId;
+  final double totalOriginal;
+  final int numeroParcelas;
+  final DateTime dataPrimeiraParc;
+  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  const ParcelamentoTableData({
+    required this.id,
+    this.remoteId,
+    required this.transacaoOriginalId,
+    required this.totalOriginal,
+    required this.numeroParcelas,
+    required this.dataPrimeiraParc,
+    required this.syncStatus,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    map['transacao_original_id'] = Variable<String>(transacaoOriginalId);
+    map['total_original'] = Variable<double>(totalOriginal);
+    map['numero_parcelas'] = Variable<int>(numeroParcelas);
+    map['data_primeira_parc'] = Variable<DateTime>(dataPrimeiraParc);
+    {
+      map['sync_status'] = Variable<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ParcelamentoTableCompanion toCompanion(bool nullToAbsent) {
+    return ParcelamentoTableCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      transacaoOriginalId: Value(transacaoOriginalId),
+      totalOriginal: Value(totalOriginal),
+      numeroParcelas: Value(numeroParcelas),
+      dataPrimeiraParc: Value(dataPrimeiraParc),
+      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ParcelamentoTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParcelamentoTableData(
+      id: serializer.fromJson<String>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      transacaoOriginalId: serializer.fromJson<String>(
+        json['transacaoOriginalId'],
+      ),
+      totalOriginal: serializer.fromJson<double>(json['totalOriginal']),
+      numeroParcelas: serializer.fromJson<int>(json['numeroParcelas']),
+      dataPrimeiraParc: serializer.fromJson<DateTime>(json['dataPrimeiraParc']),
+      syncStatus: $ParcelamentoTableTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'transacaoOriginalId': serializer.toJson<String>(transacaoOriginalId),
+      'totalOriginal': serializer.toJson<double>(totalOriginal),
+      'numeroParcelas': serializer.toJson<int>(numeroParcelas),
+      'dataPrimeiraParc': serializer.toJson<DateTime>(dataPrimeiraParc),
+      'syncStatus': serializer.toJson<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toJson(syncStatus),
+      ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ParcelamentoTableData copyWith({
+    String? id,
+    Value<String?> remoteId = const Value.absent(),
+    String? transacaoOriginalId,
+    double? totalOriginal,
+    int? numeroParcelas,
+    DateTime? dataPrimeiraParc,
+    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+  }) => ParcelamentoTableData(
+    id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    transacaoOriginalId: transacaoOriginalId ?? this.transacaoOriginalId,
+    totalOriginal: totalOriginal ?? this.totalOriginal,
+    numeroParcelas: numeroParcelas ?? this.numeroParcelas,
+    dataPrimeiraParc: dataPrimeiraParc ?? this.dataPrimeiraParc,
+    syncStatus: syncStatus ?? this.syncStatus,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ParcelamentoTableData copyWithCompanion(ParcelamentoTableCompanion data) {
+    return ParcelamentoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      transacaoOriginalId: data.transacaoOriginalId.present
+          ? data.transacaoOriginalId.value
+          : this.transacaoOriginalId,
+      totalOriginal: data.totalOriginal.present
+          ? data.totalOriginal.value
+          : this.totalOriginal,
+      numeroParcelas: data.numeroParcelas.present
+          ? data.numeroParcelas.value
+          : this.numeroParcelas,
+      dataPrimeiraParc: data.dataPrimeiraParc.present
+          ? data.dataPrimeiraParc.value
+          : this.dataPrimeiraParc,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParcelamentoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('transacaoOriginalId: $transacaoOriginalId, ')
+          ..write('totalOriginal: $totalOriginal, ')
+          ..write('numeroParcelas: $numeroParcelas, ')
+          ..write('dataPrimeiraParc: $dataPrimeiraParc, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    transacaoOriginalId,
+    totalOriginal,
+    numeroParcelas,
+    dataPrimeiraParc,
+    syncStatus,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParcelamentoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.transacaoOriginalId == this.transacaoOriginalId &&
+          other.totalOriginal == this.totalOriginal &&
+          other.numeroParcelas == this.numeroParcelas &&
+          other.dataPrimeiraParc == this.dataPrimeiraParc &&
+          other.syncStatus == this.syncStatus &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ParcelamentoTableCompanion
+    extends UpdateCompanion<ParcelamentoTableData> {
+  final Value<String> id;
+  final Value<String?> remoteId;
+  final Value<String> transacaoOriginalId;
+  final Value<double> totalOriginal;
+  final Value<int> numeroParcelas;
+  final Value<DateTime> dataPrimeiraParc;
+  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ParcelamentoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.transacaoOriginalId = const Value.absent(),
+    this.totalOriginal = const Value.absent(),
+    this.numeroParcelas = const Value.absent(),
+    this.dataPrimeiraParc = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParcelamentoTableCompanion.insert({
+    required String id,
+    this.remoteId = const Value.absent(),
+    required String transacaoOriginalId,
+    required double totalOriginal,
+    required int numeroParcelas,
+    required DateTime dataPrimeiraParc,
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       transacaoOriginalId = Value(transacaoOriginalId),
+       totalOriginal = Value(totalOriginal),
+       numeroParcelas = Value(numeroParcelas),
+       dataPrimeiraParc = Value(dataPrimeiraParc);
+  static Insertable<ParcelamentoTableData> custom({
+    Expression<String>? id,
+    Expression<String>? remoteId,
+    Expression<String>? transacaoOriginalId,
+    Expression<double>? totalOriginal,
+    Expression<int>? numeroParcelas,
+    Expression<DateTime>? dataPrimeiraParc,
+    Expression<int>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (transacaoOriginalId != null)
+        'transacao_original_id': transacaoOriginalId,
+      if (totalOriginal != null) 'total_original': totalOriginal,
+      if (numeroParcelas != null) 'numero_parcelas': numeroParcelas,
+      if (dataPrimeiraParc != null) 'data_primeira_parc': dataPrimeiraParc,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParcelamentoTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? remoteId,
+    Value<String>? transacaoOriginalId,
+    Value<double>? totalOriginal,
+    Value<int>? numeroParcelas,
+    Value<DateTime>? dataPrimeiraParc,
+    Value<SyncStatus>? syncStatus,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ParcelamentoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      transacaoOriginalId: transacaoOriginalId ?? this.transacaoOriginalId,
+      totalOriginal: totalOriginal ?? this.totalOriginal,
+      numeroParcelas: numeroParcelas ?? this.numeroParcelas,
+      dataPrimeiraParc: dataPrimeiraParc ?? this.dataPrimeiraParc,
+      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (transacaoOriginalId.present) {
+      map['transacao_original_id'] = Variable<String>(
+        transacaoOriginalId.value,
+      );
+    }
+    if (totalOriginal.present) {
+      map['total_original'] = Variable<double>(totalOriginal.value);
+    }
+    if (numeroParcelas.present) {
+      map['numero_parcelas'] = Variable<int>(numeroParcelas.value);
+    }
+    if (dataPrimeiraParc.present) {
+      map['data_primeira_parc'] = Variable<DateTime>(dataPrimeiraParc.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParcelamentoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('transacaoOriginalId: $transacaoOriginalId, ')
+          ..write('totalOriginal: $totalOriginal, ')
+          ..write('numeroParcelas: $numeroParcelas, ')
+          ..write('dataPrimeiraParc: $dataPrimeiraParc, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2499,6 +3327,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $RendaTableTable rendaTable = $RendaTableTable(this);
   late final $MetaTableTable metaTable = $MetaTableTable(this);
+  late final $ParcelamentoTableTable parcelamentoTable =
+      $ParcelamentoTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2508,6 +3338,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     perfilBancoTable,
     rendaTable,
     metaTable,
+    parcelamentoTable,
   ];
 }
 
@@ -2522,6 +3353,11 @@ typedef $$TransactionsTableTableCreateCompanionBuilder =
       Value<bool> needsCategory,
       Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
+      Value<String?> parcelamentoId,
+      Value<int?> numeroParcela,
+      Value<double?> valorParcela,
+      Value<bool> ehParcela,
+      Value<String?> statusParcela,
       Value<int> rowid,
     });
 typedef $$TransactionsTableTableUpdateCompanionBuilder =
@@ -2535,6 +3371,11 @@ typedef $$TransactionsTableTableUpdateCompanionBuilder =
       Value<bool> needsCategory,
       Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
+      Value<String?> parcelamentoId,
+      Value<int?> numeroParcela,
+      Value<double?> valorParcela,
+      Value<bool> ehParcela,
+      Value<String?> statusParcela,
       Value<int> rowid,
     });
 
@@ -2592,6 +3433,31 @@ class $$TransactionsTableTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ehParcela => $composableBuilder(
+    column: $table.ehParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TransactionsTableTableOrderingComposer
@@ -2647,6 +3513,31 @@ class $$TransactionsTableTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ehParcela => $composableBuilder(
+    column: $table.ehParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TransactionsTableTableAnnotationComposer
@@ -2691,6 +3582,29 @@ class $$TransactionsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ehParcela =>
+      $composableBuilder(column: $table.ehParcela, builder: (column) => column);
+
+  GeneratedColumn<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => column,
+  );
 }
 
 class $$TransactionsTableTableTableManager
@@ -2742,6 +3656,11 @@ class $$TransactionsTableTableTableManager
                 Value<bool> needsCategory = const Value.absent(),
                 Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> parcelamentoId = const Value.absent(),
+                Value<int?> numeroParcela = const Value.absent(),
+                Value<double?> valorParcela = const Value.absent(),
+                Value<bool> ehParcela = const Value.absent(),
+                Value<String?> statusParcela = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion(
                 id: id,
@@ -2753,6 +3672,11 @@ class $$TransactionsTableTableTableManager
                 needsCategory: needsCategory,
                 syncStatus: syncStatus,
                 updatedAt: updatedAt,
+                parcelamentoId: parcelamentoId,
+                numeroParcela: numeroParcela,
+                valorParcela: valorParcela,
+                ehParcela: ehParcela,
+                statusParcela: statusParcela,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2766,6 +3690,11 @@ class $$TransactionsTableTableTableManager
                 Value<bool> needsCategory = const Value.absent(),
                 Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> parcelamentoId = const Value.absent(),
+                Value<int?> numeroParcela = const Value.absent(),
+                Value<double?> valorParcela = const Value.absent(),
+                Value<bool> ehParcela = const Value.absent(),
+                Value<String?> statusParcela = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion.insert(
                 id: id,
@@ -2777,6 +3706,11 @@ class $$TransactionsTableTableTableManager
                 needsCategory: needsCategory,
                 syncStatus: syncStatus,
                 updatedAt: updatedAt,
+                parcelamentoId: parcelamentoId,
+                numeroParcela: numeroParcela,
+                valorParcela: valorParcela,
+                ehParcela: ehParcela,
+                statusParcela: statusParcela,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3735,6 +4669,288 @@ typedef $$MetaTableTableProcessedTableManager =
       MetaTableData,
       PrefetchHooks Function()
     >;
+typedef $$ParcelamentoTableTableCreateCompanionBuilder =
+    ParcelamentoTableCompanion Function({
+      required String id,
+      Value<String?> remoteId,
+      required String transacaoOriginalId,
+      required double totalOriginal,
+      required int numeroParcelas,
+      required DateTime dataPrimeiraParc,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ParcelamentoTableTableUpdateCompanionBuilder =
+    ParcelamentoTableCompanion Function({
+      Value<String> id,
+      Value<String?> remoteId,
+      Value<String> transacaoOriginalId,
+      Value<double> totalOriginal,
+      Value<int> numeroParcelas,
+      Value<DateTime> dataPrimeiraParc,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ParcelamentoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ParcelamentoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ParcelamentoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ParcelamentoTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ParcelamentoTableTable,
+          ParcelamentoTableData,
+          $$ParcelamentoTableTableFilterComposer,
+          $$ParcelamentoTableTableOrderingComposer,
+          $$ParcelamentoTableTableAnnotationComposer,
+          $$ParcelamentoTableTableCreateCompanionBuilder,
+          $$ParcelamentoTableTableUpdateCompanionBuilder,
+          (
+            ParcelamentoTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ParcelamentoTableTable,
+              ParcelamentoTableData
+            >,
+          ),
+          ParcelamentoTableData,
+          PrefetchHooks Function()
+        > {
+  $$ParcelamentoTableTableTableManager(
+    _$AppDatabase db,
+    $ParcelamentoTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ParcelamentoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ParcelamentoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ParcelamentoTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String> transacaoOriginalId = const Value.absent(),
+                Value<double> totalOriginal = const Value.absent(),
+                Value<int> numeroParcelas = const Value.absent(),
+                Value<DateTime> dataPrimeiraParc = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParcelamentoTableCompanion(
+                id: id,
+                remoteId: remoteId,
+                transacaoOriginalId: transacaoOriginalId,
+                totalOriginal: totalOriginal,
+                numeroParcelas: numeroParcelas,
+                dataPrimeiraParc: dataPrimeiraParc,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> remoteId = const Value.absent(),
+                required String transacaoOriginalId,
+                required double totalOriginal,
+                required int numeroParcelas,
+                required DateTime dataPrimeiraParc,
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParcelamentoTableCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                transacaoOriginalId: transacaoOriginalId,
+                totalOriginal: totalOriginal,
+                numeroParcelas: numeroParcelas,
+                dataPrimeiraParc: dataPrimeiraParc,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ParcelamentoTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ParcelamentoTableTable,
+      ParcelamentoTableData,
+      $$ParcelamentoTableTableFilterComposer,
+      $$ParcelamentoTableTableOrderingComposer,
+      $$ParcelamentoTableTableAnnotationComposer,
+      $$ParcelamentoTableTableCreateCompanionBuilder,
+      $$ParcelamentoTableTableUpdateCompanionBuilder,
+      (
+        ParcelamentoTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ParcelamentoTableTable,
+          ParcelamentoTableData
+        >,
+      ),
+      ParcelamentoTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3747,4 +4963,6 @@ class $AppDatabaseManager {
       $$RendaTableTableTableManager(_db, _db.rendaTable);
   $$MetaTableTableTableManager get metaTable =>
       $$MetaTableTableTableManager(_db, _db.metaTable);
+  $$ParcelamentoTableTableTableManager get parcelamentoTable =>
+      $$ParcelamentoTableTableTableManager(_db, _db.parcelamentoTable);
 }

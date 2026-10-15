@@ -26,6 +26,18 @@ class TransactionsTable extends Table {
       )();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
+  /// Parcelamento: campos adicionados na v5 (Sprint 02)
+  /// FK → ParcelamentoTable (nulo se não é parcela)
+  TextColumn get parcelamentoId => text().nullable()();
+  /// Número da parcela: 1, 2, 3... (nulo se não é parcela)
+  IntColumn get numeroParcela => integer().nullable()();
+  /// Valor da parcela individual (nulo se não é parcela)
+  RealColumn get valorParcela => real().nullable()();
+  /// true se é transação-filha de um parcelamento, false caso contrário
+  BoolColumn get ehParcela => boolean().withDefault(const Constant(false))();
+  /// Status da parcela: 'pendente' | 'pago' | 'atrasado' (nulo se não é parcela)
+  TextColumn get statusParcela => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -96,13 +108,32 @@ class MetaTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [TransactionsTable, PerfilBancoTable, RendaTable, MetaTable])
+/// Parcelamentos de compras de cartão — ver `.claude/plans/Sprint02-Parcelamento.md`.
+/// Quando um usuário compra algo em 12x, cria 1 registro aqui (a "mãe")
+/// e 12 registros filhos em `TransactionsTable` com `parcelamentoId` apontando para este.
+class ParcelamentoTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get remoteId => text().nullable()();
+  TextColumn get transacaoOriginalId => text()();  // FK → TransactionsTable
+  RealColumn get totalOriginal => real()();        // R$3000
+  IntColumn get numeroParcelas => integer()();     // 12
+  DateTimeColumn get dataPrimeiraParc => dateTime()();
+  IntColumn get syncStatus => intEnum<SyncStatus>().withDefault(
+        Constant(SyncStatus.pendingCreate.index),
+      )();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [TransactionsTable, PerfilBancoTable, RendaTable, MetaTable, ParcelamentoTable])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -127,6 +158,17 @@ class AppDatabase extends _$AppDatabase {
             await m.createTable(rendaTable);
             await m.deleteTable(metaTable.actualTableName);
             await m.createTable(metaTable);
+          }
+          if (from < 5) {
+            // Adiciona suporte a parcelamento de cartão:
+            // - Nova tabela ParcelamentoTable
+            // - Novos campos em TransactionsTable
+            await m.createTable(parcelamentoTable);
+            await m.addColumn(transactionsTable, transactionsTable.parcelamentoId);
+            await m.addColumn(transactionsTable, transactionsTable.numeroParcela);
+            await m.addColumn(transactionsTable, transactionsTable.valorParcela);
+            await m.addColumn(transactionsTable, transactionsTable.ehParcela);
+            await m.addColumn(transactionsTable, transactionsTable.statusParcela);
           }
         },
       );
