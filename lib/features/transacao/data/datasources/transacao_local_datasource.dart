@@ -109,6 +109,67 @@ class TransacaoLocalDataSource {
         );
   }
 
+  /// Cria N transações-filhas para um parcelamento (Sprint 02).
+  /// Cada parcela é uma transação separada com data distribuída nos meses.
+  Future<List<Transacao>> criarParcelas({
+    required String parcelamentoId,
+    required String descricaoOriginal,
+    required String categoria,
+    required double totalOriginal,
+    required int numeroParcelas,
+    required DateTime dataPrimeira,
+  }) async {
+    final valorParcela = totalOriginal / numeroParcelas;
+    final parcelas = <Transacao>[];
+
+    for (int i = 1; i <= numeroParcelas; i++) {
+      final dataVencimento = dataPrimeira.add(Duration(days: 30 * (i - 1)));
+      final id = _uuid.v4();
+
+      await _db.into(_db.transactionsTable).insert(
+            TransactionsTableCompanion.insert(
+              id: id,
+              name: '$descricaoOriginal (${i}/$numeroParcelas)',
+              category: categoria,
+              value: valorParcela,
+              occurredAt: dataVencimento,
+              parcelamentoId: Value(parcelamentoId),
+              numeroParcela: Value(i),
+              valorParcela: Value(valorParcela),
+              ehParcela: const Value(true),
+              statusParcela: const Value('pendente'),
+              needsCategory: Value(categoria.trim().isEmpty),
+            ),
+          );
+
+      parcelas.add(
+        Transacao(
+          id: id,
+          descricao: '$descricaoOriginal (${i}/$numeroParcelas)',
+          categoria: categoria,
+          valor: valorParcela,
+          data: dataVencimento,
+          syncStatus: SyncStatus.pendingCreate,
+          parcelamentoId: parcelamentoId,
+          numeroParcela: i,
+          valorParcela: valorParcela,
+          ehParcela: true,
+          statusParcela: 'pendente',
+        ),
+      );
+    }
+
+    return parcelas;
+  }
+
+  /// Obtém transação por ID (usado para validações).
+  Future<Transacao?> obterPorId(String id) async {
+    final linha =
+        await (_db.select(_db.transactionsTable)..where((t) => t.id.equals(id)))
+            .getSingleOrNull();
+    return linha != null ? _paraEntidade(linha) : null;
+  }
+
   Transacao _paraEntidade(TransactionsTableData linha) {
     return Transacao(
       id: linha.id,
@@ -118,6 +179,12 @@ class TransacaoLocalDataSource {
       data: linha.occurredAt,
       remoteId: linha.remoteId,
       syncStatus: linha.syncStatus,
+      // Campos de parcelamento (Sprint 02)
+      parcelamentoId: linha.parcelamentoId,
+      numeroParcela: linha.numeroParcela,
+      valorParcela: linha.valorParcela,
+      ehParcela: linha.ehParcela,
+      statusParcela: linha.statusParcela,
     );
   }
 }

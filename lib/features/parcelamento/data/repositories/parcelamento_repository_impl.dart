@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/errors/failure.dart' show Failure, ServerFailure;
+import '../../../transacao/data/datasources/transacao_local_datasource.dart';
 import '../../data/datasources/parcelamento_local_data_source.dart';
 import '../../data/datasources/parcelamento_remote_data_source.dart';
 import '../../data/models/parcelamento_model.dart';
@@ -10,11 +11,13 @@ import '../../domain/repositories/parcelamento_repository.dart';
 
 class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
   final ParcelamentoLocalDataSource _local;
+  final TransacaoLocalDataSource _transacaoLocal;
   // TODO: Integrar com remote datasource após sync estar pronto
   // final ParcelamentoRemoteDataSource _remote;
 
   ParcelamentoRepositoryImpl(
     this._local,
+    this._transacaoLocal,
     // ignore: unused_element
     ParcelamentoRemoteDataSource _remote,
   );
@@ -27,7 +30,16 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
     required DateTime dataPrimeira,
   }) async {
     try {
-      // Cria o registro de parcelamento
+      // 1. Busca a transação original para obter dados
+      final transacaoOriginal = await _transacaoLocal.obterPorId(transacaoId);
+
+      if (transacaoOriginal == null) {
+        return Left(
+          ServerFailure('Transação original não encontrada'),
+        );
+      }
+
+      // 2. Cria o registro de parcelamento
       final parcelamentoId = const Uuid().v4();
       final now = DateTime.now();
 
@@ -42,7 +54,15 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
 
       await _local.salvarParcelamento(parcelamento);
 
-      // TODO: Criar transações-filhas no TransacaoRepository após integração
+      // 3. Cria as N transações-filhas (uma por parcela)
+      await _transacaoLocal.criarParcelas(
+        parcelamentoId: parcelamentoId,
+        descricaoOriginal: transacaoOriginal.descricao,
+        categoria: transacaoOriginal.categoria,
+        totalOriginal: totalOriginal,
+        numeroParcelas: numeroParcelas,
+        dataPrimeira: dataPrimeira,
+      );
 
       return Right(parcelamento);
     } catch (e) {
