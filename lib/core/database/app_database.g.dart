@@ -3317,6 +3317,967 @@ class ParcelamentoTableCompanion
   }
 }
 
+class $ExtratoLinhasTableTable extends ExtratoLinhasTable
+    with TableInfo<$ExtratoLinhasTableTable, ExtratoLinhasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExtratoLinhasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _importIdMeta = const VerificationMeta(
+    'importId',
+  );
+  @override
+  late final GeneratedColumn<String> importId = GeneratedColumn<String>(
+    'import_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descricaoMeta = const VerificationMeta(
+    'descricao',
+  );
+  @override
+  late final GeneratedColumn<String> descricao = GeneratedColumn<String>(
+    'descricao',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valorMeta = const VerificationMeta('valor');
+  @override
+  late final GeneratedColumn<double> valor = GeneratedColumn<double>(
+    'valor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<DateTime> data = GeneratedColumn<DateTime>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nomeBancoOriginalMeta = const VerificationMeta(
+    'nomeBancoOriginal',
+  );
+  @override
+  late final GeneratedColumn<String> nomeBancoOriginal =
+      GeneratedColumn<String>(
+        'nome_banco_original',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _importadoEmMeta = const VerificationMeta(
+    'importadoEm',
+  );
+  @override
+  late final GeneratedColumn<DateTime> importadoEm = GeneratedColumn<DateTime>(
+    'importado_em',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    importId,
+    descricao,
+    valor,
+    data,
+    tipo,
+    nomeBancoOriginal,
+    importadoEm,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'extrato_linhas_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExtratoLinhasTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('import_id')) {
+      context.handle(
+        _importIdMeta,
+        importId.isAcceptableOrUnknown(data['import_id']!, _importIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_importIdMeta);
+    }
+    if (data.containsKey('descricao')) {
+      context.handle(
+        _descricaoMeta,
+        descricao.isAcceptableOrUnknown(data['descricao']!, _descricaoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_descricaoMeta);
+    }
+    if (data.containsKey('valor')) {
+      context.handle(
+        _valorMeta,
+        valor.isAcceptableOrUnknown(data['valor']!, _valorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valorMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoMeta);
+    }
+    if (data.containsKey('nome_banco_original')) {
+      context.handle(
+        _nomeBancoOriginalMeta,
+        nomeBancoOriginal.isAcceptableOrUnknown(
+          data['nome_banco_original']!,
+          _nomeBancoOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeBancoOriginalMeta);
+    }
+    if (data.containsKey('importado_em')) {
+      context.handle(
+        _importadoEmMeta,
+        importadoEm.isAcceptableOrUnknown(
+          data['importado_em']!,
+          _importadoEmMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExtratoLinhasTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExtratoLinhasTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      importId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}import_id'],
+      )!,
+      descricao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descricao'],
+      )!,
+      valor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      nomeBancoOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome_banco_original'],
+      )!,
+      importadoEm: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}importado_em'],
+      )!,
+    );
+  }
+
+  @override
+  $ExtratoLinhasTableTable createAlias(String alias) {
+    return $ExtratoLinhasTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExtratoLinhasTableData extends DataClass
+    implements Insertable<ExtratoLinhasTableData> {
+  final String id;
+  final String importId;
+  final String descricao;
+  final double valor;
+  final DateTime data;
+  final String tipo;
+  final String nomeBancoOriginal;
+  final DateTime importadoEm;
+  const ExtratoLinhasTableData({
+    required this.id,
+    required this.importId,
+    required this.descricao,
+    required this.valor,
+    required this.data,
+    required this.tipo,
+    required this.nomeBancoOriginal,
+    required this.importadoEm,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['import_id'] = Variable<String>(importId);
+    map['descricao'] = Variable<String>(descricao);
+    map['valor'] = Variable<double>(valor);
+    map['data'] = Variable<DateTime>(data);
+    map['tipo'] = Variable<String>(tipo);
+    map['nome_banco_original'] = Variable<String>(nomeBancoOriginal);
+    map['importado_em'] = Variable<DateTime>(importadoEm);
+    return map;
+  }
+
+  ExtratoLinhasTableCompanion toCompanion(bool nullToAbsent) {
+    return ExtratoLinhasTableCompanion(
+      id: Value(id),
+      importId: Value(importId),
+      descricao: Value(descricao),
+      valor: Value(valor),
+      data: Value(data),
+      tipo: Value(tipo),
+      nomeBancoOriginal: Value(nomeBancoOriginal),
+      importadoEm: Value(importadoEm),
+    );
+  }
+
+  factory ExtratoLinhasTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExtratoLinhasTableData(
+      id: serializer.fromJson<String>(json['id']),
+      importId: serializer.fromJson<String>(json['importId']),
+      descricao: serializer.fromJson<String>(json['descricao']),
+      valor: serializer.fromJson<double>(json['valor']),
+      data: serializer.fromJson<DateTime>(json['data']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      nomeBancoOriginal: serializer.fromJson<String>(json['nomeBancoOriginal']),
+      importadoEm: serializer.fromJson<DateTime>(json['importadoEm']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'importId': serializer.toJson<String>(importId),
+      'descricao': serializer.toJson<String>(descricao),
+      'valor': serializer.toJson<double>(valor),
+      'data': serializer.toJson<DateTime>(data),
+      'tipo': serializer.toJson<String>(tipo),
+      'nomeBancoOriginal': serializer.toJson<String>(nomeBancoOriginal),
+      'importadoEm': serializer.toJson<DateTime>(importadoEm),
+    };
+  }
+
+  ExtratoLinhasTableData copyWith({
+    String? id,
+    String? importId,
+    String? descricao,
+    double? valor,
+    DateTime? data,
+    String? tipo,
+    String? nomeBancoOriginal,
+    DateTime? importadoEm,
+  }) => ExtratoLinhasTableData(
+    id: id ?? this.id,
+    importId: importId ?? this.importId,
+    descricao: descricao ?? this.descricao,
+    valor: valor ?? this.valor,
+    data: data ?? this.data,
+    tipo: tipo ?? this.tipo,
+    nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+    importadoEm: importadoEm ?? this.importadoEm,
+  );
+  ExtratoLinhasTableData copyWithCompanion(ExtratoLinhasTableCompanion data) {
+    return ExtratoLinhasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      importId: data.importId.present ? data.importId.value : this.importId,
+      descricao: data.descricao.present ? data.descricao.value : this.descricao,
+      valor: data.valor.present ? data.valor.value : this.valor,
+      data: data.data.present ? data.data.value : this.data,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      nomeBancoOriginal: data.nomeBancoOriginal.present
+          ? data.nomeBancoOriginal.value
+          : this.nomeBancoOriginal,
+      importadoEm: data.importadoEm.present
+          ? data.importadoEm.value
+          : this.importadoEm,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtratoLinhasTableData(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('descricao: $descricao, ')
+          ..write('valor: $valor, ')
+          ..write('data: $data, ')
+          ..write('tipo: $tipo, ')
+          ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('importadoEm: $importadoEm')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    importId,
+    descricao,
+    valor,
+    data,
+    tipo,
+    nomeBancoOriginal,
+    importadoEm,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExtratoLinhasTableData &&
+          other.id == this.id &&
+          other.importId == this.importId &&
+          other.descricao == this.descricao &&
+          other.valor == this.valor &&
+          other.data == this.data &&
+          other.tipo == this.tipo &&
+          other.nomeBancoOriginal == this.nomeBancoOriginal &&
+          other.importadoEm == this.importadoEm);
+}
+
+class ExtratoLinhasTableCompanion
+    extends UpdateCompanion<ExtratoLinhasTableData> {
+  final Value<String> id;
+  final Value<String> importId;
+  final Value<String> descricao;
+  final Value<double> valor;
+  final Value<DateTime> data;
+  final Value<String> tipo;
+  final Value<String> nomeBancoOriginal;
+  final Value<DateTime> importadoEm;
+  final Value<int> rowid;
+  const ExtratoLinhasTableCompanion({
+    this.id = const Value.absent(),
+    this.importId = const Value.absent(),
+    this.descricao = const Value.absent(),
+    this.valor = const Value.absent(),
+    this.data = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.nomeBancoOriginal = const Value.absent(),
+    this.importadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExtratoLinhasTableCompanion.insert({
+    required String id,
+    required String importId,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String tipo,
+    required String nomeBancoOriginal,
+    this.importadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       importId = Value(importId),
+       descricao = Value(descricao),
+       valor = Value(valor),
+       data = Value(data),
+       tipo = Value(tipo),
+       nomeBancoOriginal = Value(nomeBancoOriginal);
+  static Insertable<ExtratoLinhasTableData> custom({
+    Expression<String>? id,
+    Expression<String>? importId,
+    Expression<String>? descricao,
+    Expression<double>? valor,
+    Expression<DateTime>? data,
+    Expression<String>? tipo,
+    Expression<String>? nomeBancoOriginal,
+    Expression<DateTime>? importadoEm,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (importId != null) 'import_id': importId,
+      if (descricao != null) 'descricao': descricao,
+      if (valor != null) 'valor': valor,
+      if (data != null) 'data': data,
+      if (tipo != null) 'tipo': tipo,
+      if (nomeBancoOriginal != null) 'nome_banco_original': nomeBancoOriginal,
+      if (importadoEm != null) 'importado_em': importadoEm,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExtratoLinhasTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? importId,
+    Value<String>? descricao,
+    Value<double>? valor,
+    Value<DateTime>? data,
+    Value<String>? tipo,
+    Value<String>? nomeBancoOriginal,
+    Value<DateTime>? importadoEm,
+    Value<int>? rowid,
+  }) {
+    return ExtratoLinhasTableCompanion(
+      id: id ?? this.id,
+      importId: importId ?? this.importId,
+      descricao: descricao ?? this.descricao,
+      valor: valor ?? this.valor,
+      data: data ?? this.data,
+      tipo: tipo ?? this.tipo,
+      nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+      importadoEm: importadoEm ?? this.importadoEm,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (importId.present) {
+      map['import_id'] = Variable<String>(importId.value);
+    }
+    if (descricao.present) {
+      map['descricao'] = Variable<String>(descricao.value);
+    }
+    if (valor.present) {
+      map['valor'] = Variable<double>(valor.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<DateTime>(data.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (nomeBancoOriginal.present) {
+      map['nome_banco_original'] = Variable<String>(nomeBancoOriginal.value);
+    }
+    if (importadoEm.present) {
+      map['importado_em'] = Variable<DateTime>(importadoEm.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtratoLinhasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('descricao: $descricao, ')
+          ..write('valor: $valor, ')
+          ..write('data: $data, ')
+          ..write('tipo: $tipo, ')
+          ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('importadoEm: $importadoEm, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReconciliationMatchesTableTable extends ReconciliationMatchesTable
+    with
+        TableInfo<
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReconciliationMatchesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _transacaoIdMeta = const VerificationMeta(
+    'transacaoId',
+  );
+  @override
+  late final GeneratedColumn<String> transacaoId = GeneratedColumn<String>(
+    'transacao_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linhaExtratoIdMeta = const VerificationMeta(
+    'linhaExtratoId',
+  );
+  @override
+  late final GeneratedColumn<String> linhaExtratoId = GeneratedColumn<String>(
+    'linha_extrato_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataReconciliacaoMeta = const VerificationMeta(
+    'dataReconciliacao',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dataReconciliacao =
+      GeneratedColumn<DateTime>(
+        'data_reconciliacao',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    transacaoId,
+    linhaExtratoId,
+    dataReconciliacao,
+    status,
+    confidence,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reconciliation_matches_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReconciliationMatchesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('transacao_id')) {
+      context.handle(
+        _transacaoIdMeta,
+        transacaoId.isAcceptableOrUnknown(
+          data['transacao_id']!,
+          _transacaoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('linha_extrato_id')) {
+      context.handle(
+        _linhaExtratoIdMeta,
+        linhaExtratoId.isAcceptableOrUnknown(
+          data['linha_extrato_id']!,
+          _linhaExtratoIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_linhaExtratoIdMeta);
+    }
+    if (data.containsKey('data_reconciliacao')) {
+      context.handle(
+        _dataReconciliacaoMeta,
+        dataReconciliacao.isAcceptableOrUnknown(
+          data['data_reconciliacao']!,
+          _dataReconciliacaoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_confidenceMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReconciliationMatchesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReconciliationMatchesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      transacaoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transacao_id'],
+      ),
+      linhaExtratoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linha_extrato_id'],
+      )!,
+      dataReconciliacao: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_reconciliacao'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence'],
+      )!,
+    );
+  }
+
+  @override
+  $ReconciliationMatchesTableTable createAlias(String alias) {
+    return $ReconciliationMatchesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ReconciliationMatchesTableData extends DataClass
+    implements Insertable<ReconciliationMatchesTableData> {
+  final String id;
+  final String? transacaoId;
+  final String linhaExtratoId;
+  final DateTime dataReconciliacao;
+  final String status;
+  final double confidence;
+  const ReconciliationMatchesTableData({
+    required this.id,
+    this.transacaoId,
+    required this.linhaExtratoId,
+    required this.dataReconciliacao,
+    required this.status,
+    required this.confidence,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || transacaoId != null) {
+      map['transacao_id'] = Variable<String>(transacaoId);
+    }
+    map['linha_extrato_id'] = Variable<String>(linhaExtratoId);
+    map['data_reconciliacao'] = Variable<DateTime>(dataReconciliacao);
+    map['status'] = Variable<String>(status);
+    map['confidence'] = Variable<double>(confidence);
+    return map;
+  }
+
+  ReconciliationMatchesTableCompanion toCompanion(bool nullToAbsent) {
+    return ReconciliationMatchesTableCompanion(
+      id: Value(id),
+      transacaoId: transacaoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transacaoId),
+      linhaExtratoId: Value(linhaExtratoId),
+      dataReconciliacao: Value(dataReconciliacao),
+      status: Value(status),
+      confidence: Value(confidence),
+    );
+  }
+
+  factory ReconciliationMatchesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReconciliationMatchesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      transacaoId: serializer.fromJson<String?>(json['transacaoId']),
+      linhaExtratoId: serializer.fromJson<String>(json['linhaExtratoId']),
+      dataReconciliacao: serializer.fromJson<DateTime>(
+        json['dataReconciliacao'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      confidence: serializer.fromJson<double>(json['confidence']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'transacaoId': serializer.toJson<String?>(transacaoId),
+      'linhaExtratoId': serializer.toJson<String>(linhaExtratoId),
+      'dataReconciliacao': serializer.toJson<DateTime>(dataReconciliacao),
+      'status': serializer.toJson<String>(status),
+      'confidence': serializer.toJson<double>(confidence),
+    };
+  }
+
+  ReconciliationMatchesTableData copyWith({
+    String? id,
+    Value<String?> transacaoId = const Value.absent(),
+    String? linhaExtratoId,
+    DateTime? dataReconciliacao,
+    String? status,
+    double? confidence,
+  }) => ReconciliationMatchesTableData(
+    id: id ?? this.id,
+    transacaoId: transacaoId.present ? transacaoId.value : this.transacaoId,
+    linhaExtratoId: linhaExtratoId ?? this.linhaExtratoId,
+    dataReconciliacao: dataReconciliacao ?? this.dataReconciliacao,
+    status: status ?? this.status,
+    confidence: confidence ?? this.confidence,
+  );
+  ReconciliationMatchesTableData copyWithCompanion(
+    ReconciliationMatchesTableCompanion data,
+  ) {
+    return ReconciliationMatchesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      transacaoId: data.transacaoId.present
+          ? data.transacaoId.value
+          : this.transacaoId,
+      linhaExtratoId: data.linhaExtratoId.present
+          ? data.linhaExtratoId.value
+          : this.linhaExtratoId,
+      dataReconciliacao: data.dataReconciliacao.present
+          ? data.dataReconciliacao.value
+          : this.dataReconciliacao,
+      status: data.status.present ? data.status.value : this.status,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReconciliationMatchesTableData(')
+          ..write('id: $id, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('linhaExtratoId: $linhaExtratoId, ')
+          ..write('dataReconciliacao: $dataReconciliacao, ')
+          ..write('status: $status, ')
+          ..write('confidence: $confidence')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    transacaoId,
+    linhaExtratoId,
+    dataReconciliacao,
+    status,
+    confidence,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReconciliationMatchesTableData &&
+          other.id == this.id &&
+          other.transacaoId == this.transacaoId &&
+          other.linhaExtratoId == this.linhaExtratoId &&
+          other.dataReconciliacao == this.dataReconciliacao &&
+          other.status == this.status &&
+          other.confidence == this.confidence);
+}
+
+class ReconciliationMatchesTableCompanion
+    extends UpdateCompanion<ReconciliationMatchesTableData> {
+  final Value<String> id;
+  final Value<String?> transacaoId;
+  final Value<String> linhaExtratoId;
+  final Value<DateTime> dataReconciliacao;
+  final Value<String> status;
+  final Value<double> confidence;
+  final Value<int> rowid;
+  const ReconciliationMatchesTableCompanion({
+    this.id = const Value.absent(),
+    this.transacaoId = const Value.absent(),
+    this.linhaExtratoId = const Value.absent(),
+    this.dataReconciliacao = const Value.absent(),
+    this.status = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReconciliationMatchesTableCompanion.insert({
+    required String id,
+    this.transacaoId = const Value.absent(),
+    required String linhaExtratoId,
+    this.dataReconciliacao = const Value.absent(),
+    required String status,
+    required double confidence,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       linhaExtratoId = Value(linhaExtratoId),
+       status = Value(status),
+       confidence = Value(confidence);
+  static Insertable<ReconciliationMatchesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? transacaoId,
+    Expression<String>? linhaExtratoId,
+    Expression<DateTime>? dataReconciliacao,
+    Expression<String>? status,
+    Expression<double>? confidence,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (transacaoId != null) 'transacao_id': transacaoId,
+      if (linhaExtratoId != null) 'linha_extrato_id': linhaExtratoId,
+      if (dataReconciliacao != null) 'data_reconciliacao': dataReconciliacao,
+      if (status != null) 'status': status,
+      if (confidence != null) 'confidence': confidence,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReconciliationMatchesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? transacaoId,
+    Value<String>? linhaExtratoId,
+    Value<DateTime>? dataReconciliacao,
+    Value<String>? status,
+    Value<double>? confidence,
+    Value<int>? rowid,
+  }) {
+    return ReconciliationMatchesTableCompanion(
+      id: id ?? this.id,
+      transacaoId: transacaoId ?? this.transacaoId,
+      linhaExtratoId: linhaExtratoId ?? this.linhaExtratoId,
+      dataReconciliacao: dataReconciliacao ?? this.dataReconciliacao,
+      status: status ?? this.status,
+      confidence: confidence ?? this.confidence,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (transacaoId.present) {
+      map['transacao_id'] = Variable<String>(transacaoId.value);
+    }
+    if (linhaExtratoId.present) {
+      map['linha_extrato_id'] = Variable<String>(linhaExtratoId.value);
+    }
+    if (dataReconciliacao.present) {
+      map['data_reconciliacao'] = Variable<DateTime>(dataReconciliacao.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReconciliationMatchesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('linhaExtratoId: $linhaExtratoId, ')
+          ..write('dataReconciliacao: $dataReconciliacao, ')
+          ..write('status: $status, ')
+          ..write('confidence: $confidence, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3329,6 +4290,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MetaTableTable metaTable = $MetaTableTable(this);
   late final $ParcelamentoTableTable parcelamentoTable =
       $ParcelamentoTableTable(this);
+  late final $ExtratoLinhasTableTable extratoLinhasTable =
+      $ExtratoLinhasTableTable(this);
+  late final $ReconciliationMatchesTableTable reconciliationMatchesTable =
+      $ReconciliationMatchesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3339,6 +4304,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     rendaTable,
     metaTable,
     parcelamentoTable,
+    extratoLinhasTable,
+    reconciliationMatchesTable,
   ];
 }
 
@@ -4951,6 +5918,526 @@ typedef $$ParcelamentoTableTableProcessedTableManager =
       ParcelamentoTableData,
       PrefetchHooks Function()
     >;
+typedef $$ExtratoLinhasTableTableCreateCompanionBuilder =
+    ExtratoLinhasTableCompanion Function({
+      required String id,
+      required String importId,
+      required String descricao,
+      required double valor,
+      required DateTime data,
+      required String tipo,
+      required String nomeBancoOriginal,
+      Value<DateTime> importadoEm,
+      Value<int> rowid,
+    });
+typedef $$ExtratoLinhasTableTableUpdateCompanionBuilder =
+    ExtratoLinhasTableCompanion Function({
+      Value<String> id,
+      Value<String> importId,
+      Value<String> descricao,
+      Value<double> valor,
+      Value<DateTime> data,
+      Value<String> tipo,
+      Value<String> nomeBancoOriginal,
+      Value<DateTime> importadoEm,
+      Value<int> rowid,
+    });
+
+class $$ExtratoLinhasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get importId => $composableBuilder(
+    column: $table.importId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExtratoLinhasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get importId => $composableBuilder(
+    column: $table.importId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExtratoLinhasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get importId =>
+      $composableBuilder(column: $table.importId, builder: (column) => column);
+
+  GeneratedColumn<String> get descricao =>
+      $composableBuilder(column: $table.descricao, builder: (column) => column);
+
+  GeneratedColumn<double> get valor =>
+      $composableBuilder(column: $table.valor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => column,
+  );
+}
+
+class $$ExtratoLinhasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExtratoLinhasTableTable,
+          ExtratoLinhasTableData,
+          $$ExtratoLinhasTableTableFilterComposer,
+          $$ExtratoLinhasTableTableOrderingComposer,
+          $$ExtratoLinhasTableTableAnnotationComposer,
+          $$ExtratoLinhasTableTableCreateCompanionBuilder,
+          $$ExtratoLinhasTableTableUpdateCompanionBuilder,
+          (
+            ExtratoLinhasTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ExtratoLinhasTableTable,
+              ExtratoLinhasTableData
+            >,
+          ),
+          ExtratoLinhasTableData,
+          PrefetchHooks Function()
+        > {
+  $$ExtratoLinhasTableTableTableManager(
+    _$AppDatabase db,
+    $ExtratoLinhasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExtratoLinhasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExtratoLinhasTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExtratoLinhasTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> importId = const Value.absent(),
+                Value<String> descricao = const Value.absent(),
+                Value<double> valor = const Value.absent(),
+                Value<DateTime> data = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<String> nomeBancoOriginal = const Value.absent(),
+                Value<DateTime> importadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtratoLinhasTableCompanion(
+                id: id,
+                importId: importId,
+                descricao: descricao,
+                valor: valor,
+                data: data,
+                tipo: tipo,
+                nomeBancoOriginal: nomeBancoOriginal,
+                importadoEm: importadoEm,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String importId,
+                required String descricao,
+                required double valor,
+                required DateTime data,
+                required String tipo,
+                required String nomeBancoOriginal,
+                Value<DateTime> importadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtratoLinhasTableCompanion.insert(
+                id: id,
+                importId: importId,
+                descricao: descricao,
+                valor: valor,
+                data: data,
+                tipo: tipo,
+                nomeBancoOriginal: nomeBancoOriginal,
+                importadoEm: importadoEm,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExtratoLinhasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExtratoLinhasTableTable,
+      ExtratoLinhasTableData,
+      $$ExtratoLinhasTableTableFilterComposer,
+      $$ExtratoLinhasTableTableOrderingComposer,
+      $$ExtratoLinhasTableTableAnnotationComposer,
+      $$ExtratoLinhasTableTableCreateCompanionBuilder,
+      $$ExtratoLinhasTableTableUpdateCompanionBuilder,
+      (
+        ExtratoLinhasTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ExtratoLinhasTableTable,
+          ExtratoLinhasTableData
+        >,
+      ),
+      ExtratoLinhasTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ReconciliationMatchesTableTableCreateCompanionBuilder =
+    ReconciliationMatchesTableCompanion Function({
+      required String id,
+      Value<String?> transacaoId,
+      required String linhaExtratoId,
+      Value<DateTime> dataReconciliacao,
+      required String status,
+      required double confidence,
+      Value<int> rowid,
+    });
+typedef $$ReconciliationMatchesTableTableUpdateCompanionBuilder =
+    ReconciliationMatchesTableCompanion Function({
+      Value<String> id,
+      Value<String?> transacaoId,
+      Value<String> linhaExtratoId,
+      Value<DateTime> dataReconciliacao,
+      Value<String> status,
+      Value<double> confidence,
+      Value<int> rowid,
+    });
+
+class $$ReconciliationMatchesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReconciliationMatchesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReconciliationMatchesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+}
+
+class $$ReconciliationMatchesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData,
+          $$ReconciliationMatchesTableTableFilterComposer,
+          $$ReconciliationMatchesTableTableOrderingComposer,
+          $$ReconciliationMatchesTableTableAnnotationComposer,
+          $$ReconciliationMatchesTableTableCreateCompanionBuilder,
+          $$ReconciliationMatchesTableTableUpdateCompanionBuilder,
+          (
+            ReconciliationMatchesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ReconciliationMatchesTableTable,
+              ReconciliationMatchesTableData
+            >,
+          ),
+          ReconciliationMatchesTableData,
+          PrefetchHooks Function()
+        > {
+  $$ReconciliationMatchesTableTableTableManager(
+    _$AppDatabase db,
+    $ReconciliationMatchesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReconciliationMatchesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ReconciliationMatchesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ReconciliationMatchesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> transacaoId = const Value.absent(),
+                Value<String> linhaExtratoId = const Value.absent(),
+                Value<DateTime> dataReconciliacao = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReconciliationMatchesTableCompanion(
+                id: id,
+                transacaoId: transacaoId,
+                linhaExtratoId: linhaExtratoId,
+                dataReconciliacao: dataReconciliacao,
+                status: status,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> transacaoId = const Value.absent(),
+                required String linhaExtratoId,
+                Value<DateTime> dataReconciliacao = const Value.absent(),
+                required String status,
+                required double confidence,
+                Value<int> rowid = const Value.absent(),
+              }) => ReconciliationMatchesTableCompanion.insert(
+                id: id,
+                transacaoId: transacaoId,
+                linhaExtratoId: linhaExtratoId,
+                dataReconciliacao: dataReconciliacao,
+                status: status,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReconciliationMatchesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReconciliationMatchesTableTable,
+      ReconciliationMatchesTableData,
+      $$ReconciliationMatchesTableTableFilterComposer,
+      $$ReconciliationMatchesTableTableOrderingComposer,
+      $$ReconciliationMatchesTableTableAnnotationComposer,
+      $$ReconciliationMatchesTableTableCreateCompanionBuilder,
+      $$ReconciliationMatchesTableTableUpdateCompanionBuilder,
+      (
+        ReconciliationMatchesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData
+        >,
+      ),
+      ReconciliationMatchesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4965,4 +6452,12 @@ class $AppDatabaseManager {
       $$MetaTableTableTableManager(_db, _db.metaTable);
   $$ParcelamentoTableTableTableManager get parcelamentoTable =>
       $$ParcelamentoTableTableTableManager(_db, _db.parcelamentoTable);
+  $$ExtratoLinhasTableTableTableManager get extratoLinhasTable =>
+      $$ExtratoLinhasTableTableTableManager(_db, _db.extratoLinhasTable);
+  $$ReconciliationMatchesTableTableTableManager
+  get reconciliationMatchesTable =>
+      $$ReconciliationMatchesTableTableTableManager(
+        _db,
+        _db.reconciliationMatchesTable,
+      );
 }

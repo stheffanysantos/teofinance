@@ -127,13 +127,51 @@ class ParcelamentoTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [TransactionsTable, PerfilBancoTable, RendaTable, MetaTable, ParcelamentoTable])
+/// Linhas de extrato importadas — intermediário entre importação e reconciliação.
+/// Cada linha representa um movimento bancário do extrato CSV/OFX.
+class ExtratoLinhasTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get importId => text()();           // FK para saber qual importação
+  TextColumn get descricao => text()();          // "SUPERMERCADO X 123"
+  RealColumn get valor => real()();
+  DateTimeColumn get data => dateTime()();
+  TextColumn get tipo => text()();               // 'D' (débito) | 'C' (crédito)
+  TextColumn get nomeBancoOriginal => text()(); // Como veio do banco
+  DateTimeColumn get importadoEm => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Matches entre transações do usuário e linhas do extrato — resultado da reconciliação.
+/// Quando faz matching, cria registro aqui linkando a transação à linha do extrato.
+class ReconciliationMatchesTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get transacaoId => text().nullable()(); // FK → TransactionsTable (nulo se orphan)
+  TextColumn get linhaExtratoId => text()();        // FK → ExtratoLinhasTable
+  DateTimeColumn get dataReconciliacao => dateTime().withDefault(currentDateAndTime)();
+  TextColumn get status => text()();                // 'auto_matched' | 'manual_matched' | 'unmatched' | 'orphan'
+  RealColumn get confidence => real()();            // 0.0–1.0 (algoritmo de matching)
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [
+  TransactionsTable,
+  PerfilBancoTable,
+  RendaTable,
+  MetaTable,
+  ParcelamentoTable,
+  ExtratoLinhasTable,
+  ReconciliationMatchesTable,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -169,6 +207,13 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(transactionsTable, transactionsTable.valorParcela);
             await m.addColumn(transactionsTable, transactionsTable.ehParcela);
             await m.addColumn(transactionsTable, transactionsTable.statusParcela);
+          }
+          if (from < 6) {
+            // Adiciona suporte a reconciliação (Sprint 03):
+            // - Nova tabela ExtratoLinhasTable (linhas do extrato)
+            // - Nova tabela ReconciliationMatchesTable (matches entre transações e extrato)
+            await m.createTable(extratoLinhasTable);
+            await m.createTable(reconciliationMatchesTable);
           }
         },
       );
