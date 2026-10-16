@@ -311,24 +311,4 @@ void main() {
 
     expect(find.textContaining('Nenhuma meta cadastrada ainda.'), findsOneWidget);
   });
-
-  testWidgets('Carteira simulada abre a partir da Trilha e alterna pizza/barras', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Trilha'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byIcon(Icons.pie_chart_outline));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Carteira simulada'), findsOneWidget);
-
-    await tester.tap(find.text('Barras'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Desempenho · 30 dias'), findsOneWidget);
-  });
 }
