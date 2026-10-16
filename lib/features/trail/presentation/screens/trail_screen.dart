@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../../../portfolio/presentation/screens/portfolio_screen.dart';
 import '../providers/trail_provider.dart';
 import '../widgets/lesson_sheet.dart';
 import '../widgets/trail_node_circle.dart';
@@ -57,22 +56,6 @@ class TrailScreen extends ConsumerWidget {
                     Row(
                       spacing: 8,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const PortfolioScreen()),
-                          ),
-                          child: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: t.card,
-                              border: Border.all(color: t.line),
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(Icons.pie_chart_outline, size: 18, color: t.ink),
-                          ),
-                        ),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(

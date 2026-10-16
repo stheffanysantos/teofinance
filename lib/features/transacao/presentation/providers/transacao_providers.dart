@@ -7,7 +7,9 @@ import '../../domain/entities/transacao.dart';
 import '../../domain/repositories/transacao_repository.dart';
 import '../../domain/usecases/categorizar_transacao_usecase.dart';
 import '../../domain/usecases/criar_transacao_usecase.dart';
+import '../../domain/usecases/dividir_transacao_usecase.dart';
 import '../../domain/usecases/excluir_transacao_usecase.dart';
+import '../../domain/usecases/remover_divisao_usecase.dart';
 
 final transacaoLocalDataSourceProvider = Provider((ref) {
   return TransacaoLocalDataSource(ref.watch(appDatabaseProvider));
@@ -27,6 +29,14 @@ final categorizarTransacaoUseCaseProvider = Provider((ref) {
 
 final excluirTransacaoUseCaseProvider = Provider((ref) {
   return ExcluirTransacaoUseCase(ref.watch(transacaoRepositoryProvider));
+});
+
+final dividirTransacaoUseCaseProvider = Provider((ref) {
+  return DividirTransacaoUseCase(ref.watch(transacaoRepositoryProvider));
+});
+
+final removerDivisaoUseCaseProvider = Provider((ref) {
+  return RemoverDivisaoUseCase(ref.watch(transacaoRepositoryProvider));
 });
 
 /// Todas as transações, mais recentes primeiro — atualiza sozinho quando

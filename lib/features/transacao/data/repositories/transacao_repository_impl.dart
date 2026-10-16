@@ -40,6 +40,20 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> definirDivisao({
+    required String id,
+    required double? minhaParte,
+    List<String> divididoCom = const [],
+  }) async {
+    try {
+      await _local.definirDivisao(id: id, minhaParte: minhaParte, divididoCom: divididoCom);
+      return const Right(unit);
+    } catch (_) {
+      return const Left(CacheFailure('Não foi possível salvar a divisão.'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> excluir(String id) async {
     try {
       await _local.excluir(id);
@@ -51,6 +65,12 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
 
   @override
   Future<List<Transacao>> listarPendentesDeSincronizacao() => _local.listarPendentes();
+
+  @override
+  Future<List<Transacao>> listarPendentesDeExclusao() => _local.listarPendentesDeExclusao();
+
+  @override
+  Future<void> confirmarExclusao(String id) => _local.confirmarExclusao(id);
 
   @override
   Future<void> confirmarSincronizacao({required String id, required String remoteId}) {
@@ -65,6 +85,8 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
     required double valor,
     required DateTime data,
     required bool precisaCategoria,
+    double? minhaParte,
+    List<String> divididoCom = const [],
   }) {
     return _local.aplicarRemoto(
       remoteId: remoteId,
@@ -73,6 +95,8 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
       valor: valor,
       data: data,
       precisaCategoria: precisaCategoria,
+      minhaParte: minhaParte,
+      divididoCom: divididoCom,
     );
   }
 }

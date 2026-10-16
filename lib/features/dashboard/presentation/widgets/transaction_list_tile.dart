@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Linha de transação usada em "Últimas transações" (dashboard) e na tela
 /// de Transações.
@@ -59,7 +60,7 @@ class TransactionListTile extends StatelessWidget {
               ],
             ),
           ),
-          Text(
+          AppAmountText(
             amountLabel,
             style: TextStyle(
               fontWeight: FontWeight.w800,

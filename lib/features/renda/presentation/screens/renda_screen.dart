@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/renda.dart';
 import '../providers/renda_providers.dart';
 import 'nova_renda_screen.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Lista de rendas fixas e variáveis cadastradas — acessada a partir do
 /// Perfil ("Minhas rendas").
@@ -59,7 +60,7 @@ class RendaScreen extends ConsumerWidget {
                       spacing: 6,
                       children: [
                         Text('Renda fixa mensal', style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 13)),
-                        Text(
+                        AppAmountText(
                           'R\$ ${totalMensalFixo.toStringAsFixed(2)}',
                           style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w800),
                         ),
@@ -126,7 +127,7 @@ class _RendaCard extends ConsumerWidget {
               ],
             ),
           ),
-          Text(
+          AppAmountText(
             'R\$ ${renda.valor.toStringAsFixed(2)}',
             style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: t.pos),
           ),

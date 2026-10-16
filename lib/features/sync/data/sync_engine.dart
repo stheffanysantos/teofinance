@@ -67,6 +67,16 @@ class SyncEngine {
   Future<void> _sincronizarTransacoes() async {
     final colecao = _colecao('transacoes');
 
+    final paraExcluir = await _transacaoRepository.listarPendentesDeExclusao();
+    for (final transacao in paraExcluir) {
+      try {
+        await colecao.doc(transacao.remoteId).delete();
+        await _transacaoRepository.confirmarExclusao(transacao.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
+
     final pendentes = await _transacaoRepository.listarPendentesDeSincronizacao();
     for (final transacao in pendentes) {
       try {
@@ -76,6 +86,8 @@ class SyncEngine {
           'categoria': transacao.categoria,
           'valor': transacao.valor,
           'data': Timestamp.fromDate(transacao.data),
+          'minhaParte': transacao.minhaParte,
+          'divididoCom': transacao.divididoCom,
         });
         await _transacaoRepository.confirmarSincronizacao(id: transacao.id, remoteId: doc.id);
       } catch (_) {
@@ -94,6 +106,8 @@ class SyncEngine {
           valor: (dados['valor'] as num?)?.toDouble() ?? 0,
           data: (dados['data'] as Timestamp?)?.toDate() ?? DateTime.now(),
           precisaCategoria: (dados['categoria'] as String? ?? '').trim().isEmpty,
+          minhaParte: (dados['minhaParte'] as num?)?.toDouble(),
+          divididoCom: ((dados['divididoCom'] as List?) ?? const []).cast<String>(),
         );
       } catch (_) {}
     }

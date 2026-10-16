@@ -56,10 +56,16 @@ final dashboardSummaryProvider = Provider<DashboardSummary>((ref) {
   final mesPassado = DateTime(agora.year, agora.month - 1);
   final transacoesMesPassado = transacoes.where((t) => noMes(t.data, mesPassado.year, mesPassado.month));
 
-  final receitasMes = transacoesEsteMes.where((t) => t.valor > 0).fold<double>(0, (a, t) => a + t.valor);
-  final despesasMes = transacoesEsteMes.where((t) => t.valor < 0).fold<double>(0, (a, t) => a + t.valor.abs());
-  final receitasMesPassado =
-      transacoesMesPassado.where((t) => t.valor > 0).fold<double>(0, (a, t) => a + t.valor);
+  // Receitas/despesas usam a parte do usuário (compras divididas); o saldo
+  // total continua sendo o caixa real, com o valor cobrado.
+  final receitasMes =
+      transacoesEsteMes.where((t) => t.valorContabilizado > 0).fold<double>(0, (a, t) => a + t.valorContabilizado);
+  final despesasMes = transacoesEsteMes
+      .where((t) => t.valorContabilizado < 0)
+      .fold<double>(0, (a, t) => a + t.valorContabilizado.abs());
+  final receitasMesPassado = transacoesMesPassado
+      .where((t) => t.valorContabilizado > 0)
+      .fold<double>(0, (a, t) => a + t.valorContabilizado);
 
   final saldoTotal = transacoes.fold<double>(0, (acc, t) => acc + t.valor);
   final deltaSaldoMes = receitasMes - despesasMes;

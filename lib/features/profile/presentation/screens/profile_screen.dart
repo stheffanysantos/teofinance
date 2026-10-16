@@ -7,7 +7,7 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
-import '../providers/profile_settings_provider.dart';
+import '../../../../core/providers/discreet_mode_provider.dart';
 import '../widgets/financial_score_gauge.dart';
 import '../widgets/settings_toggle_tile.dart';
 
@@ -19,8 +19,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final settings = ref.watch(profileSettingsProvider);
-    final settingsNotifier = ref.read(profileSettingsProvider.notifier);
+    final modoDiscreto = ref.watch(modoDiscretoProvider);
     final themeMode = ref.watch(themeModeProvider);
     final themeNotifier = ref.read(themeModeProvider.notifier);
     final isDark = themeMode == ThemeMode.dark;
@@ -70,10 +69,10 @@ class ProfileScreen extends ConsumerWidget {
                         children: [
                           SettingsToggleTile(
                             icon: Icon(Icons.lock_outline, size: 18, color: t.ink),
-                            title: 'Modo privacidade',
-                            subtitle: 'Oculta valores na tela',
-                            value: settings.privacyMode,
-                            onChanged: (_) => settingsNotifier.togglePrivacyMode(),
+                            title: 'Modo Discreto',
+                            subtitle: 'Oculta os valores em todas as telas',
+                            value: modoDiscreto,
+                            onChanged: (_) => ref.read(modoDiscretoProvider.notifier).alternar(),
                           ),
                           SettingsToggleTile(
                             icon: Icon(Icons.fingerprint, size: 18, color: t.ink),

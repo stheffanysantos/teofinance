@@ -46,6 +46,7 @@ class ResolvedTransaction {
     required this.icon,
     required this.value,
     required this.needsCategory,
+    this.divisaoLabel,
   });
 
   final String id;
@@ -54,6 +55,9 @@ class ResolvedTransaction {
   final String icon;
   final double value;
   final bool needsCategory;
+
+  /// Ex.: "Dividida com Ana e Bruno · total 100.00"; nulo se não dividida.
+  final String? divisaoLabel;
 }
 
 class ResolvedTransactionGroup {
@@ -66,6 +70,11 @@ class ResolvedTransactionGroup {
   final String date;
   final List<ResolvedTransaction> items;
   final String totalLabel;
+}
+
+String _listaDeNomes(List<String> nomes) {
+  if (nomes.length <= 1) return nomes.join();
+  return '${nomes.sublist(0, nomes.length - 1).join(', ')} e ${nomes.last}';
 }
 
 bool _dentroDoPeriodo(DateTime data, String periodo) {
@@ -104,8 +113,11 @@ final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>
           : transacao.categoria.isNotEmpty
               ? transacao.categoria.substring(0, 1).toUpperCase()
               : '?',
-      value: transacao.valor,
+      value: transacao.valorContabilizado,
       needsCategory: transacao.precisaCategoria,
+      divisaoLabel: transacao.ehDividida
+          ? 'Dividida com ${_listaDeNomes(transacao.divididoCom)} · total ${transacao.valorCobrado.abs().toStringAsFixed(2)}'
+          : null,
     );
 
     final rotulo = rotuloDataRelativa(transacao.data);

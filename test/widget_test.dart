@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/core/providers/discreet_mode_provider.dart';
+import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 import 'package:teofinance/core/errors/failure.dart';
 import 'package:teofinance/features/auth/domain/entities/usuario.dart';
 import 'package:teofinance/features/auth/domain/repositories/auth_repository.dart';
@@ -115,6 +117,12 @@ class FakeTransacaoRepository implements TransacaoRepository {
   Future<List<Transacao>> listarPendentesDeSincronizacao() async => [];
 
   @override
+  Future<List<Transacao>> listarPendentesDeExclusao() async => [];
+
+  @override
+  Future<void> confirmarExclusao(String id) async {}
+
+  @override
   Future<void> confirmarSincronizacao({required String id, required String remoteId}) async {}
 
   @override
@@ -125,13 +133,29 @@ class FakeTransacaoRepository implements TransacaoRepository {
     required double valor,
     required DateTime data,
     required bool precisaCategoria,
+    double? minhaParte,
+    List<String> divididoCom = const [],
   }) async {}
+
+  @override
+  Future<Either<Failure, Unit>> definirDivisao({
+    required String id,
+    required double? minhaParte,
+    List<String> divididoCom = const [],
+  }) async => const Right(unit);
 }
 
-ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {
+class _ModoLigado extends ModoDiscretoNotifier {
+  @override
+  bool build() => true;
+}
+
+ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+      syncEngineProvider.overrideWithValue(null),
+      if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
       ),
@@ -141,6 +165,15 @@ ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {
 }
 
 void main() {
+  testWidgets('Dashboard no Modo Discreto esconde o saldo e as despesas', (WidgetTester tester) async {
+    await tester.pumpWidget(_pumpApp(discreto: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Saldo total'), findsOneWidget);
+    expect(find.text('R\$ $kMascaraValor'), findsOneWidget);
+    expect(find.textContaining('R\$ 0'), findsNothing);
+  });
+
   testWidgets('Dashboard abre como tela inicial e navega até o Perfil', (
     WidgetTester tester,
   ) async {
@@ -266,7 +299,7 @@ void main() {
     expect(find.text('Alimentação'), findsOneWidget);
   });
 
-  testWidgets('Metas abre a partir do Dashboard e mostra o total guardado', (
+  testWidgets('Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_pumpApp());
@@ -276,27 +309,6 @@ void main() {
     await tester.tap(find.text('Metas ativas'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Total guardado'), findsOneWidget);
-    expect(find.text('Reserva de emergência'), findsOneWidget);
-  });
-
-  testWidgets('Carteira simulada abre a partir da Trilha e alterna pizza/barras', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Trilha'));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.byIcon(Icons.pie_chart_outline));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Carteira simulada'), findsOneWidget);
-
-    await tester.tap(find.text('Barras'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Desempenho · 30 dias'), findsOneWidget);
+    expect(find.textContaining('Nenhuma meta cadastrada ainda.'), findsOneWidget);
   });
 }

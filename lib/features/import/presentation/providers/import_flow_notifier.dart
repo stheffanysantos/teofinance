@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/providers/core_providers.dart';
+import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
 import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
@@ -138,6 +139,34 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
     });
 
     state = state.copyWith(etapa: ImportEtapa.concluido);
+  }
+
+  /// Guarda o extrato como linhas separadas (sem criar transações), para
+  /// comparar com os lançamentos manuais em `features/reconciliation/`.
+  Future<void> confirmarParaReconciliacao() async {
+    state = state.copyWith(carregando: true, limparErro: true);
+
+    final resultado = await ref.read(reconciliationRepositoryProvider).importarExtrato(
+          importId: _uuid.v4(),
+          linhas: state.transacoes
+              .map((t) => {
+                    'descricao': t.descricao,
+                    'valor': t.valor.abs(),
+                    'data': t.data.toIso8601String(),
+                    'tipo': t.valor < 0 ? 'D' : 'C',
+                    'nomeBancoOriginal': state.perfilUsado?.nomeBanco ?? '',
+                  })
+              .toList(),
+        );
+
+    resultado.match(
+      (falha) => state = state.copyWith(carregando: false, erro: falha.message),
+      (_) => state = state.copyWith(
+        carregando: false,
+        etapa: ImportEtapa.concluido,
+        paraReconciliacao: true,
+      ),
+    );
   }
 
   void reiniciar() => state = const ImportFlowState();

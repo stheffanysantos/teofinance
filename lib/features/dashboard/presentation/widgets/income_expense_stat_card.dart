@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Cartão compacto de receitas ou despesas do mês, usado em par (grid 2x1).
 class IncomeExpenseStatCard extends StatelessWidget {
@@ -59,7 +60,7 @@ class IncomeExpenseStatCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          AppAmountText(
             amount,
             style: TextStyle(
               fontSize: 21,

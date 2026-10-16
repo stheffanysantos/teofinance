@@ -11,6 +11,7 @@ class AppColors {
   static const Color positivoEscuro = Color(0xFF4CD08A);
   static const Color alerta = Color(0xFFD9483A);
   static const Color alertaFundo = Color(0xFFFDEAE7);
+  static const Color aviso = Color(0xFFC98A0B);
 
   static const Color fundoClaro = Color(0xFFF6F7F5);
   static const Color cardClaro = Color(0xFFFFFFFF);

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Cartão de meta com anel de progresso, usado na lista horizontal
 /// "Metas ativas" do dashboard.
@@ -63,7 +64,7 @@ class GoalRingCard extends StatelessWidget {
             style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, height: 1.15, color: t.ink),
           ),
           const SizedBox(height: 3),
-          Text(
+          AppAmountText(
             amountLabel,
             textAlign: TextAlign.center,
             maxLines: 1,

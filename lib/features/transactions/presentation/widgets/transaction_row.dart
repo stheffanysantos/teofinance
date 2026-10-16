@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../providers/transactions_mock_provider.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Linha de transação com badge de categoria (ou aviso "Sem categoria" com
 /// borda tracejada e ação "Categorizar", igual ao mock).
@@ -11,11 +12,13 @@ class TransactionRow extends StatelessWidget {
     required this.transaction,
     required this.showTopBorder,
     required this.onCategorize,
+    this.onLongPress,
   });
 
   final ResolvedTransaction transaction;
   final bool showTopBorder;
   final ValueChanged<String> onCategorize;
+  final ValueChanged<String>? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +29,10 @@ class TransactionRow extends StatelessWidget {
     final iconBg = needsCategory ? Colors.transparent : (isIncome ? t.posBg : t.track);
     final iconFg = needsCategory ? t.sub : (isIncome ? t.pos : t.ink);
 
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onLongPress == null ? null : () => onLongPress!(transaction.id),
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
         border: showTopBorder ? Border(top: BorderSide(color: t.line)) : null,
@@ -63,6 +69,15 @@ class TransactionRow extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: t.ink),
                 ),
                 const SizedBox(height: 5),
+                if (transaction.divisaoLabel != null) ...[
+                  Text(
+                    transaction.divisaoLabel!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: t.sub),
+                  ),
+                  const SizedBox(height: 4),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -83,7 +98,7 @@ class TransactionRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppAmountText(
                 formatCurrencyDelta(transaction.value),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,
@@ -113,6 +128,7 @@ class TransactionRow extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

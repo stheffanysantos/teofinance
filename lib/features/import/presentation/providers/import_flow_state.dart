@@ -21,6 +21,7 @@ class ImportFlowState {
     this.separadorDecimalVirgula = true,
     this.transacoes = const [],
     this.perfilUsado,
+    this.paraReconciliacao = false,
   });
 
   final ImportEtapa etapa;
@@ -38,6 +39,7 @@ class ImportFlowState {
 
   final List<TransacaoImportada> transacoes;
   final PerfilBanco? perfilUsado;
+  final bool paraReconciliacao;
 
   int get quantidadeSemCategoria => transacoes.where((t) => t.precisaCategoria).length;
 
@@ -55,6 +57,7 @@ class ImportFlowState {
     bool? separadorDecimalVirgula,
     List<TransacaoImportada>? transacoes,
     PerfilBanco? perfilUsado,
+    bool? paraReconciliacao,
   }) {
     return ImportFlowState(
       etapa: etapa ?? this.etapa,
@@ -69,6 +72,7 @@ class ImportFlowState {
       separadorDecimalVirgula: separadorDecimalVirgula ?? this.separadorDecimalVirgula,
       transacoes: transacoes ?? this.transacoes,
       perfilUsado: perfilUsado ?? this.perfilUsado,
+      paraReconciliacao: paraReconciliacao ?? this.paraReconciliacao,
     );
   }
 }

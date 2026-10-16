@@ -106,6 +106,87 @@ class $TransactionsTableTable extends TransactionsTable
     requiredDuringInsert: false,
     defaultValue: currentDateAndTime,
   );
+  static const VerificationMeta _parcelamentoIdMeta = const VerificationMeta(
+    'parcelamentoId',
+  );
+  @override
+  late final GeneratedColumn<String> parcelamentoId = GeneratedColumn<String>(
+    'parcelamento_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _numeroParcelaMeta = const VerificationMeta(
+    'numeroParcela',
+  );
+  @override
+  late final GeneratedColumn<int> numeroParcela = GeneratedColumn<int>(
+    'numero_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _valorParcelaMeta = const VerificationMeta(
+    'valorParcela',
+  );
+  @override
+  late final GeneratedColumn<double> valorParcela = GeneratedColumn<double>(
+    'valor_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ehParcelaMeta = const VerificationMeta(
+    'ehParcela',
+  );
+  @override
+  late final GeneratedColumn<bool> ehParcela = GeneratedColumn<bool>(
+    'eh_parcela',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("eh_parcela" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _statusParcelaMeta = const VerificationMeta(
+    'statusParcela',
+  );
+  @override
+  late final GeneratedColumn<String> statusParcela = GeneratedColumn<String>(
+    'status_parcela',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _minhaParteMeta = const VerificationMeta(
+    'minhaParte',
+  );
+  @override
+  late final GeneratedColumn<double> minhaParte = GeneratedColumn<double>(
+    'minha_parte',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _divididoComMeta = const VerificationMeta(
+    'divididoCom',
+  );
+  @override
+  late final GeneratedColumn<String> divididoCom = GeneratedColumn<String>(
+    'dividido_com',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -117,6 +198,13 @@ class $TransactionsTableTable extends TransactionsTable
     needsCategory,
     syncStatus,
     updatedAt,
+    parcelamentoId,
+    numeroParcela,
+    valorParcela,
+    ehParcela,
+    statusParcela,
+    minhaParte,
+    divididoCom,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -188,6 +276,63 @@ class $TransactionsTableTable extends TransactionsTable
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('parcelamento_id')) {
+      context.handle(
+        _parcelamentoIdMeta,
+        parcelamentoId.isAcceptableOrUnknown(
+          data['parcelamento_id']!,
+          _parcelamentoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('numero_parcela')) {
+      context.handle(
+        _numeroParcelaMeta,
+        numeroParcela.isAcceptableOrUnknown(
+          data['numero_parcela']!,
+          _numeroParcelaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('valor_parcela')) {
+      context.handle(
+        _valorParcelaMeta,
+        valorParcela.isAcceptableOrUnknown(
+          data['valor_parcela']!,
+          _valorParcelaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('eh_parcela')) {
+      context.handle(
+        _ehParcelaMeta,
+        ehParcela.isAcceptableOrUnknown(data['eh_parcela']!, _ehParcelaMeta),
+      );
+    }
+    if (data.containsKey('status_parcela')) {
+      context.handle(
+        _statusParcelaMeta,
+        statusParcela.isAcceptableOrUnknown(
+          data['status_parcela']!,
+          _statusParcelaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('minha_parte')) {
+      context.handle(
+        _minhaParteMeta,
+        minhaParte.isAcceptableOrUnknown(data['minha_parte']!, _minhaParteMeta),
+      );
+    }
+    if (data.containsKey('dividido_com')) {
+      context.handle(
+        _divididoComMeta,
+        divididoCom.isAcceptableOrUnknown(
+          data['dividido_com']!,
+          _divididoComMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -235,6 +380,34 @@ class $TransactionsTableTable extends TransactionsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      parcelamentoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}parcelamento_id'],
+      ),
+      numeroParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_parcela'],
+      ),
+      valorParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor_parcela'],
+      ),
+      ehParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}eh_parcela'],
+      )!,
+      statusParcela: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status_parcela'],
+      ),
+      minhaParte: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}minha_parte'],
+      ),
+      divididoCom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dividido_com'],
+      ),
     );
   }
 
@@ -258,6 +431,29 @@ class TransactionsTableData extends DataClass
   final bool needsCategory;
   final SyncStatus syncStatus;
   final DateTime updatedAt;
+
+  /// Parcelamento: campos adicionados na v5 (Sprint 02)
+  /// FK → ParcelamentoTable (nulo se não é parcela)
+  final String? parcelamentoId;
+
+  /// Número da parcela: 1, 2, 3... (nulo se não é parcela)
+  final int? numeroParcela;
+
+  /// Valor da parcela individual (nulo se não é parcela)
+  final double? valorParcela;
+
+  /// true se é transação-filha de um parcelamento, false caso contrário
+  final bool ehParcela;
+
+  /// Status da parcela: 'pendente' | 'pago' | 'atrasado' (nulo se não é parcela)
+  final String? statusParcela;
+
+  /// Divisão de despesa (v7): quanto da compra é realmente do usuário. Nulo =
+  /// não dividida. `valor` continua sendo o total cobrado pelo banco.
+  final double? minhaParte;
+
+  /// Nomes das outras pessoas, em JSON (`["Ana","Bruno"]`).
+  final String? divididoCom;
   const TransactionsTableData({
     required this.id,
     this.remoteId,
@@ -268,6 +464,13 @@ class TransactionsTableData extends DataClass
     required this.needsCategory,
     required this.syncStatus,
     required this.updatedAt,
+    this.parcelamentoId,
+    this.numeroParcela,
+    this.valorParcela,
+    required this.ehParcela,
+    this.statusParcela,
+    this.minhaParte,
+    this.divididoCom,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -287,6 +490,25 @@ class TransactionsTableData extends DataClass
       );
     }
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || parcelamentoId != null) {
+      map['parcelamento_id'] = Variable<String>(parcelamentoId);
+    }
+    if (!nullToAbsent || numeroParcela != null) {
+      map['numero_parcela'] = Variable<int>(numeroParcela);
+    }
+    if (!nullToAbsent || valorParcela != null) {
+      map['valor_parcela'] = Variable<double>(valorParcela);
+    }
+    map['eh_parcela'] = Variable<bool>(ehParcela);
+    if (!nullToAbsent || statusParcela != null) {
+      map['status_parcela'] = Variable<String>(statusParcela);
+    }
+    if (!nullToAbsent || minhaParte != null) {
+      map['minha_parte'] = Variable<double>(minhaParte);
+    }
+    if (!nullToAbsent || divididoCom != null) {
+      map['dividido_com'] = Variable<String>(divididoCom);
+    }
     return map;
   }
 
@@ -303,6 +525,25 @@ class TransactionsTableData extends DataClass
       needsCategory: Value(needsCategory),
       syncStatus: Value(syncStatus),
       updatedAt: Value(updatedAt),
+      parcelamentoId: parcelamentoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(parcelamentoId),
+      numeroParcela: numeroParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(numeroParcela),
+      valorParcela: valorParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valorParcela),
+      ehParcela: Value(ehParcela),
+      statusParcela: statusParcela == null && nullToAbsent
+          ? const Value.absent()
+          : Value(statusParcela),
+      minhaParte: minhaParte == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minhaParte),
+      divididoCom: divididoCom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(divididoCom),
     );
   }
 
@@ -323,6 +564,13 @@ class TransactionsTableData extends DataClass
         serializer.fromJson<int>(json['syncStatus']),
       ),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      parcelamentoId: serializer.fromJson<String?>(json['parcelamentoId']),
+      numeroParcela: serializer.fromJson<int?>(json['numeroParcela']),
+      valorParcela: serializer.fromJson<double?>(json['valorParcela']),
+      ehParcela: serializer.fromJson<bool>(json['ehParcela']),
+      statusParcela: serializer.fromJson<String?>(json['statusParcela']),
+      minhaParte: serializer.fromJson<double?>(json['minhaParte']),
+      divididoCom: serializer.fromJson<String?>(json['divididoCom']),
     );
   }
   @override
@@ -340,6 +588,13 @@ class TransactionsTableData extends DataClass
         $TransactionsTableTable.$convertersyncStatus.toJson(syncStatus),
       ),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'parcelamentoId': serializer.toJson<String?>(parcelamentoId),
+      'numeroParcela': serializer.toJson<int?>(numeroParcela),
+      'valorParcela': serializer.toJson<double?>(valorParcela),
+      'ehParcela': serializer.toJson<bool>(ehParcela),
+      'statusParcela': serializer.toJson<String?>(statusParcela),
+      'minhaParte': serializer.toJson<double?>(minhaParte),
+      'divididoCom': serializer.toJson<String?>(divididoCom),
     };
   }
 
@@ -353,6 +608,13 @@ class TransactionsTableData extends DataClass
     bool? needsCategory,
     SyncStatus? syncStatus,
     DateTime? updatedAt,
+    Value<String?> parcelamentoId = const Value.absent(),
+    Value<int?> numeroParcela = const Value.absent(),
+    Value<double?> valorParcela = const Value.absent(),
+    bool? ehParcela,
+    Value<String?> statusParcela = const Value.absent(),
+    Value<double?> minhaParte = const Value.absent(),
+    Value<String?> divididoCom = const Value.absent(),
   }) => TransactionsTableData(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -363,6 +625,19 @@ class TransactionsTableData extends DataClass
     needsCategory: needsCategory ?? this.needsCategory,
     syncStatus: syncStatus ?? this.syncStatus,
     updatedAt: updatedAt ?? this.updatedAt,
+    parcelamentoId: parcelamentoId.present
+        ? parcelamentoId.value
+        : this.parcelamentoId,
+    numeroParcela: numeroParcela.present
+        ? numeroParcela.value
+        : this.numeroParcela,
+    valorParcela: valorParcela.present ? valorParcela.value : this.valorParcela,
+    ehParcela: ehParcela ?? this.ehParcela,
+    statusParcela: statusParcela.present
+        ? statusParcela.value
+        : this.statusParcela,
+    minhaParte: minhaParte.present ? minhaParte.value : this.minhaParte,
+    divididoCom: divididoCom.present ? divididoCom.value : this.divididoCom,
   );
   TransactionsTableData copyWithCompanion(TransactionsTableCompanion data) {
     return TransactionsTableData(
@@ -381,6 +656,25 @@ class TransactionsTableData extends DataClass
           ? data.syncStatus.value
           : this.syncStatus,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      parcelamentoId: data.parcelamentoId.present
+          ? data.parcelamentoId.value
+          : this.parcelamentoId,
+      numeroParcela: data.numeroParcela.present
+          ? data.numeroParcela.value
+          : this.numeroParcela,
+      valorParcela: data.valorParcela.present
+          ? data.valorParcela.value
+          : this.valorParcela,
+      ehParcela: data.ehParcela.present ? data.ehParcela.value : this.ehParcela,
+      statusParcela: data.statusParcela.present
+          ? data.statusParcela.value
+          : this.statusParcela,
+      minhaParte: data.minhaParte.present
+          ? data.minhaParte.value
+          : this.minhaParte,
+      divididoCom: data.divididoCom.present
+          ? data.divididoCom.value
+          : this.divididoCom,
     );
   }
 
@@ -395,7 +689,14 @@ class TransactionsTableData extends DataClass
           ..write('occurredAt: $occurredAt, ')
           ..write('needsCategory: $needsCategory, ')
           ..write('syncStatus: $syncStatus, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('parcelamentoId: $parcelamentoId, ')
+          ..write('numeroParcela: $numeroParcela, ')
+          ..write('valorParcela: $valorParcela, ')
+          ..write('ehParcela: $ehParcela, ')
+          ..write('statusParcela: $statusParcela, ')
+          ..write('minhaParte: $minhaParte, ')
+          ..write('divididoCom: $divididoCom')
           ..write(')'))
         .toString();
   }
@@ -411,6 +712,13 @@ class TransactionsTableData extends DataClass
     needsCategory,
     syncStatus,
     updatedAt,
+    parcelamentoId,
+    numeroParcela,
+    valorParcela,
+    ehParcela,
+    statusParcela,
+    minhaParte,
+    divididoCom,
   );
   @override
   bool operator ==(Object other) =>
@@ -424,7 +732,14 @@ class TransactionsTableData extends DataClass
           other.occurredAt == this.occurredAt &&
           other.needsCategory == this.needsCategory &&
           other.syncStatus == this.syncStatus &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.parcelamentoId == this.parcelamentoId &&
+          other.numeroParcela == this.numeroParcela &&
+          other.valorParcela == this.valorParcela &&
+          other.ehParcela == this.ehParcela &&
+          other.statusParcela == this.statusParcela &&
+          other.minhaParte == this.minhaParte &&
+          other.divididoCom == this.divididoCom);
 }
 
 class TransactionsTableCompanion
@@ -438,6 +753,13 @@ class TransactionsTableCompanion
   final Value<bool> needsCategory;
   final Value<SyncStatus> syncStatus;
   final Value<DateTime> updatedAt;
+  final Value<String?> parcelamentoId;
+  final Value<int?> numeroParcela;
+  final Value<double?> valorParcela;
+  final Value<bool> ehParcela;
+  final Value<String?> statusParcela;
+  final Value<double?> minhaParte;
+  final Value<String?> divididoCom;
   final Value<int> rowid;
   const TransactionsTableCompanion({
     this.id = const Value.absent(),
@@ -449,6 +771,13 @@ class TransactionsTableCompanion
     this.needsCategory = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.parcelamentoId = const Value.absent(),
+    this.numeroParcela = const Value.absent(),
+    this.valorParcela = const Value.absent(),
+    this.ehParcela = const Value.absent(),
+    this.statusParcela = const Value.absent(),
+    this.minhaParte = const Value.absent(),
+    this.divididoCom = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsTableCompanion.insert({
@@ -461,6 +790,13 @@ class TransactionsTableCompanion
     this.needsCategory = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.parcelamentoId = const Value.absent(),
+    this.numeroParcela = const Value.absent(),
+    this.valorParcela = const Value.absent(),
+    this.ehParcela = const Value.absent(),
+    this.statusParcela = const Value.absent(),
+    this.minhaParte = const Value.absent(),
+    this.divididoCom = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -477,6 +813,13 @@ class TransactionsTableCompanion
     Expression<bool>? needsCategory,
     Expression<int>? syncStatus,
     Expression<DateTime>? updatedAt,
+    Expression<String>? parcelamentoId,
+    Expression<int>? numeroParcela,
+    Expression<double>? valorParcela,
+    Expression<bool>? ehParcela,
+    Expression<String>? statusParcela,
+    Expression<double>? minhaParte,
+    Expression<String>? divididoCom,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -489,6 +832,13 @@ class TransactionsTableCompanion
       if (needsCategory != null) 'needs_category': needsCategory,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (parcelamentoId != null) 'parcelamento_id': parcelamentoId,
+      if (numeroParcela != null) 'numero_parcela': numeroParcela,
+      if (valorParcela != null) 'valor_parcela': valorParcela,
+      if (ehParcela != null) 'eh_parcela': ehParcela,
+      if (statusParcela != null) 'status_parcela': statusParcela,
+      if (minhaParte != null) 'minha_parte': minhaParte,
+      if (divididoCom != null) 'dividido_com': divididoCom,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -503,6 +853,13 @@ class TransactionsTableCompanion
     Value<bool>? needsCategory,
     Value<SyncStatus>? syncStatus,
     Value<DateTime>? updatedAt,
+    Value<String?>? parcelamentoId,
+    Value<int?>? numeroParcela,
+    Value<double?>? valorParcela,
+    Value<bool>? ehParcela,
+    Value<String?>? statusParcela,
+    Value<double?>? minhaParte,
+    Value<String?>? divididoCom,
     Value<int>? rowid,
   }) {
     return TransactionsTableCompanion(
@@ -515,6 +872,13 @@ class TransactionsTableCompanion
       needsCategory: needsCategory ?? this.needsCategory,
       syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
+      parcelamentoId: parcelamentoId ?? this.parcelamentoId,
+      numeroParcela: numeroParcela ?? this.numeroParcela,
+      valorParcela: valorParcela ?? this.valorParcela,
+      ehParcela: ehParcela ?? this.ehParcela,
+      statusParcela: statusParcela ?? this.statusParcela,
+      minhaParte: minhaParte ?? this.minhaParte,
+      divididoCom: divididoCom ?? this.divididoCom,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -551,6 +915,27 @@ class TransactionsTableCompanion
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (parcelamentoId.present) {
+      map['parcelamento_id'] = Variable<String>(parcelamentoId.value);
+    }
+    if (numeroParcela.present) {
+      map['numero_parcela'] = Variable<int>(numeroParcela.value);
+    }
+    if (valorParcela.present) {
+      map['valor_parcela'] = Variable<double>(valorParcela.value);
+    }
+    if (ehParcela.present) {
+      map['eh_parcela'] = Variable<bool>(ehParcela.value);
+    }
+    if (statusParcela.present) {
+      map['status_parcela'] = Variable<String>(statusParcela.value);
+    }
+    if (minhaParte.present) {
+      map['minha_parte'] = Variable<double>(minhaParte.value);
+    }
+    if (divididoCom.present) {
+      map['dividido_com'] = Variable<String>(divididoCom.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -569,6 +954,13 @@ class TransactionsTableCompanion
           ..write('needsCategory: $needsCategory, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('parcelamentoId: $parcelamentoId, ')
+          ..write('numeroParcela: $numeroParcela, ')
+          ..write('valorParcela: $valorParcela, ')
+          ..write('ehParcela: $ehParcela, ')
+          ..write('statusParcela: $statusParcela, ')
+          ..write('minhaParte: $minhaParte, ')
+          ..write('divididoCom: $divididoCom, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2489,6 +2881,1513 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
   }
 }
 
+class $ParcelamentoTableTable extends ParcelamentoTable
+    with TableInfo<$ParcelamentoTableTable, ParcelamentoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ParcelamentoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _transacaoOriginalIdMeta =
+      const VerificationMeta('transacaoOriginalId');
+  @override
+  late final GeneratedColumn<String> transacaoOriginalId =
+      GeneratedColumn<String>(
+        'transacao_original_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _totalOriginalMeta = const VerificationMeta(
+    'totalOriginal',
+  );
+  @override
+  late final GeneratedColumn<double> totalOriginal = GeneratedColumn<double>(
+    'total_original',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _numeroParcelasMeta = const VerificationMeta(
+    'numeroParcelas',
+  );
+  @override
+  late final GeneratedColumn<int> numeroParcelas = GeneratedColumn<int>(
+    'numero_parcelas',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataPrimeiraParcMeta = const VerificationMeta(
+    'dataPrimeiraParc',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dataPrimeiraParc =
+      GeneratedColumn<DateTime>(
+        'data_primeira_parc',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: Constant(SyncStatus.pendingCreate.index),
+      ).withConverter<SyncStatus>($ParcelamentoTableTable.$convertersyncStatus);
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    transacaoOriginalId,
+    totalOriginal,
+    numeroParcelas,
+    dataPrimeiraParc,
+    syncStatus,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'parcelamento_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ParcelamentoTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('transacao_original_id')) {
+      context.handle(
+        _transacaoOriginalIdMeta,
+        transacaoOriginalId.isAcceptableOrUnknown(
+          data['transacao_original_id']!,
+          _transacaoOriginalIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_transacaoOriginalIdMeta);
+    }
+    if (data.containsKey('total_original')) {
+      context.handle(
+        _totalOriginalMeta,
+        totalOriginal.isAcceptableOrUnknown(
+          data['total_original']!,
+          _totalOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_totalOriginalMeta);
+    }
+    if (data.containsKey('numero_parcelas')) {
+      context.handle(
+        _numeroParcelasMeta,
+        numeroParcelas.isAcceptableOrUnknown(
+          data['numero_parcelas']!,
+          _numeroParcelasMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_numeroParcelasMeta);
+    }
+    if (data.containsKey('data_primeira_parc')) {
+      context.handle(
+        _dataPrimeiraParcMeta,
+        dataPrimeiraParc.isAcceptableOrUnknown(
+          data['data_primeira_parc']!,
+          _dataPrimeiraParcMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dataPrimeiraParcMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ParcelamentoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ParcelamentoTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      transacaoOriginalId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transacao_original_id'],
+      )!,
+      totalOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}total_original'],
+      )!,
+      numeroParcelas: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}numero_parcelas'],
+      )!,
+      dataPrimeiraParc: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_primeira_parc'],
+      )!,
+      syncStatus: $ParcelamentoTableTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ParcelamentoTableTable createAlias(String alias) {
+    return $ParcelamentoTableTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const EnumIndexConverter<SyncStatus>(SyncStatus.values);
+}
+
+class ParcelamentoTableData extends DataClass
+    implements Insertable<ParcelamentoTableData> {
+  final String id;
+  final String? remoteId;
+  final String transacaoOriginalId;
+  final double totalOriginal;
+  final int numeroParcelas;
+  final DateTime dataPrimeiraParc;
+  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  const ParcelamentoTableData({
+    required this.id,
+    this.remoteId,
+    required this.transacaoOriginalId,
+    required this.totalOriginal,
+    required this.numeroParcelas,
+    required this.dataPrimeiraParc,
+    required this.syncStatus,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    map['transacao_original_id'] = Variable<String>(transacaoOriginalId);
+    map['total_original'] = Variable<double>(totalOriginal);
+    map['numero_parcelas'] = Variable<int>(numeroParcelas);
+    map['data_primeira_parc'] = Variable<DateTime>(dataPrimeiraParc);
+    {
+      map['sync_status'] = Variable<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ParcelamentoTableCompanion toCompanion(bool nullToAbsent) {
+    return ParcelamentoTableCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      transacaoOriginalId: Value(transacaoOriginalId),
+      totalOriginal: Value(totalOriginal),
+      numeroParcelas: Value(numeroParcelas),
+      dataPrimeiraParc: Value(dataPrimeiraParc),
+      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ParcelamentoTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ParcelamentoTableData(
+      id: serializer.fromJson<String>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      transacaoOriginalId: serializer.fromJson<String>(
+        json['transacaoOriginalId'],
+      ),
+      totalOriginal: serializer.fromJson<double>(json['totalOriginal']),
+      numeroParcelas: serializer.fromJson<int>(json['numeroParcelas']),
+      dataPrimeiraParc: serializer.fromJson<DateTime>(json['dataPrimeiraParc']),
+      syncStatus: $ParcelamentoTableTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'transacaoOriginalId': serializer.toJson<String>(transacaoOriginalId),
+      'totalOriginal': serializer.toJson<double>(totalOriginal),
+      'numeroParcelas': serializer.toJson<int>(numeroParcelas),
+      'dataPrimeiraParc': serializer.toJson<DateTime>(dataPrimeiraParc),
+      'syncStatus': serializer.toJson<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toJson(syncStatus),
+      ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ParcelamentoTableData copyWith({
+    String? id,
+    Value<String?> remoteId = const Value.absent(),
+    String? transacaoOriginalId,
+    double? totalOriginal,
+    int? numeroParcelas,
+    DateTime? dataPrimeiraParc,
+    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+  }) => ParcelamentoTableData(
+    id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    transacaoOriginalId: transacaoOriginalId ?? this.transacaoOriginalId,
+    totalOriginal: totalOriginal ?? this.totalOriginal,
+    numeroParcelas: numeroParcelas ?? this.numeroParcelas,
+    dataPrimeiraParc: dataPrimeiraParc ?? this.dataPrimeiraParc,
+    syncStatus: syncStatus ?? this.syncStatus,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ParcelamentoTableData copyWithCompanion(ParcelamentoTableCompanion data) {
+    return ParcelamentoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      transacaoOriginalId: data.transacaoOriginalId.present
+          ? data.transacaoOriginalId.value
+          : this.transacaoOriginalId,
+      totalOriginal: data.totalOriginal.present
+          ? data.totalOriginal.value
+          : this.totalOriginal,
+      numeroParcelas: data.numeroParcelas.present
+          ? data.numeroParcelas.value
+          : this.numeroParcelas,
+      dataPrimeiraParc: data.dataPrimeiraParc.present
+          ? data.dataPrimeiraParc.value
+          : this.dataPrimeiraParc,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParcelamentoTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('transacaoOriginalId: $transacaoOriginalId, ')
+          ..write('totalOriginal: $totalOriginal, ')
+          ..write('numeroParcelas: $numeroParcelas, ')
+          ..write('dataPrimeiraParc: $dataPrimeiraParc, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    transacaoOriginalId,
+    totalOriginal,
+    numeroParcelas,
+    dataPrimeiraParc,
+    syncStatus,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParcelamentoTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.transacaoOriginalId == this.transacaoOriginalId &&
+          other.totalOriginal == this.totalOriginal &&
+          other.numeroParcelas == this.numeroParcelas &&
+          other.dataPrimeiraParc == this.dataPrimeiraParc &&
+          other.syncStatus == this.syncStatus &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ParcelamentoTableCompanion
+    extends UpdateCompanion<ParcelamentoTableData> {
+  final Value<String> id;
+  final Value<String?> remoteId;
+  final Value<String> transacaoOriginalId;
+  final Value<double> totalOriginal;
+  final Value<int> numeroParcelas;
+  final Value<DateTime> dataPrimeiraParc;
+  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ParcelamentoTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.transacaoOriginalId = const Value.absent(),
+    this.totalOriginal = const Value.absent(),
+    this.numeroParcelas = const Value.absent(),
+    this.dataPrimeiraParc = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ParcelamentoTableCompanion.insert({
+    required String id,
+    this.remoteId = const Value.absent(),
+    required String transacaoOriginalId,
+    required double totalOriginal,
+    required int numeroParcelas,
+    required DateTime dataPrimeiraParc,
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       transacaoOriginalId = Value(transacaoOriginalId),
+       totalOriginal = Value(totalOriginal),
+       numeroParcelas = Value(numeroParcelas),
+       dataPrimeiraParc = Value(dataPrimeiraParc);
+  static Insertable<ParcelamentoTableData> custom({
+    Expression<String>? id,
+    Expression<String>? remoteId,
+    Expression<String>? transacaoOriginalId,
+    Expression<double>? totalOriginal,
+    Expression<int>? numeroParcelas,
+    Expression<DateTime>? dataPrimeiraParc,
+    Expression<int>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (transacaoOriginalId != null)
+        'transacao_original_id': transacaoOriginalId,
+      if (totalOriginal != null) 'total_original': totalOriginal,
+      if (numeroParcelas != null) 'numero_parcelas': numeroParcelas,
+      if (dataPrimeiraParc != null) 'data_primeira_parc': dataPrimeiraParc,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ParcelamentoTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? remoteId,
+    Value<String>? transacaoOriginalId,
+    Value<double>? totalOriginal,
+    Value<int>? numeroParcelas,
+    Value<DateTime>? dataPrimeiraParc,
+    Value<SyncStatus>? syncStatus,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ParcelamentoTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      transacaoOriginalId: transacaoOriginalId ?? this.transacaoOriginalId,
+      totalOriginal: totalOriginal ?? this.totalOriginal,
+      numeroParcelas: numeroParcelas ?? this.numeroParcelas,
+      dataPrimeiraParc: dataPrimeiraParc ?? this.dataPrimeiraParc,
+      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (transacaoOriginalId.present) {
+      map['transacao_original_id'] = Variable<String>(
+        transacaoOriginalId.value,
+      );
+    }
+    if (totalOriginal.present) {
+      map['total_original'] = Variable<double>(totalOriginal.value);
+    }
+    if (numeroParcelas.present) {
+      map['numero_parcelas'] = Variable<int>(numeroParcelas.value);
+    }
+    if (dataPrimeiraParc.present) {
+      map['data_primeira_parc'] = Variable<DateTime>(dataPrimeiraParc.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(
+        $ParcelamentoTableTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ParcelamentoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('transacaoOriginalId: $transacaoOriginalId, ')
+          ..write('totalOriginal: $totalOriginal, ')
+          ..write('numeroParcelas: $numeroParcelas, ')
+          ..write('dataPrimeiraParc: $dataPrimeiraParc, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ExtratoLinhasTableTable extends ExtratoLinhasTable
+    with TableInfo<$ExtratoLinhasTableTable, ExtratoLinhasTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExtratoLinhasTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _importIdMeta = const VerificationMeta(
+    'importId',
+  );
+  @override
+  late final GeneratedColumn<String> importId = GeneratedColumn<String>(
+    'import_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descricaoMeta = const VerificationMeta(
+    'descricao',
+  );
+  @override
+  late final GeneratedColumn<String> descricao = GeneratedColumn<String>(
+    'descricao',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valorMeta = const VerificationMeta('valor');
+  @override
+  late final GeneratedColumn<double> valor = GeneratedColumn<double>(
+    'valor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<DateTime> data = GeneratedColumn<DateTime>(
+    'data',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _tipoMeta = const VerificationMeta('tipo');
+  @override
+  late final GeneratedColumn<String> tipo = GeneratedColumn<String>(
+    'tipo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nomeBancoOriginalMeta = const VerificationMeta(
+    'nomeBancoOriginal',
+  );
+  @override
+  late final GeneratedColumn<String> nomeBancoOriginal =
+      GeneratedColumn<String>(
+        'nome_banco_original',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _importadoEmMeta = const VerificationMeta(
+    'importadoEm',
+  );
+  @override
+  late final GeneratedColumn<DateTime> importadoEm = GeneratedColumn<DateTime>(
+    'importado_em',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    importId,
+    descricao,
+    valor,
+    data,
+    tipo,
+    nomeBancoOriginal,
+    importadoEm,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'extrato_linhas_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ExtratoLinhasTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('import_id')) {
+      context.handle(
+        _importIdMeta,
+        importId.isAcceptableOrUnknown(data['import_id']!, _importIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_importIdMeta);
+    }
+    if (data.containsKey('descricao')) {
+      context.handle(
+        _descricaoMeta,
+        descricao.isAcceptableOrUnknown(data['descricao']!, _descricaoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_descricaoMeta);
+    }
+    if (data.containsKey('valor')) {
+      context.handle(
+        _valorMeta,
+        valor.isAcceptableOrUnknown(data['valor']!, _valorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valorMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+        _dataMeta,
+        this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('tipo')) {
+      context.handle(
+        _tipoMeta,
+        tipo.isAcceptableOrUnknown(data['tipo']!, _tipoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tipoMeta);
+    }
+    if (data.containsKey('nome_banco_original')) {
+      context.handle(
+        _nomeBancoOriginalMeta,
+        nomeBancoOriginal.isAcceptableOrUnknown(
+          data['nome_banco_original']!,
+          _nomeBancoOriginalMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_nomeBancoOriginalMeta);
+    }
+    if (data.containsKey('importado_em')) {
+      context.handle(
+        _importadoEmMeta,
+        importadoEm.isAcceptableOrUnknown(
+          data['importado_em']!,
+          _importadoEmMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExtratoLinhasTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExtratoLinhasTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      importId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}import_id'],
+      )!,
+      descricao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descricao'],
+      )!,
+      valor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor'],
+      )!,
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data'],
+      )!,
+      tipo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tipo'],
+      )!,
+      nomeBancoOriginal: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}nome_banco_original'],
+      )!,
+      importadoEm: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}importado_em'],
+      )!,
+    );
+  }
+
+  @override
+  $ExtratoLinhasTableTable createAlias(String alias) {
+    return $ExtratoLinhasTableTable(attachedDatabase, alias);
+  }
+}
+
+class ExtratoLinhasTableData extends DataClass
+    implements Insertable<ExtratoLinhasTableData> {
+  final String id;
+  final String importId;
+  final String descricao;
+  final double valor;
+  final DateTime data;
+  final String tipo;
+  final String nomeBancoOriginal;
+  final DateTime importadoEm;
+  const ExtratoLinhasTableData({
+    required this.id,
+    required this.importId,
+    required this.descricao,
+    required this.valor,
+    required this.data,
+    required this.tipo,
+    required this.nomeBancoOriginal,
+    required this.importadoEm,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['import_id'] = Variable<String>(importId);
+    map['descricao'] = Variable<String>(descricao);
+    map['valor'] = Variable<double>(valor);
+    map['data'] = Variable<DateTime>(data);
+    map['tipo'] = Variable<String>(tipo);
+    map['nome_banco_original'] = Variable<String>(nomeBancoOriginal);
+    map['importado_em'] = Variable<DateTime>(importadoEm);
+    return map;
+  }
+
+  ExtratoLinhasTableCompanion toCompanion(bool nullToAbsent) {
+    return ExtratoLinhasTableCompanion(
+      id: Value(id),
+      importId: Value(importId),
+      descricao: Value(descricao),
+      valor: Value(valor),
+      data: Value(data),
+      tipo: Value(tipo),
+      nomeBancoOriginal: Value(nomeBancoOriginal),
+      importadoEm: Value(importadoEm),
+    );
+  }
+
+  factory ExtratoLinhasTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExtratoLinhasTableData(
+      id: serializer.fromJson<String>(json['id']),
+      importId: serializer.fromJson<String>(json['importId']),
+      descricao: serializer.fromJson<String>(json['descricao']),
+      valor: serializer.fromJson<double>(json['valor']),
+      data: serializer.fromJson<DateTime>(json['data']),
+      tipo: serializer.fromJson<String>(json['tipo']),
+      nomeBancoOriginal: serializer.fromJson<String>(json['nomeBancoOriginal']),
+      importadoEm: serializer.fromJson<DateTime>(json['importadoEm']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'importId': serializer.toJson<String>(importId),
+      'descricao': serializer.toJson<String>(descricao),
+      'valor': serializer.toJson<double>(valor),
+      'data': serializer.toJson<DateTime>(data),
+      'tipo': serializer.toJson<String>(tipo),
+      'nomeBancoOriginal': serializer.toJson<String>(nomeBancoOriginal),
+      'importadoEm': serializer.toJson<DateTime>(importadoEm),
+    };
+  }
+
+  ExtratoLinhasTableData copyWith({
+    String? id,
+    String? importId,
+    String? descricao,
+    double? valor,
+    DateTime? data,
+    String? tipo,
+    String? nomeBancoOriginal,
+    DateTime? importadoEm,
+  }) => ExtratoLinhasTableData(
+    id: id ?? this.id,
+    importId: importId ?? this.importId,
+    descricao: descricao ?? this.descricao,
+    valor: valor ?? this.valor,
+    data: data ?? this.data,
+    tipo: tipo ?? this.tipo,
+    nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+    importadoEm: importadoEm ?? this.importadoEm,
+  );
+  ExtratoLinhasTableData copyWithCompanion(ExtratoLinhasTableCompanion data) {
+    return ExtratoLinhasTableData(
+      id: data.id.present ? data.id.value : this.id,
+      importId: data.importId.present ? data.importId.value : this.importId,
+      descricao: data.descricao.present ? data.descricao.value : this.descricao,
+      valor: data.valor.present ? data.valor.value : this.valor,
+      data: data.data.present ? data.data.value : this.data,
+      tipo: data.tipo.present ? data.tipo.value : this.tipo,
+      nomeBancoOriginal: data.nomeBancoOriginal.present
+          ? data.nomeBancoOriginal.value
+          : this.nomeBancoOriginal,
+      importadoEm: data.importadoEm.present
+          ? data.importadoEm.value
+          : this.importadoEm,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtratoLinhasTableData(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('descricao: $descricao, ')
+          ..write('valor: $valor, ')
+          ..write('data: $data, ')
+          ..write('tipo: $tipo, ')
+          ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('importadoEm: $importadoEm')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    importId,
+    descricao,
+    valor,
+    data,
+    tipo,
+    nomeBancoOriginal,
+    importadoEm,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExtratoLinhasTableData &&
+          other.id == this.id &&
+          other.importId == this.importId &&
+          other.descricao == this.descricao &&
+          other.valor == this.valor &&
+          other.data == this.data &&
+          other.tipo == this.tipo &&
+          other.nomeBancoOriginal == this.nomeBancoOriginal &&
+          other.importadoEm == this.importadoEm);
+}
+
+class ExtratoLinhasTableCompanion
+    extends UpdateCompanion<ExtratoLinhasTableData> {
+  final Value<String> id;
+  final Value<String> importId;
+  final Value<String> descricao;
+  final Value<double> valor;
+  final Value<DateTime> data;
+  final Value<String> tipo;
+  final Value<String> nomeBancoOriginal;
+  final Value<DateTime> importadoEm;
+  final Value<int> rowid;
+  const ExtratoLinhasTableCompanion({
+    this.id = const Value.absent(),
+    this.importId = const Value.absent(),
+    this.descricao = const Value.absent(),
+    this.valor = const Value.absent(),
+    this.data = const Value.absent(),
+    this.tipo = const Value.absent(),
+    this.nomeBancoOriginal = const Value.absent(),
+    this.importadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ExtratoLinhasTableCompanion.insert({
+    required String id,
+    required String importId,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String tipo,
+    required String nomeBancoOriginal,
+    this.importadoEm = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       importId = Value(importId),
+       descricao = Value(descricao),
+       valor = Value(valor),
+       data = Value(data),
+       tipo = Value(tipo),
+       nomeBancoOriginal = Value(nomeBancoOriginal);
+  static Insertable<ExtratoLinhasTableData> custom({
+    Expression<String>? id,
+    Expression<String>? importId,
+    Expression<String>? descricao,
+    Expression<double>? valor,
+    Expression<DateTime>? data,
+    Expression<String>? tipo,
+    Expression<String>? nomeBancoOriginal,
+    Expression<DateTime>? importadoEm,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (importId != null) 'import_id': importId,
+      if (descricao != null) 'descricao': descricao,
+      if (valor != null) 'valor': valor,
+      if (data != null) 'data': data,
+      if (tipo != null) 'tipo': tipo,
+      if (nomeBancoOriginal != null) 'nome_banco_original': nomeBancoOriginal,
+      if (importadoEm != null) 'importado_em': importadoEm,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ExtratoLinhasTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? importId,
+    Value<String>? descricao,
+    Value<double>? valor,
+    Value<DateTime>? data,
+    Value<String>? tipo,
+    Value<String>? nomeBancoOriginal,
+    Value<DateTime>? importadoEm,
+    Value<int>? rowid,
+  }) {
+    return ExtratoLinhasTableCompanion(
+      id: id ?? this.id,
+      importId: importId ?? this.importId,
+      descricao: descricao ?? this.descricao,
+      valor: valor ?? this.valor,
+      data: data ?? this.data,
+      tipo: tipo ?? this.tipo,
+      nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+      importadoEm: importadoEm ?? this.importadoEm,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (importId.present) {
+      map['import_id'] = Variable<String>(importId.value);
+    }
+    if (descricao.present) {
+      map['descricao'] = Variable<String>(descricao.value);
+    }
+    if (valor.present) {
+      map['valor'] = Variable<double>(valor.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<DateTime>(data.value);
+    }
+    if (tipo.present) {
+      map['tipo'] = Variable<String>(tipo.value);
+    }
+    if (nomeBancoOriginal.present) {
+      map['nome_banco_original'] = Variable<String>(nomeBancoOriginal.value);
+    }
+    if (importadoEm.present) {
+      map['importado_em'] = Variable<DateTime>(importadoEm.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExtratoLinhasTableCompanion(')
+          ..write('id: $id, ')
+          ..write('importId: $importId, ')
+          ..write('descricao: $descricao, ')
+          ..write('valor: $valor, ')
+          ..write('data: $data, ')
+          ..write('tipo: $tipo, ')
+          ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('importadoEm: $importadoEm, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ReconciliationMatchesTableTable extends ReconciliationMatchesTable
+    with
+        TableInfo<
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ReconciliationMatchesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _transacaoIdMeta = const VerificationMeta(
+    'transacaoId',
+  );
+  @override
+  late final GeneratedColumn<String> transacaoId = GeneratedColumn<String>(
+    'transacao_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _linhaExtratoIdMeta = const VerificationMeta(
+    'linhaExtratoId',
+  );
+  @override
+  late final GeneratedColumn<String> linhaExtratoId = GeneratedColumn<String>(
+    'linha_extrato_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dataReconciliacaoMeta = const VerificationMeta(
+    'dataReconciliacao',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dataReconciliacao =
+      GeneratedColumn<DateTime>(
+        'data_reconciliacao',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _confidenceMeta = const VerificationMeta(
+    'confidence',
+  );
+  @override
+  late final GeneratedColumn<double> confidence = GeneratedColumn<double>(
+    'confidence',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    transacaoId,
+    linhaExtratoId,
+    dataReconciliacao,
+    status,
+    confidence,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'reconciliation_matches_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ReconciliationMatchesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('transacao_id')) {
+      context.handle(
+        _transacaoIdMeta,
+        transacaoId.isAcceptableOrUnknown(
+          data['transacao_id']!,
+          _transacaoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('linha_extrato_id')) {
+      context.handle(
+        _linhaExtratoIdMeta,
+        linhaExtratoId.isAcceptableOrUnknown(
+          data['linha_extrato_id']!,
+          _linhaExtratoIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_linhaExtratoIdMeta);
+    }
+    if (data.containsKey('data_reconciliacao')) {
+      context.handle(
+        _dataReconciliacaoMeta,
+        dataReconciliacao.isAcceptableOrUnknown(
+          data['data_reconciliacao']!,
+          _dataReconciliacaoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('confidence')) {
+      context.handle(
+        _confidenceMeta,
+        confidence.isAcceptableOrUnknown(data['confidence']!, _confidenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_confidenceMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ReconciliationMatchesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ReconciliationMatchesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      transacaoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transacao_id'],
+      ),
+      linhaExtratoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}linha_extrato_id'],
+      )!,
+      dataReconciliacao: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_reconciliacao'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      confidence: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}confidence'],
+      )!,
+    );
+  }
+
+  @override
+  $ReconciliationMatchesTableTable createAlias(String alias) {
+    return $ReconciliationMatchesTableTable(attachedDatabase, alias);
+  }
+}
+
+class ReconciliationMatchesTableData extends DataClass
+    implements Insertable<ReconciliationMatchesTableData> {
+  final String id;
+  final String? transacaoId;
+  final String linhaExtratoId;
+  final DateTime dataReconciliacao;
+  final String status;
+  final double confidence;
+  const ReconciliationMatchesTableData({
+    required this.id,
+    this.transacaoId,
+    required this.linhaExtratoId,
+    required this.dataReconciliacao,
+    required this.status,
+    required this.confidence,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || transacaoId != null) {
+      map['transacao_id'] = Variable<String>(transacaoId);
+    }
+    map['linha_extrato_id'] = Variable<String>(linhaExtratoId);
+    map['data_reconciliacao'] = Variable<DateTime>(dataReconciliacao);
+    map['status'] = Variable<String>(status);
+    map['confidence'] = Variable<double>(confidence);
+    return map;
+  }
+
+  ReconciliationMatchesTableCompanion toCompanion(bool nullToAbsent) {
+    return ReconciliationMatchesTableCompanion(
+      id: Value(id),
+      transacaoId: transacaoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transacaoId),
+      linhaExtratoId: Value(linhaExtratoId),
+      dataReconciliacao: Value(dataReconciliacao),
+      status: Value(status),
+      confidence: Value(confidence),
+    );
+  }
+
+  factory ReconciliationMatchesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ReconciliationMatchesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      transacaoId: serializer.fromJson<String?>(json['transacaoId']),
+      linhaExtratoId: serializer.fromJson<String>(json['linhaExtratoId']),
+      dataReconciliacao: serializer.fromJson<DateTime>(
+        json['dataReconciliacao'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      confidence: serializer.fromJson<double>(json['confidence']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'transacaoId': serializer.toJson<String?>(transacaoId),
+      'linhaExtratoId': serializer.toJson<String>(linhaExtratoId),
+      'dataReconciliacao': serializer.toJson<DateTime>(dataReconciliacao),
+      'status': serializer.toJson<String>(status),
+      'confidence': serializer.toJson<double>(confidence),
+    };
+  }
+
+  ReconciliationMatchesTableData copyWith({
+    String? id,
+    Value<String?> transacaoId = const Value.absent(),
+    String? linhaExtratoId,
+    DateTime? dataReconciliacao,
+    String? status,
+    double? confidence,
+  }) => ReconciliationMatchesTableData(
+    id: id ?? this.id,
+    transacaoId: transacaoId.present ? transacaoId.value : this.transacaoId,
+    linhaExtratoId: linhaExtratoId ?? this.linhaExtratoId,
+    dataReconciliacao: dataReconciliacao ?? this.dataReconciliacao,
+    status: status ?? this.status,
+    confidence: confidence ?? this.confidence,
+  );
+  ReconciliationMatchesTableData copyWithCompanion(
+    ReconciliationMatchesTableCompanion data,
+  ) {
+    return ReconciliationMatchesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      transacaoId: data.transacaoId.present
+          ? data.transacaoId.value
+          : this.transacaoId,
+      linhaExtratoId: data.linhaExtratoId.present
+          ? data.linhaExtratoId.value
+          : this.linhaExtratoId,
+      dataReconciliacao: data.dataReconciliacao.present
+          ? data.dataReconciliacao.value
+          : this.dataReconciliacao,
+      status: data.status.present ? data.status.value : this.status,
+      confidence: data.confidence.present
+          ? data.confidence.value
+          : this.confidence,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReconciliationMatchesTableData(')
+          ..write('id: $id, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('linhaExtratoId: $linhaExtratoId, ')
+          ..write('dataReconciliacao: $dataReconciliacao, ')
+          ..write('status: $status, ')
+          ..write('confidence: $confidence')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    transacaoId,
+    linhaExtratoId,
+    dataReconciliacao,
+    status,
+    confidence,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ReconciliationMatchesTableData &&
+          other.id == this.id &&
+          other.transacaoId == this.transacaoId &&
+          other.linhaExtratoId == this.linhaExtratoId &&
+          other.dataReconciliacao == this.dataReconciliacao &&
+          other.status == this.status &&
+          other.confidence == this.confidence);
+}
+
+class ReconciliationMatchesTableCompanion
+    extends UpdateCompanion<ReconciliationMatchesTableData> {
+  final Value<String> id;
+  final Value<String?> transacaoId;
+  final Value<String> linhaExtratoId;
+  final Value<DateTime> dataReconciliacao;
+  final Value<String> status;
+  final Value<double> confidence;
+  final Value<int> rowid;
+  const ReconciliationMatchesTableCompanion({
+    this.id = const Value.absent(),
+    this.transacaoId = const Value.absent(),
+    this.linhaExtratoId = const Value.absent(),
+    this.dataReconciliacao = const Value.absent(),
+    this.status = const Value.absent(),
+    this.confidence = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ReconciliationMatchesTableCompanion.insert({
+    required String id,
+    this.transacaoId = const Value.absent(),
+    required String linhaExtratoId,
+    this.dataReconciliacao = const Value.absent(),
+    required String status,
+    required double confidence,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       linhaExtratoId = Value(linhaExtratoId),
+       status = Value(status),
+       confidence = Value(confidence);
+  static Insertable<ReconciliationMatchesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? transacaoId,
+    Expression<String>? linhaExtratoId,
+    Expression<DateTime>? dataReconciliacao,
+    Expression<String>? status,
+    Expression<double>? confidence,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (transacaoId != null) 'transacao_id': transacaoId,
+      if (linhaExtratoId != null) 'linha_extrato_id': linhaExtratoId,
+      if (dataReconciliacao != null) 'data_reconciliacao': dataReconciliacao,
+      if (status != null) 'status': status,
+      if (confidence != null) 'confidence': confidence,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ReconciliationMatchesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? transacaoId,
+    Value<String>? linhaExtratoId,
+    Value<DateTime>? dataReconciliacao,
+    Value<String>? status,
+    Value<double>? confidence,
+    Value<int>? rowid,
+  }) {
+    return ReconciliationMatchesTableCompanion(
+      id: id ?? this.id,
+      transacaoId: transacaoId ?? this.transacaoId,
+      linhaExtratoId: linhaExtratoId ?? this.linhaExtratoId,
+      dataReconciliacao: dataReconciliacao ?? this.dataReconciliacao,
+      status: status ?? this.status,
+      confidence: confidence ?? this.confidence,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (transacaoId.present) {
+      map['transacao_id'] = Variable<String>(transacaoId.value);
+    }
+    if (linhaExtratoId.present) {
+      map['linha_extrato_id'] = Variable<String>(linhaExtratoId.value);
+    }
+    if (dataReconciliacao.present) {
+      map['data_reconciliacao'] = Variable<DateTime>(dataReconciliacao.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (confidence.present) {
+      map['confidence'] = Variable<double>(confidence.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ReconciliationMatchesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('linhaExtratoId: $linhaExtratoId, ')
+          ..write('dataReconciliacao: $dataReconciliacao, ')
+          ..write('status: $status, ')
+          ..write('confidence: $confidence, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2499,6 +4398,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $RendaTableTable rendaTable = $RendaTableTable(this);
   late final $MetaTableTable metaTable = $MetaTableTable(this);
+  late final $ParcelamentoTableTable parcelamentoTable =
+      $ParcelamentoTableTable(this);
+  late final $ExtratoLinhasTableTable extratoLinhasTable =
+      $ExtratoLinhasTableTable(this);
+  late final $ReconciliationMatchesTableTable reconciliationMatchesTable =
+      $ReconciliationMatchesTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2508,6 +4413,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     perfilBancoTable,
     rendaTable,
     metaTable,
+    parcelamentoTable,
+    extratoLinhasTable,
+    reconciliationMatchesTable,
   ];
 }
 
@@ -2522,6 +4430,13 @@ typedef $$TransactionsTableTableCreateCompanionBuilder =
       Value<bool> needsCategory,
       Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
+      Value<String?> parcelamentoId,
+      Value<int?> numeroParcela,
+      Value<double?> valorParcela,
+      Value<bool> ehParcela,
+      Value<String?> statusParcela,
+      Value<double?> minhaParte,
+      Value<String?> divididoCom,
       Value<int> rowid,
     });
 typedef $$TransactionsTableTableUpdateCompanionBuilder =
@@ -2535,6 +4450,13 @@ typedef $$TransactionsTableTableUpdateCompanionBuilder =
       Value<bool> needsCategory,
       Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
+      Value<String?> parcelamentoId,
+      Value<int?> numeroParcela,
+      Value<double?> valorParcela,
+      Value<bool> ehParcela,
+      Value<String?> statusParcela,
+      Value<double?> minhaParte,
+      Value<String?> divididoCom,
       Value<int> rowid,
     });
 
@@ -2592,6 +4514,41 @@ class $$TransactionsTableTableFilterComposer
     column: $table.updatedAt,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get ehParcela => $composableBuilder(
+    column: $table.ehParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TransactionsTableTableOrderingComposer
@@ -2647,6 +4604,41 @@ class $$TransactionsTableTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get ehParcela => $composableBuilder(
+    column: $table.ehParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TransactionsTableTableAnnotationComposer
@@ -2691,6 +4683,39 @@ class $$TransactionsTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get parcelamentoId => $composableBuilder(
+    column: $table.parcelamentoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroParcela => $composableBuilder(
+    column: $table.numeroParcela,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get valorParcela => $composableBuilder(
+    column: $table.valorParcela,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get ehParcela =>
+      $composableBuilder(column: $table.ehParcela, builder: (column) => column);
+
+  GeneratedColumn<String> get statusParcela => $composableBuilder(
+    column: $table.statusParcela,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => column,
+  );
 }
 
 class $$TransactionsTableTableTableManager
@@ -2742,6 +4767,13 @@ class $$TransactionsTableTableTableManager
                 Value<bool> needsCategory = const Value.absent(),
                 Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> parcelamentoId = const Value.absent(),
+                Value<int?> numeroParcela = const Value.absent(),
+                Value<double?> valorParcela = const Value.absent(),
+                Value<bool> ehParcela = const Value.absent(),
+                Value<String?> statusParcela = const Value.absent(),
+                Value<double?> minhaParte = const Value.absent(),
+                Value<String?> divididoCom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion(
                 id: id,
@@ -2753,6 +4785,13 @@ class $$TransactionsTableTableTableManager
                 needsCategory: needsCategory,
                 syncStatus: syncStatus,
                 updatedAt: updatedAt,
+                parcelamentoId: parcelamentoId,
+                numeroParcela: numeroParcela,
+                valorParcela: valorParcela,
+                ehParcela: ehParcela,
+                statusParcela: statusParcela,
+                minhaParte: minhaParte,
+                divididoCom: divididoCom,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -2766,6 +4805,13 @@ class $$TransactionsTableTableTableManager
                 Value<bool> needsCategory = const Value.absent(),
                 Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> parcelamentoId = const Value.absent(),
+                Value<int?> numeroParcela = const Value.absent(),
+                Value<double?> valorParcela = const Value.absent(),
+                Value<bool> ehParcela = const Value.absent(),
+                Value<String?> statusParcela = const Value.absent(),
+                Value<double?> minhaParte = const Value.absent(),
+                Value<String?> divididoCom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion.insert(
                 id: id,
@@ -2777,6 +4823,13 @@ class $$TransactionsTableTableTableManager
                 needsCategory: needsCategory,
                 syncStatus: syncStatus,
                 updatedAt: updatedAt,
+                parcelamentoId: parcelamentoId,
+                numeroParcela: numeroParcela,
+                valorParcela: valorParcela,
+                ehParcela: ehParcela,
+                statusParcela: statusParcela,
+                minhaParte: minhaParte,
+                divididoCom: divididoCom,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -3735,6 +5788,808 @@ typedef $$MetaTableTableProcessedTableManager =
       MetaTableData,
       PrefetchHooks Function()
     >;
+typedef $$ParcelamentoTableTableCreateCompanionBuilder =
+    ParcelamentoTableCompanion Function({
+      required String id,
+      Value<String?> remoteId,
+      required String transacaoOriginalId,
+      required double totalOriginal,
+      required int numeroParcelas,
+      required DateTime dataPrimeiraParc,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ParcelamentoTableTableUpdateCompanionBuilder =
+    ParcelamentoTableCompanion Function({
+      Value<String> id,
+      Value<String?> remoteId,
+      Value<String> transacaoOriginalId,
+      Value<double> totalOriginal,
+      Value<int> numeroParcelas,
+      Value<DateTime> dataPrimeiraParc,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ParcelamentoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ParcelamentoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ParcelamentoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ParcelamentoTableTable> {
+  $$ParcelamentoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get transacaoOriginalId => $composableBuilder(
+    column: $table.transacaoOriginalId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get totalOriginal => $composableBuilder(
+    column: $table.totalOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get numeroParcelas => $composableBuilder(
+    column: $table.numeroParcelas,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dataPrimeiraParc => $composableBuilder(
+    column: $table.dataPrimeiraParc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ParcelamentoTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ParcelamentoTableTable,
+          ParcelamentoTableData,
+          $$ParcelamentoTableTableFilterComposer,
+          $$ParcelamentoTableTableOrderingComposer,
+          $$ParcelamentoTableTableAnnotationComposer,
+          $$ParcelamentoTableTableCreateCompanionBuilder,
+          $$ParcelamentoTableTableUpdateCompanionBuilder,
+          (
+            ParcelamentoTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ParcelamentoTableTable,
+              ParcelamentoTableData
+            >,
+          ),
+          ParcelamentoTableData,
+          PrefetchHooks Function()
+        > {
+  $$ParcelamentoTableTableTableManager(
+    _$AppDatabase db,
+    $ParcelamentoTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ParcelamentoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ParcelamentoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ParcelamentoTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String> transacaoOriginalId = const Value.absent(),
+                Value<double> totalOriginal = const Value.absent(),
+                Value<int> numeroParcelas = const Value.absent(),
+                Value<DateTime> dataPrimeiraParc = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParcelamentoTableCompanion(
+                id: id,
+                remoteId: remoteId,
+                transacaoOriginalId: transacaoOriginalId,
+                totalOriginal: totalOriginal,
+                numeroParcelas: numeroParcelas,
+                dataPrimeiraParc: dataPrimeiraParc,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> remoteId = const Value.absent(),
+                required String transacaoOriginalId,
+                required double totalOriginal,
+                required int numeroParcelas,
+                required DateTime dataPrimeiraParc,
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ParcelamentoTableCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                transacaoOriginalId: transacaoOriginalId,
+                totalOriginal: totalOriginal,
+                numeroParcelas: numeroParcelas,
+                dataPrimeiraParc: dataPrimeiraParc,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ParcelamentoTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ParcelamentoTableTable,
+      ParcelamentoTableData,
+      $$ParcelamentoTableTableFilterComposer,
+      $$ParcelamentoTableTableOrderingComposer,
+      $$ParcelamentoTableTableAnnotationComposer,
+      $$ParcelamentoTableTableCreateCompanionBuilder,
+      $$ParcelamentoTableTableUpdateCompanionBuilder,
+      (
+        ParcelamentoTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ParcelamentoTableTable,
+          ParcelamentoTableData
+        >,
+      ),
+      ParcelamentoTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ExtratoLinhasTableTableCreateCompanionBuilder =
+    ExtratoLinhasTableCompanion Function({
+      required String id,
+      required String importId,
+      required String descricao,
+      required double valor,
+      required DateTime data,
+      required String tipo,
+      required String nomeBancoOriginal,
+      Value<DateTime> importadoEm,
+      Value<int> rowid,
+    });
+typedef $$ExtratoLinhasTableTableUpdateCompanionBuilder =
+    ExtratoLinhasTableCompanion Function({
+      Value<String> id,
+      Value<String> importId,
+      Value<String> descricao,
+      Value<double> valor,
+      Value<DateTime> data,
+      Value<String> tipo,
+      Value<String> nomeBancoOriginal,
+      Value<DateTime> importadoEm,
+      Value<int> rowid,
+    });
+
+class $$ExtratoLinhasTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get importId => $composableBuilder(
+    column: $table.importId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ExtratoLinhasTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get importId => $composableBuilder(
+    column: $table.importId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get data => $composableBuilder(
+    column: $table.data,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tipo => $composableBuilder(
+    column: $table.tipo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ExtratoLinhasTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExtratoLinhasTableTable> {
+  $$ExtratoLinhasTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get importId =>
+      $composableBuilder(column: $table.importId, builder: (column) => column);
+
+  GeneratedColumn<String> get descricao =>
+      $composableBuilder(column: $table.descricao, builder: (column) => column);
+
+  GeneratedColumn<double> get valor =>
+      $composableBuilder(column: $table.valor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<String> get tipo =>
+      $composableBuilder(column: $table.tipo, builder: (column) => column);
+
+  GeneratedColumn<String> get nomeBancoOriginal => $composableBuilder(
+    column: $table.nomeBancoOriginal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get importadoEm => $composableBuilder(
+    column: $table.importadoEm,
+    builder: (column) => column,
+  );
+}
+
+class $$ExtratoLinhasTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ExtratoLinhasTableTable,
+          ExtratoLinhasTableData,
+          $$ExtratoLinhasTableTableFilterComposer,
+          $$ExtratoLinhasTableTableOrderingComposer,
+          $$ExtratoLinhasTableTableAnnotationComposer,
+          $$ExtratoLinhasTableTableCreateCompanionBuilder,
+          $$ExtratoLinhasTableTableUpdateCompanionBuilder,
+          (
+            ExtratoLinhasTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ExtratoLinhasTableTable,
+              ExtratoLinhasTableData
+            >,
+          ),
+          ExtratoLinhasTableData,
+          PrefetchHooks Function()
+        > {
+  $$ExtratoLinhasTableTableTableManager(
+    _$AppDatabase db,
+    $ExtratoLinhasTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExtratoLinhasTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExtratoLinhasTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExtratoLinhasTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> importId = const Value.absent(),
+                Value<String> descricao = const Value.absent(),
+                Value<double> valor = const Value.absent(),
+                Value<DateTime> data = const Value.absent(),
+                Value<String> tipo = const Value.absent(),
+                Value<String> nomeBancoOriginal = const Value.absent(),
+                Value<DateTime> importadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtratoLinhasTableCompanion(
+                id: id,
+                importId: importId,
+                descricao: descricao,
+                valor: valor,
+                data: data,
+                tipo: tipo,
+                nomeBancoOriginal: nomeBancoOriginal,
+                importadoEm: importadoEm,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String importId,
+                required String descricao,
+                required double valor,
+                required DateTime data,
+                required String tipo,
+                required String nomeBancoOriginal,
+                Value<DateTime> importadoEm = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ExtratoLinhasTableCompanion.insert(
+                id: id,
+                importId: importId,
+                descricao: descricao,
+                valor: valor,
+                data: data,
+                tipo: tipo,
+                nomeBancoOriginal: nomeBancoOriginal,
+                importadoEm: importadoEm,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ExtratoLinhasTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ExtratoLinhasTableTable,
+      ExtratoLinhasTableData,
+      $$ExtratoLinhasTableTableFilterComposer,
+      $$ExtratoLinhasTableTableOrderingComposer,
+      $$ExtratoLinhasTableTableAnnotationComposer,
+      $$ExtratoLinhasTableTableCreateCompanionBuilder,
+      $$ExtratoLinhasTableTableUpdateCompanionBuilder,
+      (
+        ExtratoLinhasTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ExtratoLinhasTableTable,
+          ExtratoLinhasTableData
+        >,
+      ),
+      ExtratoLinhasTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ReconciliationMatchesTableTableCreateCompanionBuilder =
+    ReconciliationMatchesTableCompanion Function({
+      required String id,
+      Value<String?> transacaoId,
+      required String linhaExtratoId,
+      Value<DateTime> dataReconciliacao,
+      required String status,
+      required double confidence,
+      Value<int> rowid,
+    });
+typedef $$ReconciliationMatchesTableTableUpdateCompanionBuilder =
+    ReconciliationMatchesTableCompanion Function({
+      Value<String> id,
+      Value<String?> transacaoId,
+      Value<String> linhaExtratoId,
+      Value<DateTime> dataReconciliacao,
+      Value<String> status,
+      Value<double> confidence,
+      Value<int> rowid,
+    });
+
+class $$ReconciliationMatchesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ReconciliationMatchesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ReconciliationMatchesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ReconciliationMatchesTableTable> {
+  $$ReconciliationMatchesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get linhaExtratoId => $composableBuilder(
+    column: $table.linhaExtratoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dataReconciliacao => $composableBuilder(
+    column: $table.dataReconciliacao,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<double> get confidence => $composableBuilder(
+    column: $table.confidence,
+    builder: (column) => column,
+  );
+}
+
+class $$ReconciliationMatchesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData,
+          $$ReconciliationMatchesTableTableFilterComposer,
+          $$ReconciliationMatchesTableTableOrderingComposer,
+          $$ReconciliationMatchesTableTableAnnotationComposer,
+          $$ReconciliationMatchesTableTableCreateCompanionBuilder,
+          $$ReconciliationMatchesTableTableUpdateCompanionBuilder,
+          (
+            ReconciliationMatchesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ReconciliationMatchesTableTable,
+              ReconciliationMatchesTableData
+            >,
+          ),
+          ReconciliationMatchesTableData,
+          PrefetchHooks Function()
+        > {
+  $$ReconciliationMatchesTableTableTableManager(
+    _$AppDatabase db,
+    $ReconciliationMatchesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ReconciliationMatchesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ReconciliationMatchesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ReconciliationMatchesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> transacaoId = const Value.absent(),
+                Value<String> linhaExtratoId = const Value.absent(),
+                Value<DateTime> dataReconciliacao = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<double> confidence = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ReconciliationMatchesTableCompanion(
+                id: id,
+                transacaoId: transacaoId,
+                linhaExtratoId: linhaExtratoId,
+                dataReconciliacao: dataReconciliacao,
+                status: status,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> transacaoId = const Value.absent(),
+                required String linhaExtratoId,
+                Value<DateTime> dataReconciliacao = const Value.absent(),
+                required String status,
+                required double confidence,
+                Value<int> rowid = const Value.absent(),
+              }) => ReconciliationMatchesTableCompanion.insert(
+                id: id,
+                transacaoId: transacaoId,
+                linhaExtratoId: linhaExtratoId,
+                dataReconciliacao: dataReconciliacao,
+                status: status,
+                confidence: confidence,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ReconciliationMatchesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ReconciliationMatchesTableTable,
+      ReconciliationMatchesTableData,
+      $$ReconciliationMatchesTableTableFilterComposer,
+      $$ReconciliationMatchesTableTableOrderingComposer,
+      $$ReconciliationMatchesTableTableAnnotationComposer,
+      $$ReconciliationMatchesTableTableCreateCompanionBuilder,
+      $$ReconciliationMatchesTableTableUpdateCompanionBuilder,
+      (
+        ReconciliationMatchesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ReconciliationMatchesTableTable,
+          ReconciliationMatchesTableData
+        >,
+      ),
+      ReconciliationMatchesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3747,4 +6602,14 @@ class $AppDatabaseManager {
       $$RendaTableTableTableManager(_db, _db.rendaTable);
   $$MetaTableTableTableManager get metaTable =>
       $$MetaTableTableTableManager(_db, _db.metaTable);
+  $$ParcelamentoTableTableTableManager get parcelamentoTable =>
+      $$ParcelamentoTableTableTableManager(_db, _db.parcelamentoTable);
+  $$ExtratoLinhasTableTableTableManager get extratoLinhasTable =>
+      $$ExtratoLinhasTableTableTableManager(_db, _db.extratoLinhasTable);
+  $$ReconciliationMatchesTableTableTableManager
+  get reconciliationMatchesTable =>
+      $$ReconciliationMatchesTableTableTableManager(
+        _db,
+        _db.reconciliationMatchesTable,
+      );
 }

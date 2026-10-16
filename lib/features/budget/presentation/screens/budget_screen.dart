@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../providers/budget_mock_provider.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Tela de Orçamento (envelopes por categoria) — implementação fiel a
 /// Budget.dc.html. Acessada a partir do cartão "Despesas" do Dashboard.
@@ -63,13 +64,14 @@ class BudgetScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Total gasto', style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 13)),
-                        Text(
-                          'Limite R\$ ${budget.totalLimit.toStringAsFixed(0)}',
+                        AppAmountText(
+                          'R\$ ${budget.totalLimit.toStringAsFixed(0)}',
+                          prefix: 'Limite ',
                           style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 13),
                         ),
                       ],
                     ),
-                    Text(
+                    AppAmountText(
                       'R\$ ${budget.totalSpent.toStringAsFixed(0)}',
                       style: const TextStyle(
                         color: Colors.white,
@@ -88,8 +90,10 @@ class BudgetScreen extends ConsumerWidget {
                         valueColor: AlwaysStoppedAnimation(t.accent),
                       ),
                     ),
-                    Text(
-                      'Restam R\$ ${totalLeft.toStringAsFixed(0)} · 18 dias até o fim do mês',
+                    AppAmountText(
+                      'R\$ ${totalLeft.toStringAsFixed(0)}',
+                      prefix: 'Restam ',
+                      suffix: ' · 18 dias até o fim do mês',
                       style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 12, fontWeight: FontWeight.w600),
                     ),
                   ],
@@ -177,12 +181,13 @@ class _EnvelopeCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
+                  AppAmountText(
                     'R\$ ${envelope.spent.toStringAsFixed(0)}',
                     style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: t.ink),
                   ),
-                  Text(
-                    'de R\$ ${envelope.limit.toStringAsFixed(0)}',
+                  AppAmountText(
+                    'R\$ ${envelope.limit.toStringAsFixed(0)}',
+                    prefix: 'de ',
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: t.sub),
                   ),
                 ],
