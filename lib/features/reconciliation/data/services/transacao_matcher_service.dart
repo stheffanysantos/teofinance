@@ -18,11 +18,6 @@ class TransacaoMatcherService {
     final matches = <(Transacao, ExtratoLinha, double)>[];
 
     for (final txn in transacoes) {
-      // Skip se já foi reconciliada
-      if (txn.reconciliationStatus == 'reconciliada') {
-        continue;
-      }
-
       for (final linha in linhasExtrato) {
         final confidence = _calcularConfianca(txn, linha);
 
@@ -38,30 +33,34 @@ class TransacaoMatcherService {
     return matches;
   }
 
-  /// Calcula confiança do match (0.0–1.0).
-  /// 50% valor, 50% data.
+  /// Calcula confiança do match (0.0–1.0): até 0.5 pelo valor e 0.5 pela data.
   double _calcularConfianca(Transacao txn, ExtratoLinha linha) {
     double score = 0.0;
 
-    // 1. Valor (50%)
-    final diferencaValor = (txn.valorContabilizado - linha.valorAsTransacao).abs();
-    final percentualDiferenca = diferencaValor / txn.valorContabilizado.abs();
+    final valorTxn = txn.valorContabilizado;
+    final diferencaValor = (valorTxn - linha.valorAsTransacao).abs();
+    final base = valorTxn.abs();
+    final percentualDiferenca = base == 0 ? (diferencaValor == 0 ? 0.0 : 1.0) : diferencaValor / base;
 
     if (percentualDiferenca == 0.0) {
-      score += 0.5; // Valor exato
+      score += 0.5;
     } else if (percentualDiferenca <= 0.05) {
-      score += 0.5 * (1 - percentualDiferenca / 0.05); // Até 5%
+      score += 0.5 * (1 - percentualDiferenca / 0.05);
     }
 
-    // 2. Data (50%)
-    final diferencaDias = txn.data.difference(linha.data).inDays.abs();
+    final diferencaDias = DateTime(txn.data.year, txn.data.month, txn.data.day)
+        .difference(DateTime(linha.data.year, linha.data.month, linha.data.day))
+        .inDays
+        .abs();
 
     if (diferencaDias == 0) {
-      score += 0.5; // Mesma data
-    } else if (diferencaDias <= 2) {
-      score += 0.5 * (1 - diferencaDias / 2);
-    } else if (diferencaDias <= 3) {
-      score += 0.25; // Tolerância maior = menos confiança
+      score += 0.5;
+    } else if (diferencaDias == 1) {
+      score += 0.45;
+    } else if (diferencaDias == 2) {
+      score += 0.4;
+    } else if (diferencaDias == 3) {
+      score += 0.25;
     }
 
     return score.clamp(0.0, 1.0);

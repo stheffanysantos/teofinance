@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
 import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
@@ -337,6 +338,14 @@ class _Revisao extends ConsumerWidget {
             ),
             child: const Text('Confirmar importação'),
           ),
+          OutlinedButton(
+            onPressed: notifier.confirmarParaReconciliacao,
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(50),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Reconciliar com minhas transações'),
+          ),
         ],
       ),
     );
@@ -360,15 +369,31 @@ class _Concluido extends ConsumerWidget {
           children: [
             Icon(Icons.check_circle_outline, size: 56, color: t.pos),
             Text(
-              '${state.transacoes.length} transações importadas!',
+              state.paraReconciliacao
+                  ? '${state.transacoes.length} linhas do extrato prontas para reconciliar!'
+                  : '${state.transacoes.length} transações importadas!',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: t.ink),
             ),
             Text(
-              'Elas já aparecem em Contas. A sincronização com a nuvem acontece automaticamente.',
+              state.paraReconciliacao
+                  ? 'Elas não viram transações: serão comparadas com os lançamentos que você cadastrou.'
+                  : 'Elas já aparecem em Contas. A sincronização com a nuvem acontece automaticamente.',
               textAlign: TextAlign.center,
               style: TextStyle(color: t.sub, fontSize: 13),
             ),
+            if (state.paraReconciliacao)
+              FilledButton(
+                onPressed: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const ReconciliationScreen()),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: t.hero,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Abrir reconciliação'),
+              ),
             FilledButton(
               onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
               style: FilledButton.styleFrom(

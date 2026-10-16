@@ -129,7 +129,7 @@ class TransacaoLocalDataSource {
       await _db.into(_db.transactionsTable).insert(
             TransactionsTableCompanion.insert(
               id: id,
-              name: '$descricaoOriginal (${i}/$numeroParcelas)',
+              name: '$descricaoOriginal ($i/$numeroParcelas)',
               category: categoria,
               value: valorParcela,
               occurredAt: dataVencimento,
@@ -145,7 +145,7 @@ class TransacaoLocalDataSource {
       parcelas.add(
         Transacao(
           id: id,
-          descricao: '$descricaoOriginal (${i}/$numeroParcelas)',
+          descricao: '$descricaoOriginal ($i/$numeroParcelas)',
           categoria: categoria,
           valor: valorParcela,
           data: dataVencimento,
@@ -160,6 +160,13 @@ class TransacaoLocalDataSource {
     }
 
     return parcelas;
+  }
+
+  Future<List<Transacao>> listarPorPeriodo(DateTime inicio, DateTime fim) async {
+    final linhas = await (_db.select(_db.transactionsTable)
+          ..where((t) => t.occurredAt.isBetweenValues(inicio, fim)))
+        .get();
+    return linhas.map(_paraEntidade).toList();
   }
 
   /// Obtém transação por ID (usado para validações).

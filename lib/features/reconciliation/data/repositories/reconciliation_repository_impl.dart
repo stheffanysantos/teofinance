@@ -49,64 +49,73 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
   }
 
   @override
-  Future<Either<Failure, List<ReconciliationMatch>>> fazerMatching({
+  Future<Either<Failure, ReconciliationResultado>> fazerMatching({
     required String userId,
     required DateTime dataInicio,
     required DateTime dataFim,
   }) async {
     try {
-      // 1. Busca transações do período
-      final transacoes = await _transacaoLocal.listarPendentes();
-      final transacoesFiltered = transacoes
-          .where((t) =>
-              t.data.isAfter(dataInicio) && t.data.isBefore(dataFim))
-          .toList();
+      final transacoes = await _transacaoLocal.listarPorPeriodo(dataInicio, dataFim);
+      final linhas = await _local.obterLinhasPorPeriodo(dataInicio, dataFim);
 
-      // 2. Busca linhas do extrato (últimas importações)
-      // TODO: implementar busca de últimas linhas importadas
-      final linhasExtrato = <ExtratoLinha>[];
-
-      // 3. Faz matching
-      final matches = _matcher.encontrarMatches(
-        transacoes: transacoesFiltered,
-        linhasExtrato: linhasExtrato,
+      // Aprovações manuais sobrevivem a uma nova execução; o resto é recalculado.
+      final existentes = await _local.obterMatchesPorLinhas(linhas.map((l) => l.id).toList());
+      final aprovados = existentes.where((m) => m.status == 'manual_matched').toList();
+      final rejeitados = existentes
+          .where((m) => m.status == 'rejected')
+          .map((m) => '${m.transacaoId}|${m.linhaExtratoId}')
+          .toSet();
+      await _local.removerMatches(
+        existentes
+            .where((m) => m.status != 'manual_matched' && m.status != 'rejected')
+            .map((m) => m.id)
+            .toList(),
       );
 
-      // 4. Cria registros de match
-      final companions = <ReconciliationMatchesTableCompanion>[];
-      final matchedIds = <String>{};
+      final linhasUsadas = aprovados.map((m) => m.linhaExtratoId).toSet();
+      final transacoesUsadas = aprovados.map((m) => m.transacaoId).whereType<String>().toSet();
 
-      for (final (txn, linha, confidence) in matches) {
+      final candidatos = _matcher.encontrarMatches(
+        transacoes: transacoes.where((t) => !transacoesUsadas.contains(t.id)).toList(),
+        linhasExtrato: linhas.where((l) => !linhasUsadas.contains(l.id)).toList(),
+      );
+
+      // Casamento um-para-um, do mais confiável para o menos.
+      final companions = <ReconciliationMatchesTableCompanion>[];
+      for (final (txn, linha, confidence) in candidatos) {
+        if (linhasUsadas.contains(linha.id) || transacoesUsadas.contains(txn.id)) continue;
+        if (rejeitados.contains('${txn.id}|${linha.id}')) continue;
+        linhasUsadas.add(linha.id);
+        transacoesUsadas.add(txn.id);
         companions.add(ReconciliationMatchesTableCompanion(
           id: drift.Value(const Uuid().v4()),
           transacaoId: drift.Value(txn.id),
           linhaExtratoId: drift.Value(linha.id),
           dataReconciliacao: drift.Value(DateTime.now()),
-          status: drift.Value(
-            confidence == 1.0 ? 'auto_matched' : 'manual_matched',
-          ),
+          status: drift.Value(confidence >= 0.95 ? 'auto_matched' : 'unmatched'),
           confidence: drift.Value(confidence),
         ));
-        matchedIds.add(linha.id);
       }
 
-      // 5. Identifica orphans (linhas do extrato sem correspondência)
-      for (final linha in linhasExtrato) {
-        if (!matchedIds.contains(linha.id)) {
-          companions.add(ReconciliationMatchesTableCompanion(
-            id: drift.Value(const Uuid().v4()),
-            transacaoId: const drift.Value(null),
-            linhaExtratoId: drift.Value(linha.id),
-            dataReconciliacao: drift.Value(DateTime.now()),
-            status: const drift.Value('orphan'),
-            confidence: const drift.Value(0.0),
-          ));
-        }
+      for (final linha in linhas) {
+        if (linhasUsadas.contains(linha.id)) continue;
+        companions.add(ReconciliationMatchesTableCompanion(
+          id: drift.Value(const Uuid().v4()),
+          transacaoId: const drift.Value(null),
+          linhaExtratoId: drift.Value(linha.id),
+          dataReconciliacao: drift.Value(DateTime.now()),
+          status: const drift.Value('orphan'),
+          confidence: const drift.Value(0.0),
+        ));
       }
 
-      // 6. Salva todos os matches
-      final result = await _local.salvarMatches(companions);
-      return Right(result);
+      final novos = await _local.salvarMatches(companions);
+
+      return Right(ReconciliationResultado(
+        matches: [...aprovados, ...novos],
+        linhas: {for (final l in linhas) l.id: l},
+        transacoes: {for (final t in transacoes) t.id: t},
+      ));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
@@ -125,7 +134,7 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
   @override
   Future<Either<Failure, void>> rejeitarMatch(String matchId) async {
     try {
-      await _local.atualizarStatusMatch(matchId, 'unmatched');
+      await _local.atualizarStatusMatch(matchId, 'rejected');
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

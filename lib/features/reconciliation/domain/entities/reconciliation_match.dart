@@ -14,12 +14,12 @@ class ReconciliationMatch {
   final String? transacaoId;
   final String linhaExtratoId;
   final DateTime dataReconciliacao;
-  // 'auto_matched' | 'manual_matched' | 'unmatched' | 'orphan'
+  // 'auto_matched' | 'manual_matched' | 'unmatched' (candidato a revisar) | 'orphan' | 'rejected'
   final String status;
   // 0.0–1.0 (1.0 = match perfeito)
   final double confidence;
 
-  bool get isMatched => status.contains('matched');
+  bool get isMatched => status == 'auto_matched' || status == 'manual_matched';
   bool get isOrphan => status == 'orphan';
   bool get isAutoMatched => status == 'auto_matched';
 }

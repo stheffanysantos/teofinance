@@ -12,6 +12,7 @@ class ParcelarTransacaoScreen extends ConsumerStatefulWidget {
   final VoidCallback? onSuccess;
 
   const ParcelarTransacaoScreen({
+    super.key,
     required this.transacao,
     this.onSuccess,
   });
@@ -69,7 +70,7 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
 
             // Preview das parcelas
             Card(
-              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: Column(
@@ -95,7 +96,7 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Card(
-                  color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                  color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Text(
@@ -115,6 +116,8 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
                 onPressed: state.isLoading
                     ? null
                     : () async {
+                        final navigator = Navigator.of(context);
+                        final messenger = ScaffoldMessenger.of(context);
                         await notifier.criarParcelamento(
                           transacaoId: widget.transacao.id,
                           totalOriginal: widget.transacao.valor,
@@ -126,8 +129,8 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
 
                         if (state.erro == null) {
                           widget.onSuccess?.call();
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          navigator.pop();
+                          messenger.showSnackBar(
                             const SnackBar(
                               content: Text('Transação parcelada com sucesso!'),
                             ),

@@ -10,6 +10,7 @@ class ParcelamentoIndicator extends StatelessWidget {
   final Parcelamento? parcelamento;
 
   const ParcelamentoIndicator({
+    super.key,
     required this.transacao,
     this.parcelamento,
   });
@@ -29,9 +30,9 @@ class ParcelamentoIndicator extends StatelessWidget {
         style: Theme.of(context).textTheme.labelSmall,
       ),
       avatar: const Icon(Icons.calendar_month, size: 16),
-      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+      backgroundColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
       side: BorderSide(
-        color: Theme.of(context).primaryColor.withOpacity(0.3),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
       ),
     );
   }

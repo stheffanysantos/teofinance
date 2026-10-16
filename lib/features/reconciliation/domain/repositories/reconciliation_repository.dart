@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:teofinance/core/errors/failure.dart';
 import '../entities/reconciliation_match.dart';
 import '../entities/extrato_linha.dart';
+import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
 
 abstract class ReconciliationRepository {
   /// Importa as linhas do extrato CSV/OFX e as armazena para reconciliação.
@@ -12,7 +13,7 @@ abstract class ReconciliationRepository {
 
   /// Faz matching automático entre transações e linhas do extrato.
   /// Usa algoritmo simples: valor exato + data ±2 dias = match 100%
-  Future<Either<Failure, List<ReconciliationMatch>>> fazerMatching({
+  Future<Either<Failure, ReconciliationResultado>> fazerMatching({
     required String userId,
     required DateTime dataInicio,
     required DateTime dataFim,
@@ -37,6 +38,20 @@ abstract class ReconciliationRepository {
     required DateTime dataInicio,
     required DateTime dataFim,
   });
+}
+
+/// Matches de um período junto com as entidades referenciadas, para a UI
+/// exibir descrição/valor/data sem consultar o banco.
+class ReconciliationResultado {
+  const ReconciliationResultado({
+    required this.matches,
+    required this.linhas,
+    required this.transacoes,
+  });
+
+  final List<ReconciliationMatch> matches;
+  final Map<String, ExtratoLinha> linhas;
+  final Map<String, Transacao> transacoes;
 }
 
 /// Resultado da reconciliação de um período.
