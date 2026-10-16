@@ -55,7 +55,7 @@ class MatchCard extends StatelessWidget {
             _Linha(
               titulo: 'Seu lançamento',
               descricao: transacao!.descricao,
-              valor: transacao!.valorContabilizado,
+              valor: transacao!.valorCobrado,
               data: transacao!.data,
             ),
           if (linha != null)

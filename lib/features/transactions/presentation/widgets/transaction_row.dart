@@ -68,6 +68,15 @@ class TransactionRow extends StatelessWidget {
                   style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: t.ink),
                 ),
                 const SizedBox(height: 5),
+                if (transaction.divisaoLabel != null) ...[
+                  Text(
+                    transaction.divisaoLabel!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 11, color: t.sub),
+                  ),
+                  const SizedBox(height: 4),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(

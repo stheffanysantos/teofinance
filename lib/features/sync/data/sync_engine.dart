@@ -86,6 +86,8 @@ class SyncEngine {
           'categoria': transacao.categoria,
           'valor': transacao.valor,
           'data': Timestamp.fromDate(transacao.data),
+          'minhaParte': transacao.minhaParte,
+          'divididoCom': transacao.divididoCom,
         });
         await _transacaoRepository.confirmarSincronizacao(id: transacao.id, remoteId: doc.id);
       } catch (_) {
@@ -104,6 +106,8 @@ class SyncEngine {
           valor: (dados['valor'] as num?)?.toDouble() ?? 0,
           data: (dados['data'] as Timestamp?)?.toDate() ?? DateTime.now(),
           precisaCategoria: (dados['categoria'] as String? ?? '').trim().isEmpty,
+          minhaParte: (dados['minhaParte'] as num?)?.toDouble(),
+          divididoCom: ((dados['divididoCom'] as List?) ?? const []).cast<String>(),
         );
       } catch (_) {}
     }

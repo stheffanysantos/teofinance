@@ -64,4 +64,40 @@ void main() {
 
     expect(await datasource.listarPendentesDeExclusao(), isEmpty);
   });
+
+  test('definirDivisao grava parte e nomes, marca pendingUpdate e dá para remover', () async {
+    final t = await datasource.criar(descricao: 'Pizza', valor: -100, data: dia, categoria: 'Comida');
+    await datasource.confirmarSincronizacao(id: t.id, remoteId: 'remoto-1');
+
+    await datasource.definirDivisao(id: t.id, minhaParte: 33.33, divididoCom: ['Ana', 'Bruno']);
+
+    var salva = (await datasource.obterPorId(t.id))!;
+    expect(salva.minhaParte, 33.33);
+    expect(salva.divididoCom, ['Ana', 'Bruno']);
+    expect(salva.valorContabilizado, -33.33);
+    expect((await datasource.listarPendentes()).map((x) => x.id), [t.id]);
+
+    await datasource.definirDivisao(id: t.id, minhaParte: null, divididoCom: const []);
+
+    salva = (await datasource.obterPorId(t.id))!;
+    expect(salva.ehDividida, isFalse);
+    expect(salva.divididoCom, isEmpty);
+  });
+
+  test('aplicarRemoto traz a divisão de outro aparelho', () async {
+    await datasource.aplicarRemoto(
+      remoteId: 'remoto-2',
+      descricao: 'Pizza',
+      categoria: 'Comida',
+      valor: -100,
+      data: dia,
+      precisaCategoria: false,
+      minhaParte: 25,
+      divididoCom: ['Ana', 'Bruno', 'Carla'],
+    );
+
+    final todas = await datasource.observarTodas().first;
+    expect(todas.single.minhaParte, 25);
+    expect(todas.single.divididoCom, ['Ana', 'Bruno', 'Carla']);
+  });
 }

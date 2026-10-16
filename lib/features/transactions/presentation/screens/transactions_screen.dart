@@ -8,6 +8,7 @@ import '../../../parcelamento/presentation/screens/parcelar_transacao_screen.dar
 import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
 import '../../../transacao/presentation/screens/nova_transacao_screen.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
+import '../../../transacao/presentation/screens/dividir_transacao_screen.dart';
 import '../providers/transactions_mock_provider.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
@@ -219,27 +220,50 @@ class TransactionsScreen extends ConsumerWidget {
   Future<void> _abrirAcoes(BuildContext context, WidgetRef ref, String transacaoId) async {
     final transacoes = ref.read(transacoesStreamProvider).valueOrNull ?? [];
     final transacao = transacoes.where((x) => x.id == transacaoId).firstOrNull;
-    if (transacao == null || transacao.ehParcela) return;
+    if (transacao == null) return;
 
-    final parcelar = await showModalBottomSheet<bool>(
+    final podeParcelar = !transacao.ehParcela && !transacao.ehDividida;
+
+    final acao = await showModalBottomSheet<String>(
       context: context,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (podeParcelar)
+              ListTile(
+                leading: const Icon(Icons.credit_card),
+                title: const Text('Parcelar compra'),
+                onTap: () => Navigator.of(context).pop('parcelar'),
+              ),
             ListTile(
-              leading: const Icon(Icons.credit_card),
-              title: const Text('Parcelar compra'),
-              onTap: () => Navigator.of(context).pop(true),
+              leading: const Icon(Icons.group_outlined),
+              title: Text(transacao.ehDividida ? 'Editar divisão' : 'Dividir com amigos'),
+              onTap: () => Navigator.of(context).pop('dividir'),
             ),
+            if (transacao.ehDividida)
+              ListTile(
+                leading: const Icon(Icons.group_off_outlined),
+                title: const Text('Remover divisão'),
+                onTap: () => Navigator.of(context).pop('remover'),
+              ),
           ],
         ),
       ),
     );
-    if (parcelar == true && context.mounted) {
-      await Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => ParcelarTransacaoScreen(transacao: transacao)),
-      );
+    if (acao == null || !context.mounted) return;
+
+    switch (acao) {
+      case 'parcelar':
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => ParcelarTransacaoScreen(transacao: transacao)),
+        );
+      case 'dividir':
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => DividirTransacaoScreen(transacao: transacao)),
+        );
+      case 'remover':
+        await ref.read(removerDivisaoUseCaseProvider).call(transacao.id);
     }
   }
 

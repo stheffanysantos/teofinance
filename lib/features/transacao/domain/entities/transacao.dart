@@ -19,6 +19,8 @@ class Transacao {
     this.valorParcela,
     this.ehParcela = false,
     this.statusParcela,
+    this.minhaParte,
+    this.divididoCom = const [],
   });
 
   final String id;
@@ -40,10 +42,25 @@ class Transacao {
   final bool ehParcela;
   final String? statusParcela;
 
+  /// Divisão de despesa: parte do usuário no total cobrado (positiva); nula
+  /// se a compra não foi dividida.
+  final double? minhaParte;
+  final List<String> divididoCom;
+
   bool get precisaCategoria => categoria.trim().isEmpty;
   bool get isReceita => valor > 0;
 
-  /// Se é uma parcela, usa o `valorParcela` para cálculos (ex: dashboard);
-  /// senão, usa o `valor` normal.
-  double get valorContabilizado => ehParcela ? (valorParcela ?? valor) : valor;
+  bool get ehDividida => minhaParte != null;
+
+  /// O que o banco efetivamente cobra (total da compra ou da parcela) — é este
+  /// valor que aparece no extrato e que a reconciliação compara.
+  double get valorCobrado => ehParcela ? (valorParcela ?? valor) : valor;
+
+  /// O que pesa no bolso do usuário: a parte dele quando a compra foi
+  /// dividida, senão o valor cobrado. Usado por dashboard e listagens.
+  double get valorContabilizado {
+    final cobrado = valorCobrado;
+    if (minhaParte == null) return cobrado;
+    return cobrado < 0 ? -minhaParte! : minhaParte!;
+  }
 }

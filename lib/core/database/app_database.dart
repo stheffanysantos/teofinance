@@ -38,6 +38,12 @@ class TransactionsTable extends Table {
   /// Status da parcela: 'pendente' | 'pago' | 'atrasado' (nulo se não é parcela)
   TextColumn get statusParcela => text().nullable()();
 
+  /// Divisão de despesa (v7): quanto da compra é realmente do usuário. Nulo =
+  /// não dividida. `valor` continua sendo o total cobrado pelo banco.
+  RealColumn get minhaParte => real().nullable()();
+  /// Nomes das outras pessoas, em JSON (`["Ana","Bruno"]`).
+  TextColumn get divididoCom => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -171,7 +177,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -214,6 +220,10 @@ class AppDatabase extends _$AppDatabase {
             // - Nova tabela ReconciliationMatchesTable (matches entre transações e extrato)
             await m.createTable(extratoLinhasTable);
             await m.createTable(reconciliationMatchesTable);
+          }
+          if (from < 7) {
+            await m.addColumn(transactionsTable, transactionsTable.minhaParte);
+            await m.addColumn(transactionsTable, transactionsTable.divididoCom);
           }
         },
       );

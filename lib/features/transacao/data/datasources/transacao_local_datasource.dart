@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -54,6 +56,22 @@ class TransacaoLocalDataSource {
   /// Transação já enviada ao Firestore só é marcada (`pendingDelete`) — o
   /// `features/sync/` apaga o documento remoto e depois chama
   /// [confirmarExclusao]; sem isso o próximo pull a traria de volta.
+  /// Define (ou remove, com [minhaParte] nulo) a divisão da despesa.
+  Future<void> definirDivisao({
+    required String id,
+    required double? minhaParte,
+    required List<String> divididoCom,
+  }) {
+    return (_db.update(_db.transactionsTable)..where((t) => t.id.equals(id))).write(
+      TransactionsTableCompanion(
+        minhaParte: Value(minhaParte),
+        divididoCom: Value(minhaParte == null ? null : jsonEncode(divididoCom)),
+        syncStatus: const Value(SyncStatus.pendingUpdate),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
   Future<void> excluir(String id) async {
     final linha = await (_db.select(_db.transactionsTable)..where((t) => t.id.equals(id)))
         .getSingleOrNull();
@@ -113,6 +131,8 @@ class TransacaoLocalDataSource {
     required double valor,
     required DateTime data,
     required bool precisaCategoria,
+    double? minhaParte,
+    List<String> divididoCom = const [],
   }) async {
     final existente =
         await (_db.select(_db.transactionsTable)..where((t) => t.remoteId.equals(remoteId)))
@@ -132,6 +152,8 @@ class TransacaoLocalDataSource {
             value: valor,
             occurredAt: data,
             needsCategory: Value(precisaCategoria),
+            minhaParte: Value(minhaParte),
+            divididoCom: Value(minhaParte == null ? null : jsonEncode(divididoCom)),
             syncStatus: const Value(SyncStatus.synced),
           ),
         );
@@ -223,6 +245,10 @@ class TransacaoLocalDataSource {
       valorParcela: linha.valorParcela,
       ehParcela: linha.ehParcela,
       statusParcela: linha.statusParcela,
+      minhaParte: linha.minhaParte,
+      divididoCom: linha.divididoCom == null
+          ? const []
+          : (jsonDecode(linha.divididoCom!) as List).cast<String>(),
     );
   }
 }

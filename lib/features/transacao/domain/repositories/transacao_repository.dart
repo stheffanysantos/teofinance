@@ -17,6 +17,13 @@ abstract class TransacaoRepository {
 
   Future<Either<Failure, Unit>> categorizar({required String id, required String categoria});
 
+  /// [minhaParte] nulo remove a divisão.
+  Future<Either<Failure, Unit>> definirDivisao({
+    required String id,
+    required double? minhaParte,
+    List<String> divididoCom,
+  });
+
   Future<Either<Failure, Unit>> excluir(String id);
 
   /// Usado só por `features/sync/` — ver `.claude/rules/architecture.md`.
@@ -35,5 +42,7 @@ abstract class TransacaoRepository {
     required double valor,
     required DateTime data,
     required bool precisaCategoria,
+    double? minhaParte,
+    List<String> divididoCom,
   });
 }

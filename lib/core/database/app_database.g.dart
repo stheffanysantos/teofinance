@@ -165,6 +165,28 @@ class $TransactionsTableTable extends TransactionsTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _minhaParteMeta = const VerificationMeta(
+    'minhaParte',
+  );
+  @override
+  late final GeneratedColumn<double> minhaParte = GeneratedColumn<double>(
+    'minha_parte',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _divididoComMeta = const VerificationMeta(
+    'divididoCom',
+  );
+  @override
+  late final GeneratedColumn<String> divididoCom = GeneratedColumn<String>(
+    'dividido_com',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -181,6 +203,8 @@ class $TransactionsTableTable extends TransactionsTable
     valorParcela,
     ehParcela,
     statusParcela,
+    minhaParte,
+    divididoCom,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -294,6 +318,21 @@ class $TransactionsTableTable extends TransactionsTable
         ),
       );
     }
+    if (data.containsKey('minha_parte')) {
+      context.handle(
+        _minhaParteMeta,
+        minhaParte.isAcceptableOrUnknown(data['minha_parte']!, _minhaParteMeta),
+      );
+    }
+    if (data.containsKey('dividido_com')) {
+      context.handle(
+        _divididoComMeta,
+        divididoCom.isAcceptableOrUnknown(
+          data['dividido_com']!,
+          _divididoComMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -361,6 +400,14 @@ class $TransactionsTableTable extends TransactionsTable
         DriftSqlType.string,
         data['${effectivePrefix}status_parcela'],
       ),
+      minhaParte: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}minha_parte'],
+      ),
+      divididoCom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dividido_com'],
+      ),
     );
   }
 
@@ -400,6 +447,13 @@ class TransactionsTableData extends DataClass
 
   /// Status da parcela: 'pendente' | 'pago' | 'atrasado' (nulo se não é parcela)
   final String? statusParcela;
+
+  /// Divisão de despesa (v7): quanto da compra é realmente do usuário. Nulo =
+  /// não dividida. `valor` continua sendo o total cobrado pelo banco.
+  final double? minhaParte;
+
+  /// Nomes das outras pessoas, em JSON (`["Ana","Bruno"]`).
+  final String? divididoCom;
   const TransactionsTableData({
     required this.id,
     this.remoteId,
@@ -415,6 +469,8 @@ class TransactionsTableData extends DataClass
     this.valorParcela,
     required this.ehParcela,
     this.statusParcela,
+    this.minhaParte,
+    this.divididoCom,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -447,6 +503,12 @@ class TransactionsTableData extends DataClass
     if (!nullToAbsent || statusParcela != null) {
       map['status_parcela'] = Variable<String>(statusParcela);
     }
+    if (!nullToAbsent || minhaParte != null) {
+      map['minha_parte'] = Variable<double>(minhaParte);
+    }
+    if (!nullToAbsent || divididoCom != null) {
+      map['dividido_com'] = Variable<String>(divididoCom);
+    }
     return map;
   }
 
@@ -476,6 +538,12 @@ class TransactionsTableData extends DataClass
       statusParcela: statusParcela == null && nullToAbsent
           ? const Value.absent()
           : Value(statusParcela),
+      minhaParte: minhaParte == null && nullToAbsent
+          ? const Value.absent()
+          : Value(minhaParte),
+      divididoCom: divididoCom == null && nullToAbsent
+          ? const Value.absent()
+          : Value(divididoCom),
     );
   }
 
@@ -501,6 +569,8 @@ class TransactionsTableData extends DataClass
       valorParcela: serializer.fromJson<double?>(json['valorParcela']),
       ehParcela: serializer.fromJson<bool>(json['ehParcela']),
       statusParcela: serializer.fromJson<String?>(json['statusParcela']),
+      minhaParte: serializer.fromJson<double?>(json['minhaParte']),
+      divididoCom: serializer.fromJson<String?>(json['divididoCom']),
     );
   }
   @override
@@ -523,6 +593,8 @@ class TransactionsTableData extends DataClass
       'valorParcela': serializer.toJson<double?>(valorParcela),
       'ehParcela': serializer.toJson<bool>(ehParcela),
       'statusParcela': serializer.toJson<String?>(statusParcela),
+      'minhaParte': serializer.toJson<double?>(minhaParte),
+      'divididoCom': serializer.toJson<String?>(divididoCom),
     };
   }
 
@@ -541,6 +613,8 @@ class TransactionsTableData extends DataClass
     Value<double?> valorParcela = const Value.absent(),
     bool? ehParcela,
     Value<String?> statusParcela = const Value.absent(),
+    Value<double?> minhaParte = const Value.absent(),
+    Value<String?> divididoCom = const Value.absent(),
   }) => TransactionsTableData(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -562,6 +636,8 @@ class TransactionsTableData extends DataClass
     statusParcela: statusParcela.present
         ? statusParcela.value
         : this.statusParcela,
+    minhaParte: minhaParte.present ? minhaParte.value : this.minhaParte,
+    divididoCom: divididoCom.present ? divididoCom.value : this.divididoCom,
   );
   TransactionsTableData copyWithCompanion(TransactionsTableCompanion data) {
     return TransactionsTableData(
@@ -593,6 +669,12 @@ class TransactionsTableData extends DataClass
       statusParcela: data.statusParcela.present
           ? data.statusParcela.value
           : this.statusParcela,
+      minhaParte: data.minhaParte.present
+          ? data.minhaParte.value
+          : this.minhaParte,
+      divididoCom: data.divididoCom.present
+          ? data.divididoCom.value
+          : this.divididoCom,
     );
   }
 
@@ -612,7 +694,9 @@ class TransactionsTableData extends DataClass
           ..write('numeroParcela: $numeroParcela, ')
           ..write('valorParcela: $valorParcela, ')
           ..write('ehParcela: $ehParcela, ')
-          ..write('statusParcela: $statusParcela')
+          ..write('statusParcela: $statusParcela, ')
+          ..write('minhaParte: $minhaParte, ')
+          ..write('divididoCom: $divididoCom')
           ..write(')'))
         .toString();
   }
@@ -633,6 +717,8 @@ class TransactionsTableData extends DataClass
     valorParcela,
     ehParcela,
     statusParcela,
+    minhaParte,
+    divididoCom,
   );
   @override
   bool operator ==(Object other) =>
@@ -651,7 +737,9 @@ class TransactionsTableData extends DataClass
           other.numeroParcela == this.numeroParcela &&
           other.valorParcela == this.valorParcela &&
           other.ehParcela == this.ehParcela &&
-          other.statusParcela == this.statusParcela);
+          other.statusParcela == this.statusParcela &&
+          other.minhaParte == this.minhaParte &&
+          other.divididoCom == this.divididoCom);
 }
 
 class TransactionsTableCompanion
@@ -670,6 +758,8 @@ class TransactionsTableCompanion
   final Value<double?> valorParcela;
   final Value<bool> ehParcela;
   final Value<String?> statusParcela;
+  final Value<double?> minhaParte;
+  final Value<String?> divididoCom;
   final Value<int> rowid;
   const TransactionsTableCompanion({
     this.id = const Value.absent(),
@@ -686,6 +776,8 @@ class TransactionsTableCompanion
     this.valorParcela = const Value.absent(),
     this.ehParcela = const Value.absent(),
     this.statusParcela = const Value.absent(),
+    this.minhaParte = const Value.absent(),
+    this.divididoCom = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsTableCompanion.insert({
@@ -703,6 +795,8 @@ class TransactionsTableCompanion
     this.valorParcela = const Value.absent(),
     this.ehParcela = const Value.absent(),
     this.statusParcela = const Value.absent(),
+    this.minhaParte = const Value.absent(),
+    this.divididoCom = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -724,6 +818,8 @@ class TransactionsTableCompanion
     Expression<double>? valorParcela,
     Expression<bool>? ehParcela,
     Expression<String>? statusParcela,
+    Expression<double>? minhaParte,
+    Expression<String>? divididoCom,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -741,6 +837,8 @@ class TransactionsTableCompanion
       if (valorParcela != null) 'valor_parcela': valorParcela,
       if (ehParcela != null) 'eh_parcela': ehParcela,
       if (statusParcela != null) 'status_parcela': statusParcela,
+      if (minhaParte != null) 'minha_parte': minhaParte,
+      if (divididoCom != null) 'dividido_com': divididoCom,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -760,6 +858,8 @@ class TransactionsTableCompanion
     Value<double?>? valorParcela,
     Value<bool>? ehParcela,
     Value<String?>? statusParcela,
+    Value<double?>? minhaParte,
+    Value<String?>? divididoCom,
     Value<int>? rowid,
   }) {
     return TransactionsTableCompanion(
@@ -777,6 +877,8 @@ class TransactionsTableCompanion
       valorParcela: valorParcela ?? this.valorParcela,
       ehParcela: ehParcela ?? this.ehParcela,
       statusParcela: statusParcela ?? this.statusParcela,
+      minhaParte: minhaParte ?? this.minhaParte,
+      divididoCom: divididoCom ?? this.divididoCom,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -828,6 +930,12 @@ class TransactionsTableCompanion
     if (statusParcela.present) {
       map['status_parcela'] = Variable<String>(statusParcela.value);
     }
+    if (minhaParte.present) {
+      map['minha_parte'] = Variable<double>(minhaParte.value);
+    }
+    if (divididoCom.present) {
+      map['dividido_com'] = Variable<String>(divididoCom.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -851,6 +959,8 @@ class TransactionsTableCompanion
           ..write('valorParcela: $valorParcela, ')
           ..write('ehParcela: $ehParcela, ')
           ..write('statusParcela: $statusParcela, ')
+          ..write('minhaParte: $minhaParte, ')
+          ..write('divididoCom: $divididoCom, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4325,6 +4435,8 @@ typedef $$TransactionsTableTableCreateCompanionBuilder =
       Value<double?> valorParcela,
       Value<bool> ehParcela,
       Value<String?> statusParcela,
+      Value<double?> minhaParte,
+      Value<String?> divididoCom,
       Value<int> rowid,
     });
 typedef $$TransactionsTableTableUpdateCompanionBuilder =
@@ -4343,6 +4455,8 @@ typedef $$TransactionsTableTableUpdateCompanionBuilder =
       Value<double?> valorParcela,
       Value<bool> ehParcela,
       Value<String?> statusParcela,
+      Value<double?> minhaParte,
+      Value<String?> divididoCom,
       Value<int> rowid,
     });
 
@@ -4425,6 +4539,16 @@ class $$TransactionsTableTableFilterComposer
     column: $table.statusParcela,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnFilters<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$TransactionsTableTableOrderingComposer
@@ -4505,6 +4629,16 @@ class $$TransactionsTableTableOrderingComposer
     column: $table.statusParcela,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TransactionsTableTableAnnotationComposer
@@ -4572,6 +4706,16 @@ class $$TransactionsTableTableAnnotationComposer
     column: $table.statusParcela,
     builder: (column) => column,
   );
+
+  GeneratedColumn<double> get minhaParte => $composableBuilder(
+    column: $table.minhaParte,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get divididoCom => $composableBuilder(
+    column: $table.divididoCom,
+    builder: (column) => column,
+  );
 }
 
 class $$TransactionsTableTableTableManager
@@ -4628,6 +4772,8 @@ class $$TransactionsTableTableTableManager
                 Value<double?> valorParcela = const Value.absent(),
                 Value<bool> ehParcela = const Value.absent(),
                 Value<String?> statusParcela = const Value.absent(),
+                Value<double?> minhaParte = const Value.absent(),
+                Value<String?> divididoCom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion(
                 id: id,
@@ -4644,6 +4790,8 @@ class $$TransactionsTableTableTableManager
                 valorParcela: valorParcela,
                 ehParcela: ehParcela,
                 statusParcela: statusParcela,
+                minhaParte: minhaParte,
+                divididoCom: divididoCom,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -4662,6 +4810,8 @@ class $$TransactionsTableTableTableManager
                 Value<double?> valorParcela = const Value.absent(),
                 Value<bool> ehParcela = const Value.absent(),
                 Value<String?> statusParcela = const Value.absent(),
+                Value<double?> minhaParte = const Value.absent(),
+                Value<String?> divididoCom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TransactionsTableCompanion.insert(
                 id: id,
@@ -4678,6 +4828,8 @@ class $$TransactionsTableTableTableManager
                 valorParcela: valorParcela,
                 ehParcela: ehParcela,
                 statusParcela: statusParcela,
+                minhaParte: minhaParte,
+                divididoCom: divididoCom,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

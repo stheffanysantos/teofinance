@@ -37,7 +37,8 @@ class TransacaoMatcherService {
   double _calcularConfianca(Transacao txn, ExtratoLinha linha) {
     double score = 0.0;
 
-    final valorTxn = txn.valorContabilizado;
+    // O banco mostra o total cobrado, não a parte do usuário numa compra dividida.
+    final valorTxn = txn.valorCobrado;
     final diferencaValor = (valorTxn - linha.valorAsTransacao).abs();
     final base = valorTxn.abs();
     final percentualDiferenca = base == 0 ? (diferencaValor == 0 ? 0.0 : 1.0) : diferencaValor / base;

@@ -132,7 +132,16 @@ class FakeTransacaoRepository implements TransacaoRepository {
     required double valor,
     required DateTime data,
     required bool precisaCategoria,
+    double? minhaParte,
+    List<String> divididoCom = const [],
   }) async {}
+
+  @override
+  Future<Either<Failure, Unit>> definirDivisao({
+    required String id,
+    required double? minhaParte,
+    List<String> divididoCom = const [],
+  }) async => const Right(unit);
 }
 
 ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {

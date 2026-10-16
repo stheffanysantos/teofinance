@@ -61,4 +61,23 @@ void main() {
     );
     expect(r, isEmpty);
   });
+
+  test('compra dividida casa pelo total cobrado, não pela parte do usuário', () {
+    final dividida = Transacao(
+      id: 't1',
+      descricao: 'Pizza',
+      categoria: '',
+      valor: -100,
+      data: dia,
+      minhaParte: 33.33,
+    );
+
+    final r = service.encontrarMatches(
+      transacoes: [dividida],
+      linhasExtrato: [_linha('l1', 100, 'D', dia)],
+    );
+
+    expect(r, hasLength(1));
+    expect(r.first.$3, 1.0);
+  });
 }
