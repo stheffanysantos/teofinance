@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/sync/sync_status.dart';
+import '../../../parcelamento/domain/services/calculo_parcelas.dart';
 import '../../domain/entities/transacao.dart';
 
 /// Única classe da feature que fala com `TransactionsTable` (ver
@@ -169,11 +170,12 @@ class TransacaoLocalDataSource {
     required int numeroParcelas,
     required DateTime dataPrimeira,
   }) async {
-    final valorParcela = totalOriginal / numeroParcelas;
+    final valores = valoresDasParcelas(totalOriginal, numeroParcelas);
     final parcelas = <Transacao>[];
 
     for (int i = 1; i <= numeroParcelas; i++) {
-      final dataVencimento = dataPrimeira.add(Duration(days: 30 * (i - 1)));
+      final valorParcela = valores[i - 1];
+      final dataVencimento = dataDaParcela(dataPrimeira, i - 1);
       final id = _uuid.v4();
 
       await _db.into(_db.transactionsTable).insert(

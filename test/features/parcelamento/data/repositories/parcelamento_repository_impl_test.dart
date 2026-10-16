@@ -70,4 +70,29 @@ void main() {
     expect(resultado.isLeft(), isTrue);
     expect(await transacoes.observarTodas().first, isEmpty);
   });
+
+  test('parcelas vencem em meses de calendário e os centavos fecham o total', () async {
+    final compra = await transacoes.criar(
+      descricao: 'Fone',
+      valor: -100,
+      data: DateTime(2026, 1, 31),
+      categoria: 'Casa',
+    );
+
+    await repository.criarParcelamento(
+      transacaoId: compra.id,
+      totalOriginal: 100,
+      numeroParcelas: 3,
+      dataPrimeira: DateTime(2026, 1, 31),
+    );
+
+    final parcelas = (await transacoes.observarTodas().first).reversed.toList();
+    expect(parcelas.map((p) => p.data), [
+      DateTime(2026, 1, 31),
+      DateTime(2026, 2, 28),
+      DateTime(2026, 3, 31),
+    ]);
+    expect(parcelas.map((p) => p.valor), [-33.33, -33.33, -33.34]);
+    expect(parcelas.map((p) => p.valorParcela), [-33.33, -33.33, -33.34]);
+  });
 }
