@@ -147,6 +147,22 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
     required String linhaExtratoId,
   }) async {
     try {
+      final daLinha = await _local.obterMatchesPorLinhas([linhaExtratoId]);
+      final daTransacao = await _local.obterMatchesPorTransacao(transacaoId);
+
+      final jaAprovado = [...daLinha, ...daTransacao].any((m) => m.status == 'manual_matched');
+      if (jaAprovado) {
+        return const Left(ServerFailure('Esta transação ou linha do extrato já foi vinculada.'));
+      }
+
+      // Palpites antigos (órfã, candidato, automático) deixam de valer; rejeições
+      // continuam registradas para o par não voltar a ser sugerido.
+      final substituidos = {...daLinha, ...daTransacao}
+          .where((m) => m.status != 'rejected')
+          .map((m) => m.id)
+          .toList();
+      await _local.removerMatches(substituidos);
+
       final match = ReconciliationMatch(
         id: const Uuid().v4(),
         transacaoId: transacaoId,
@@ -156,16 +172,16 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
         confidence: 1.0,
       );
 
-      final companion = ReconciliationMatchesTableCompanion(
-        id: drift.Value(match.id),
-        transacaoId: drift.Value(transacaoId),
-        linhaExtratoId: drift.Value(linhaExtratoId),
-        dataReconciliacao: drift.Value(match.dataReconciliacao),
-        status: drift.Value(match.status),
-        confidence: drift.Value(match.confidence),
-      );
-
-      await _local.salvarMatches([companion]);
+      await _local.salvarMatches([
+        ReconciliationMatchesTableCompanion(
+          id: drift.Value(match.id),
+          transacaoId: drift.Value(transacaoId),
+          linhaExtratoId: drift.Value(linhaExtratoId),
+          dataReconciliacao: drift.Value(match.dataReconciliacao),
+          status: drift.Value(match.status),
+          confidence: drift.Value(match.confidence),
+        ),
+      ]);
       return Right(match);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

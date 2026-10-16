@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/extrato_linha.dart';
 import '../../domain/entities/reconciliation_match.dart';
-import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 class OrphanCard extends StatelessWidget {
   final ReconciliationMatch match;
   final ExtratoLinha? linha;
+  final VoidCallback? onVincular;
 
-  const OrphanCard({required this.match, this.linha, super.key});
+  const OrphanCard({required this.match, this.linha, this.onVincular, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,36 +28,48 @@ class OrphanCard extends StatelessWidget {
         border: Border.all(color: AppColors.aviso.withValues(alpha: 0.4)),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        spacing: 12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
         children: [
-          const Icon(Icons.help_outline, color: AppColors.aviso),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 2,
-              children: [
-                Text(
-                  l?.descricao ?? 'Linha do extrato',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: t.ink),
+          Row(
+            spacing: 12,
+            children: [
+              const Icon(Icons.help_outline, color: AppColors.aviso),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(
+                      l?.descricao ?? 'Linha do extrato',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: t.ink),
+                    ),
+                    Text(
+                      'Sem lançamento correspondente${data.isEmpty ? '' : ' · $data'}',
+                      style: TextStyle(fontSize: 11, color: t.sub),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Sem lançamento correspondente${data.isEmpty ? '' : ' · $data'}',
-                  style: TextStyle(fontSize: 11, color: t.sub),
-                ),
-              ],
-            ),
-          ),
-          if (l != null)
-            AppAmountText(
-              l.valorAsTransacao.toStringAsFixed(2),
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: l.valorAsTransacao < 0 ? t.neg : t.pos,
               ),
+              if (l != null)
+                AppAmountText(
+                  l.valorAsTransacao.toStringAsFixed(2),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: l.valorAsTransacao < 0 ? t.neg : t.pos,
+                  ),
+                ),
+            ],
+          ),
+          if (onVincular != null)
+            OutlinedButton.icon(
+              onPressed: onVincular,
+              icon: const Icon(Icons.link, size: 18),
+              label: const Text('Vincular a uma transação'),
             ),
         ],
       ),

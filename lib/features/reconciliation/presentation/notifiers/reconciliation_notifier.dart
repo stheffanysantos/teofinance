@@ -53,11 +53,14 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
 
   ReconciliationNotifier(this._repository) : super(const ReconciliationState());
 
+  ({String userId, DateTime inicio, DateTime fim})? _periodo;
+
   Future<void> fazerReconciliacao({
     required String userId,
     required DateTime dataInicio,
     required DateTime dataFim,
   }) async {
+    _periodo = (userId: userId, inicio: dataInicio, fim: dataFim);
     state = state.copyWith(isLoading: true, limparErro: true);
 
     final result = await _repository.fazerMatching(
@@ -75,6 +78,54 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
         transacoes: r.transacoes,
       ),
     );
+  }
+
+  /// Liga uma linha do extrato (normalmente órfã) a uma transação escolhida
+  /// pelo usuário e recalcula o período para refletir quem ficou livre.
+  Future<void> vincularManualmente({
+    required String transacaoId,
+    required String linhaExtratoId,
+  }) async {
+    final result = await _repository.criarMatchManual(
+      transacaoId: transacaoId,
+      linhaExtratoId: linhaExtratoId,
+    );
+
+    final periodo = _periodo;
+    await result.fold(
+      (failure) async => state = state.copyWith(erro: failure.message),
+      (_) async {
+        if (periodo == null) return;
+        await fazerReconciliacao(
+          userId: periodo.userId,
+          dataInicio: periodo.inicio,
+          dataFim: periodo.fim,
+        );
+      },
+    );
+  }
+
+  /// Transações do período que ainda podem ser ligadas a [linha], da mais
+  /// parecida (valor e data) para a menos.
+  List<Transacao> candidatasPara(ExtratoLinha linha) {
+    final ocupadas = state.matches
+        .where((m) => m.isMatched)
+        .map((m) => m.transacaoId)
+        .whereType<String>()
+        .toSet();
+
+    final candidatas = state.transacoes.values.where((t) => !ocupadas.contains(t.id)).toList();
+    candidatas.sort((a, b) {
+      final porValor = (a.valorCobrado - linha.valorAsTransacao)
+          .abs()
+          .compareTo((b.valorCobrado - linha.valorAsTransacao).abs());
+      if (porValor != 0) return porValor;
+      return a.data
+          .difference(linha.data)
+          .abs()
+          .compareTo(b.data.difference(linha.data).abs());
+    });
+    return candidatas;
   }
 
   Future<void> aprovarMatch(String matchId) async {

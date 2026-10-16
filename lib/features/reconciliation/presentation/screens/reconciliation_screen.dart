@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
+import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
+
+import '../../domain/entities/extrato_linha.dart';
 import '../notifiers/reconciliation_notifier.dart';
 import '../providers/reconciliation_providers.dart';
 import '../widgets/match_card.dart';
@@ -48,6 +52,23 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
 
   Future<void> _aprovar(String id) async {
     await ref.read(reconciliationNotifierProvider.notifier).aprovarMatch(id);
+  }
+
+  Future<void> _vincular(ExtratoLinha linha) async {
+    final notifier = ref.read(reconciliationNotifierProvider.notifier);
+    final candidatas = notifier.candidatasPara(linha);
+
+    final escolhida = await showModalBottomSheet<Transacao>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => _EscolherTransacao(linha: linha, candidatas: candidatas),
+    );
+    if (escolhida == null) return;
+
+    await notifier.vincularManualmente(
+      transacaoId: escolhida.id,
+      linhaExtratoId: linha.id,
+    );
   }
 
   Future<void> _rejeitar(String id) async {
@@ -146,7 +167,13 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
           ),
           for (final m in lista)
             if (status == 'orphan')
-              OrphanCard(match: m, linha: state.linhas[m.linhaExtratoId])
+              OrphanCard(
+                match: m,
+                linha: state.linhas[m.linhaExtratoId],
+                onVincular: state.linhas[m.linhaExtratoId] == null
+                    ? null
+                    : () => _vincular(state.linhas[m.linhaExtratoId]!),
+              )
             else
               MatchCard(
                 match: m,
@@ -189,6 +216,80 @@ class _SeletorMes extends StatelessWidget {
         Text(rotulo, style: TextStyle(fontWeight: FontWeight.w700, color: t.ink)),
         IconButton(onPressed: onProximo, icon: Icon(Icons.chevron_right, color: t.ink)),
       ],
+    );
+  }
+}
+
+class _EscolherTransacao extends StatelessWidget {
+  const _EscolherTransacao({required this.linha, required this.candidatas});
+
+  final ExtratoLinha linha;
+  final List<Transacao> candidatas;
+
+  String _data(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}/${d.year}';
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+              child: Text(
+                'Qual transação é esta linha?',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: t.ink),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                '${linha.descricao} · ${_data(linha.data)}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(color: t.sub, fontSize: 13),
+              ),
+            ),
+            if (candidatas.isEmpty)
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Text(
+                  'Nenhuma transação livre neste mês. Cadastre a transação e volte aqui.',
+                  style: TextStyle(color: t.sub),
+                ),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: candidatas.length,
+                  separatorBuilder: (_, _) => Divider(height: 1, color: t.line),
+                  itemBuilder: (context, i) {
+                    final c = candidatas[i];
+                    return ListTile(
+                      title: Text(c.descricao, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(_data(c.data)),
+                      trailing: AppAmountText(
+                        c.valorCobrado.toStringAsFixed(2),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: c.valorCobrado < 0 ? t.neg : t.pos,
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(c),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ abstract class ReconciliationLocalDataSource {
   Future<List<ExtratoLinha>> obterLinhasPorPeriodo(DateTime inicio, DateTime fim);
   Future<List<ReconciliationMatch>> obterMatchesPorLinhas(List<String> linhaIds);
   Future<void> removerMatches(List<String> matchIds);
+  Future<List<ReconciliationMatch>> obterMatchesPorTransacao(String transacaoId);
 }
 
 class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource {
@@ -152,5 +153,22 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
     await (_db.delete(_db.reconciliationMatchesTable)
           ..where((m) => m.id.isIn(matchIds)))
         .go();
+  }
+
+  @override
+  Future<List<ReconciliationMatch>> obterMatchesPorTransacao(String transacaoId) async {
+    final dados = await (_db.select(_db.reconciliationMatchesTable)
+          ..where((m) => m.transacaoId.equals(transacaoId)))
+        .get();
+    return dados
+        .map((d) => ReconciliationMatch(
+              id: d.id,
+              transacaoId: d.transacaoId,
+              linhaExtratoId: d.linhaExtratoId,
+              dataReconciliacao: d.dataReconciliacao,
+              status: d.status,
+              confidence: d.confidence,
+            ))
+        .toList();
   }
 }
