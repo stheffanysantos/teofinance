@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 import 'package:teofinance/core/errors/failure.dart';
 import 'package:teofinance/features/auth/domain/entities/usuario.dart';
 import 'package:teofinance/features/auth/domain/repositories/auth_repository.dart';
@@ -115,6 +116,12 @@ class FakeTransacaoRepository implements TransacaoRepository {
   Future<List<Transacao>> listarPendentesDeSincronizacao() async => [];
 
   @override
+  Future<List<Transacao>> listarPendentesDeExclusao() async => [];
+
+  @override
+  Future<void> confirmarExclusao(String id) async {}
+
+  @override
   Future<void> confirmarSincronizacao({required String id, required String remoteId}) async {}
 
   @override
@@ -132,6 +139,7 @@ ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
+      syncEngineProvider.overrideWithValue(null),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
       ),
@@ -266,7 +274,7 @@ void main() {
     expect(find.text('Alimentação'), findsOneWidget);
   });
 
-  testWidgets('Metas abre a partir do Dashboard e mostra o total guardado', (
+  testWidgets('Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_pumpApp());
@@ -276,8 +284,7 @@ void main() {
     await tester.tap(find.text('Metas ativas'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Total guardado'), findsOneWidget);
-    expect(find.text('Reserva de emergência'), findsOneWidget);
+    expect(find.textContaining('Nenhuma meta cadastrada ainda.'), findsOneWidget);
   });
 
   testWidgets('Carteira simulada abre a partir da Trilha e alterna pizza/barras', (

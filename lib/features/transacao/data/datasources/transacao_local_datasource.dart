@@ -15,6 +15,7 @@ class TransacaoLocalDataSource {
 
   Stream<List<Transacao>> observarTodas() {
     final query = _db.select(_db.transactionsTable)
+      ..where((t) => t.syncStatus.equalsValue(SyncStatus.pendingDelete).not())
       ..orderBy([(t) => OrderingTerm.desc(t.occurredAt)]);
     return query.watch().map((linhas) => linhas.map(_paraEntidade).toList());
   }
@@ -50,8 +51,35 @@ class TransacaoLocalDataSource {
     );
   }
 
-  Future<void> excluir(String id) {
+  /// Transação já enviada ao Firestore só é marcada (`pendingDelete`) — o
+  /// `features/sync/` apaga o documento remoto e depois chama
+  /// [confirmarExclusao]; sem isso o próximo pull a traria de volta.
+  Future<void> excluir(String id) async {
+    final linha = await (_db.select(_db.transactionsTable)..where((t) => t.id.equals(id)))
+        .getSingleOrNull();
+    if (linha == null) return;
+
+    if (linha.remoteId == null) {
+      await confirmarExclusao(id);
+      return;
+    }
+    await (_db.update(_db.transactionsTable)..where((t) => t.id.equals(id))).write(
+      TransactionsTableCompanion(
+        syncStatus: const Value(SyncStatus.pendingDelete),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> confirmarExclusao(String id) {
     return (_db.delete(_db.transactionsTable)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<List<Transacao>> listarPendentesDeExclusao() async {
+    final linhas = await (_db.select(_db.transactionsTable)
+          ..where((t) => t.syncStatus.equalsValue(SyncStatus.pendingDelete)))
+        .get();
+    return linhas.map(_paraEntidade).toList();
   }
 
   /// Transações criadas/alteradas localmente que ainda não foram enviadas
@@ -164,7 +192,8 @@ class TransacaoLocalDataSource {
 
   Future<List<Transacao>> listarPorPeriodo(DateTime inicio, DateTime fim) async {
     final linhas = await (_db.select(_db.transactionsTable)
-          ..where((t) => t.occurredAt.isBetweenValues(inicio, fim)))
+          ..where((t) => t.occurredAt.isBetweenValues(inicio, fim) &
+              t.syncStatus.equalsValue(SyncStatus.pendingDelete).not()))
         .get();
     return linhas.map(_paraEntidade).toList();
   }
@@ -172,7 +201,9 @@ class TransacaoLocalDataSource {
   /// Obtém transação por ID (usado para validações).
   Future<Transacao?> obterPorId(String id) async {
     final linha =
-        await (_db.select(_db.transactionsTable)..where((t) => t.id.equals(id)))
+        await (_db.select(_db.transactionsTable)
+              ..where((t) => t.id.equals(id) &
+                  t.syncStatus.equalsValue(SyncStatus.pendingDelete).not()))
             .getSingleOrNull();
     return linha != null ? _paraEntidade(linha) : null;
   }

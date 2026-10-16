@@ -67,6 +67,16 @@ class SyncEngine {
   Future<void> _sincronizarTransacoes() async {
     final colecao = _colecao('transacoes');
 
+    final paraExcluir = await _transacaoRepository.listarPendentesDeExclusao();
+    for (final transacao in paraExcluir) {
+      try {
+        await colecao.doc(transacao.remoteId).delete();
+        await _transacaoRepository.confirmarExclusao(transacao.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
+
     final pendentes = await _transacaoRepository.listarPendentesDeSincronizacao();
     for (final transacao in pendentes) {
       try {

@@ -22,6 +22,10 @@ abstract class TransacaoRepository {
   /// Usado só por `features/sync/` — ver `.claude/rules/architecture.md`.
   Future<List<Transacao>> listarPendentesDeSincronizacao();
 
+  Future<List<Transacao>> listarPendentesDeExclusao();
+
+  Future<void> confirmarExclusao(String id);
+
   Future<void> confirmarSincronizacao({required String id, required String remoteId});
 
   Future<void> aplicarRemoto({

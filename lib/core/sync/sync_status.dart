@@ -4,4 +4,6 @@
 ///
 /// Nunca usar flags booleanas espalhadas (`pendingSync`, `isSynced`, etc.)
 /// para este conceito — sempre este enum único.
-enum SyncStatus { pendingCreate, pendingUpdate, synced }
+///
+/// `pendingDelete` fica sempre no fim: o drift grava o índice do enum.
+enum SyncStatus { pendingCreate, pendingUpdate, synced, pendingDelete }
