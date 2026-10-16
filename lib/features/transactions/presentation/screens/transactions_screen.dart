@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/categorias.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../connect/presentation/screens/connect_screen.dart';
+import '../../../parcelamento/presentation/screens/parcelar_transacao_screen.dart';
+import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
 import '../../../transacao/presentation/screens/nova_transacao_screen.dart';
+import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../providers/transactions_mock_provider.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
@@ -59,6 +62,22 @@ class TransactionsScreen extends ConsumerWidget {
                             ),
                             alignment: Alignment.center,
                             child: Icon(Icons.add, size: 20, color: t.ink),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const ReconciliationScreen()),
+                          ),
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: t.card,
+                              border: Border.all(color: t.line),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(Icons.fact_check_outlined, size: 18, color: t.ink),
                           ),
                         ),
                         Container(
@@ -166,6 +185,9 @@ class TransactionsScreen extends ConsumerWidget {
                                     transaction: group.items[i],
                                     showTopBorder: i > 0,
                                     onCategorize: (id) => _escolherCategoria(context, filterNotifier, id),
+                                    onLongPress: group.items[i].value < 0
+                                        ? (id) => _abrirAcoes(context, ref, id)
+                                        : null,
                                   ),
                               ],
                             ),
@@ -192,6 +214,33 @@ class TransactionsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _abrirAcoes(BuildContext context, WidgetRef ref, String transacaoId) async {
+    final transacoes = ref.read(transacoesStreamProvider).valueOrNull ?? [];
+    final transacao = transacoes.where((x) => x.id == transacaoId).firstOrNull;
+    if (transacao == null || transacao.ehParcela) return;
+
+    final parcelar = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.credit_card),
+              title: const Text('Parcelar compra'),
+              onTap: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (parcelar == true && context.mounted) {
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => ParcelarTransacaoScreen(transacao: transacao)),
+      );
+    }
   }
 
   Future<void> _escolherCategoria(

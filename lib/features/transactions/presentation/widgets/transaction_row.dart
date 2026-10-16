@@ -11,11 +11,13 @@ class TransactionRow extends StatelessWidget {
     required this.transaction,
     required this.showTopBorder,
     required this.onCategorize,
+    this.onLongPress,
   });
 
   final ResolvedTransaction transaction;
   final bool showTopBorder;
   final ValueChanged<String> onCategorize;
+  final ValueChanged<String>? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,10 @@ class TransactionRow extends StatelessWidget {
     final iconBg = needsCategory ? Colors.transparent : (isIncome ? t.posBg : t.track);
     final iconFg = needsCategory ? t.sub : (isIncome ? t.pos : t.ink);
 
-    return Container(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onLongPress == null ? null : () => onLongPress!(transaction.id),
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
       decoration: BoxDecoration(
         border: showTopBorder ? Border(top: BorderSide(color: t.line)) : null,
@@ -113,6 +118,7 @@ class TransactionRow extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

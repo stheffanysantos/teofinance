@@ -120,7 +120,7 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
                         final messenger = ScaffoldMessenger.of(context);
                         await notifier.criarParcelamento(
                           transacaoId: widget.transacao.id,
-                          totalOriginal: widget.transacao.valor,
+                          totalOriginal: widget.transacao.valor.abs(),
                           numeroParcelas: _numeroParcelas,
                           dataPrimeira: DateTime.now(),
                         );

@@ -59,10 +59,13 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
         parcelamentoId: parcelamentoId,
         descricaoOriginal: transacaoOriginal.descricao,
         categoria: transacaoOriginal.categoria,
-        totalOriginal: totalOriginal,
+        totalOriginal: transacaoOriginal.valor < 0 ? -totalOriginal : totalOriginal,
         numeroParcelas: numeroParcelas,
         dataPrimeira: dataPrimeira,
       );
+
+      // As parcelas substituem a compra original; mantê-la contaria o valor duas vezes.
+      await _transacaoLocal.excluir(transacaoId);
 
       return Right(parcelamento);
     } catch (e) {
