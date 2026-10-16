@@ -4,6 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/extrato_linha.dart';
 import '../../domain/entities/reconciliation_match.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 class OrphanCard extends StatelessWidget {
   final ReconciliationMatch match;
@@ -49,7 +50,7 @@ class OrphanCard extends StatelessWidget {
             ),
           ),
           if (l != null)
-            Text(
+            AppAmountText(
               l.valorAsTransacao.toStringAsFixed(2),
               style: TextStyle(
                 fontSize: 14,

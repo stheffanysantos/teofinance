@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Cartão de patrimônio líquido com mini-gráfico de linha (6 meses).
 class NetWorthChartCard extends StatelessWidget {
@@ -47,7 +48,7 @@ class NetWorthChartCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 2),
-          Text(rangeLabel, style: TextStyle(fontSize: 12, color: t.sub)),
+          AppAmountText(rangeLabel, style: TextStyle(fontSize: 12, color: t.sub)),
           SizedBox(
             height: 120,
             width: double.infinity,

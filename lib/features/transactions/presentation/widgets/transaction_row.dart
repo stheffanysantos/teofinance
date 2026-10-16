@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../providers/transactions_mock_provider.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Linha de transação com badge de categoria (ou aviso "Sem categoria" com
 /// borda tracejada e ação "Categorizar", igual ao mock).
@@ -97,7 +98,7 @@ class TransactionRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppAmountText(
                 formatCurrencyDelta(transaction.value),
                 style: TextStyle(
                   fontWeight: FontWeight.w800,

@@ -9,6 +9,7 @@ import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
 import '../providers/import_flow_notifier.dart';
 import '../providers/import_flow_state.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Tela de importação de extrato — cobre os passos 1-7 de
 /// `.claude/docs/IMPORT_FLOW.md`. Serve para qualquer banco: a diferença
@@ -318,7 +319,7 @@ class _Revisao extends ConsumerWidget {
                     '${transacao.precisaCategoria ? '' : ' · ${transacao.categoria}'}',
                     style: TextStyle(color: t.sub),
                   ),
-                  trailing: Text(
+                  trailing: AppAmountText(
                     transacao.valor.toStringAsFixed(2),
                     style: TextStyle(
                       color: transacao.valor < 0 ? t.neg : t.pos,

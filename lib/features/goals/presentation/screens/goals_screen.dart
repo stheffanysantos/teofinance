@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../meta/domain/entities/meta.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
 import '../../../meta/presentation/screens/nova_meta_screen.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 const _meses = [
   'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
@@ -73,7 +74,7 @@ class GoalsScreen extends ConsumerWidget {
                                 'Total guardado',
                                 style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 13),
                               ),
-                              Text(
+                              AppAmountText(
                                 'R\$ ${total.toStringAsFixed(0)}',
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -83,8 +84,9 @@ class GoalsScreen extends ConsumerWidget {
                                   fontFeatures: [FontFeature.tabularFigures()],
                                 ),
                               ),
-                              Text(
-                                'Aporte sugerido este mês: R\$ ${aporteSugerido.toStringAsFixed(0)}',
+                              AppAmountText(
+                                'R\$ ${aporteSugerido.toStringAsFixed(0)}',
+                                prefix: 'Aporte sugerido este mês: ',
                                 style: TextStyle(
                                   color: Colors.white.withValues(alpha: .8),
                                   fontSize: 12,
@@ -228,7 +230,7 @@ class _MetaCard extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                AppAmountText(
                   'R\$ ${meta.valorAtual.toStringAsFixed(0)}',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
@@ -237,8 +239,9 @@ class _MetaCard extends ConsumerWidget {
                     fontFeatures: const [FontFeature.tabularFigures()],
                   ),
                 ),
-                Text(
-                  'meta R\$ ${meta.valorAlvo.toStringAsFixed(0)}',
+                AppAmountText(
+                  'R\$ ${meta.valorAlvo.toStringAsFixed(0)}',
+                  prefix: 'meta ',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,

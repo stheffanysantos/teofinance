@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../transacao/domain/entities/transacao.dart';
 import '../providers/parcelamento_providers.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Modal para o usuário parcelar uma transação existente.
 /// Exibe a transação, um slider para escolher número de parcelas,
@@ -43,7 +44,7 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
               child: ListTile(
                 title: Text(widget.transacao.descricao),
                 subtitle: Text(widget.transacao.categoria),
-                trailing: Text(
+                trailing: AppAmountText(
                   'R\$ ${widget.transacao.valor.toStringAsFixed(2)}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Theme.of(context).primaryColor,
@@ -79,7 +80,7 @@ class _ParcelarTransacaoScreenState extends ConsumerState<ParcelarTransacaoScree
                       'Valor por parcela',
                       style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    Text(
+                    AppAmountText(
                       'R\$ ${(widget.transacao.valor / _numeroParcelas).toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: Theme.of(context).primaryColor,

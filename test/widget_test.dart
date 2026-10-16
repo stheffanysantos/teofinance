@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/core/providers/discreet_mode_provider.dart';
 import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 import 'package:teofinance/core/errors/failure.dart';
 import 'package:teofinance/features/auth/domain/entities/usuario.dart';
@@ -144,11 +145,17 @@ class FakeTransacaoRepository implements TransacaoRepository {
   }) async => const Right(unit);
 }
 
-ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {
+class _ModoLigado extends ModoDiscretoNotifier {
+  @override
+  bool build() => true;
+}
+
+ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       syncEngineProvider.overrideWithValue(null),
+      if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
       ),
@@ -158,6 +165,15 @@ ProviderScope _pumpApp({TransacaoRepository? transacaoRepository}) {
 }
 
 void main() {
+  testWidgets('Dashboard no Modo Discreto esconde o saldo e as despesas', (WidgetTester tester) async {
+    await tester.pumpWidget(_pumpApp(discreto: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Saldo total'), findsOneWidget);
+    expect(find.text('R\$ $kMascaraValor'), findsOneWidget);
+    expect(find.textContaining('R\$ 0'), findsNothing);
+  });
+
   testWidgets('Dashboard abre como tela inicial e navega até o Perfil', (
     WidgetTester tester,
   ) async {

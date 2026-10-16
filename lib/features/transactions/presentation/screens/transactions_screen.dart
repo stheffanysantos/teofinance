@@ -12,6 +12,7 @@ import '../../../transacao/presentation/screens/dividir_transacao_screen.dart';
 import '../providers/transactions_mock_provider.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
+import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Tela de Transações — implementação fiel a Transactions.dc.html: filtros
 /// de período/categoria em pílula, grupos por data, categorização manual
@@ -161,7 +162,7 @@ class TransactionsScreen extends ConsumerWidget {
                                 group.date,
                                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: t.sub),
                               ),
-                              Text(
+                              AppAmountText(
                                 group.totalLabel,
                                 style: TextStyle(
                                   fontSize: 12,
