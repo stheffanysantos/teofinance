@@ -2,13 +2,9 @@ import 'package:fpdart/fpdart.dart';
 import 'package:teofinance/core/constants/categorias.dart';
 import 'package:teofinance/core/errors/failure.dart';
 import 'package:teofinance/core/utils/currency_format.dart';
+import 'package:teofinance/core/utils/date_label.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/contexto_financeiro.dart';
 import 'package:teofinance/features/ai_assistant/domain/services/motor_resposta.dart';
-
-const _meses = [
-  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
-];
 
 /// Responde por regras determinísticas sobre o [ContextoFinanceiro] — sem
 /// modelo e sem rede. Serve de motor padrão e de fallback quando o Gemma local
@@ -22,7 +18,7 @@ class MotorRespostaPorRegras implements MotorResposta {
     required ContextoFinanceiro contexto,
   }) async {
     final q = _normalizar(pergunta);
-    final mes = _meses[contexto.mes.month - 1];
+    final mes = kMesesPorExtenso[contexto.mes.month - 1];
 
     final categoria = _categoriaCitada(q, contexto);
     if (categoria != null) return Right(_sobreCategoria(categoria, contexto, mes));

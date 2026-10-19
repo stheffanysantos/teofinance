@@ -3,6 +3,11 @@ const kMesesAbreviados = [
   'jul', 'ago', 'set', 'out', 'nov', 'dez',
 ];
 
+const kMesesPorExtenso = [
+  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
+  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
+];
+
 /// "Hoje" / "Ontem" / "dd mmm" — usado em qualquer lista de transações.
 String rotuloDataRelativa(DateTime data) {
   final agora = DateTime.now();

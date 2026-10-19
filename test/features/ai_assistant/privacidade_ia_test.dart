@@ -18,6 +18,15 @@ void main() {
     'dart:html': 'acesso a rede',
   };
 
+  // O download do modelo mora em `core/services/`, nunca em `features/ai_assistant/`.
+  final chamadasProibidas = {
+    '.fromNetwork(': 'download de modelo',
+    'installModel(': 'instalação/download de modelo',
+    'HttpClient': 'cliente HTTP',
+    'Socket.': 'conexão de rede',
+    "Uri.parse('http": 'endereço de rede',
+  };
+
   final arquivos = Directory('lib/features/ai_assistant')
       .listSync(recursive: true)
       .whereType<File>()
@@ -29,6 +38,21 @@ void main() {
   });
 
   for (final arquivo in arquivos) {
+    test('${arquivo.path.replaceAll('\\', '/')} não contém chamadas de rede nem de download', () {
+      final codigo = arquivo
+          .readAsLinesSync()
+          .where((l) => !l.trimLeft().startsWith('//'))
+          .join('\n');
+
+      for (final entrada in chamadasProibidas.entries) {
+        expect(
+          codigo.contains(entrada.key),
+          isFalse,
+          reason: '${entrada.value}: ${entrada.key}',
+        );
+      }
+    });
+
     test('${arquivo.path.replaceAll('\\', '/')} não importa rede nem fontes externas de dados', () {
       final imports = arquivo.readAsLinesSync().where((l) => l.trimLeft().startsWith('import '));
 

@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_bubble.dart';
+import '../widgets/modelo_ia_banner.dart';
 
 /// Tela do Assistente IA — implementação fiel a Chat.dc.html. Toda resposta
-/// é gerada localmente (ver `ChatNotifier._reply`); nenhuma transação ou
+/// é gerada localmente (ver `ResponderPerguntaUseCase`); nenhuma transação ou
 /// pergunta sai do aparelho, conforme `.claude/agents/ai-assistant-engineer.md`.
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -91,6 +92,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ],
             ),
           ),
+          const ModeloIaBanner(),
           Expanded(
             child: ListView(
               controller: _scrollController,
