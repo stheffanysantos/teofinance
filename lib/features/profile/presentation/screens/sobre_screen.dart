@@ -13,8 +13,8 @@ class SobreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final info = ref.watch(appInfoProvider).valueOrNull;
-    final versao = info == null ? '' : 'Versão ${info.version} (${info.buildNumber})';
+    final info = ref.watch(appInfoProvider);
+    final versao = 'Versão ${info.version} (${info.build})';
 
     return Scaffold(
       backgroundColor: t.bg,
@@ -43,7 +43,7 @@ class SobreScreen extends ConsumerWidget {
                     _nomeDoApp,
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: t.ink),
                   ),
-                  if (versao.isNotEmpty) Text(versao, style: TextStyle(fontSize: 13, color: t.sub)),
+                  Text(versao, style: TextStyle(fontSize: 13, color: t.sub)),
                 ],
               ),
             ),
@@ -71,7 +71,7 @@ class SobreScreen extends ConsumerWidget {
               onTap: () => showLicensePage(
                 context: context,
                 applicationName: _nomeDoApp,
-                applicationVersion: info?.version,
+                applicationVersion: info.version,
               ),
             ),
           ],

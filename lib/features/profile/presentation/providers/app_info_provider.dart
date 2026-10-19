@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:teofinance/core/app_info.dart';
 
-/// Nome, versão e build do app, lidos do pacote instalado — nunca um texto
-/// fixo na tela, que ficaria desatualizado a cada release.
-final appInfoProvider = FutureProvider<PackageInfo>((ref) => PackageInfo.fromPlatform());
+/// Versão e build do app, para "Sobre o app" e o Perfil.
+final appInfoProvider = Provider<AppInfo>((ref) => const AppInfo());

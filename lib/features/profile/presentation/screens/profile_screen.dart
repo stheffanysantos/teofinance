@@ -35,7 +35,7 @@ class ProfileScreen extends ConsumerWidget {
     final iniciais = email.isNotEmpty ? email.substring(0, 1).toUpperCase() : '?';
     final biometriaHabilitada = ref.watch(biometriaHabilitadaProvider).valueOrNull ?? false;
     final syncState = ref.watch(syncUiStateProvider);
-    final appInfo = ref.watch(appInfoProvider).valueOrNull;
+    final appInfo = ref.watch(appInfoProvider);
     final score = ref.watch(scoreFinanceiroProvider);
 
     return SafeArea(
@@ -146,7 +146,7 @@ class ProfileScreen extends ConsumerWidget {
                           SettingsNavTile(
                             icon: Icon(Icons.info_outline, size: 18, color: t.ink),
                             title: 'Sobre o app',
-                            trailingText: appInfo == null ? null : 'v${appInfo.version}',
+                            trailingText: 'v${appInfo.version}',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const SobreScreen()),
                             ),
