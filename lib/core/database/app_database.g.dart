@@ -4388,6 +4388,314 @@ class ReconciliationMatchesTableCompanion
   }
 }
 
+class $OrcamentoTableTable extends OrcamentoTable
+    with TableInfo<$OrcamentoTableTable, OrcamentoTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OrcamentoTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoriaMeta = const VerificationMeta(
+    'categoria',
+  );
+  @override
+  late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
+    'categoria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _limiteMeta = const VerificationMeta('limite');
+  @override
+  late final GeneratedColumn<double> limite = GeneratedColumn<double>(
+    'limite',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, categoria, limite, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'orcamento_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OrcamentoTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('categoria')) {
+      context.handle(
+        _categoriaMeta,
+        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoriaMeta);
+    }
+    if (data.containsKey('limite')) {
+      context.handle(
+        _limiteMeta,
+        limite.isAcceptableOrUnknown(data['limite']!, _limiteMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_limiteMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OrcamentoTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OrcamentoTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      categoria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}categoria'],
+      )!,
+      limite: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}limite'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OrcamentoTableTable createAlias(String alias) {
+    return $OrcamentoTableTable(attachedDatabase, alias);
+  }
+}
+
+class OrcamentoTableData extends DataClass
+    implements Insertable<OrcamentoTableData> {
+  final String id;
+  final String categoria;
+  final double limite;
+  final DateTime updatedAt;
+  const OrcamentoTableData({
+    required this.id,
+    required this.categoria,
+    required this.limite,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['categoria'] = Variable<String>(categoria);
+    map['limite'] = Variable<double>(limite);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  OrcamentoTableCompanion toCompanion(bool nullToAbsent) {
+    return OrcamentoTableCompanion(
+      id: Value(id),
+      categoria: Value(categoria),
+      limite: Value(limite),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory OrcamentoTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OrcamentoTableData(
+      id: serializer.fromJson<String>(json['id']),
+      categoria: serializer.fromJson<String>(json['categoria']),
+      limite: serializer.fromJson<double>(json['limite']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'categoria': serializer.toJson<String>(categoria),
+      'limite': serializer.toJson<double>(limite),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  OrcamentoTableData copyWith({
+    String? id,
+    String? categoria,
+    double? limite,
+    DateTime? updatedAt,
+  }) => OrcamentoTableData(
+    id: id ?? this.id,
+    categoria: categoria ?? this.categoria,
+    limite: limite ?? this.limite,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  OrcamentoTableData copyWithCompanion(OrcamentoTableCompanion data) {
+    return OrcamentoTableData(
+      id: data.id.present ? data.id.value : this.id,
+      categoria: data.categoria.present ? data.categoria.value : this.categoria,
+      limite: data.limite.present ? data.limite.value : this.limite,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrcamentoTableData(')
+          ..write('id: $id, ')
+          ..write('categoria: $categoria, ')
+          ..write('limite: $limite, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, categoria, limite, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OrcamentoTableData &&
+          other.id == this.id &&
+          other.categoria == this.categoria &&
+          other.limite == this.limite &&
+          other.updatedAt == this.updatedAt);
+}
+
+class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
+  final Value<String> id;
+  final Value<String> categoria;
+  final Value<double> limite;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const OrcamentoTableCompanion({
+    this.id = const Value.absent(),
+    this.categoria = const Value.absent(),
+    this.limite = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OrcamentoTableCompanion.insert({
+    required String id,
+    required String categoria,
+    required double limite,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       categoria = Value(categoria),
+       limite = Value(limite);
+  static Insertable<OrcamentoTableData> custom({
+    Expression<String>? id,
+    Expression<String>? categoria,
+    Expression<double>? limite,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (categoria != null) 'categoria': categoria,
+      if (limite != null) 'limite': limite,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OrcamentoTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? categoria,
+    Value<double>? limite,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return OrcamentoTableCompanion(
+      id: id ?? this.id,
+      categoria: categoria ?? this.categoria,
+      limite: limite ?? this.limite,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (categoria.present) {
+      map['categoria'] = Variable<String>(categoria.value);
+    }
+    if (limite.present) {
+      map['limite'] = Variable<double>(limite.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrcamentoTableCompanion(')
+          ..write('id: $id, ')
+          ..write('categoria: $categoria, ')
+          ..write('limite: $limite, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4404,6 +4712,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ExtratoLinhasTableTable(this);
   late final $ReconciliationMatchesTableTable reconciliationMatchesTable =
       $ReconciliationMatchesTableTable(this);
+  late final $OrcamentoTableTable orcamentoTable = $OrcamentoTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4416,6 +4725,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     parcelamentoTable,
     extratoLinhasTable,
     reconciliationMatchesTable,
+    orcamentoTable,
   ];
 }
 
@@ -6590,6 +6900,193 @@ typedef $$ReconciliationMatchesTableTableProcessedTableManager =
       ReconciliationMatchesTableData,
       PrefetchHooks Function()
     >;
+typedef $$OrcamentoTableTableCreateCompanionBuilder =
+    OrcamentoTableCompanion Function({
+      required String id,
+      required String categoria,
+      required double limite,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$OrcamentoTableTableUpdateCompanionBuilder =
+    OrcamentoTableCompanion Function({
+      Value<String> id,
+      Value<String> categoria,
+      Value<double> limite,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$OrcamentoTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OrcamentoTableTable> {
+  $$OrcamentoTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get limite => $composableBuilder(
+    column: $table.limite,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OrcamentoTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OrcamentoTableTable> {
+  $$OrcamentoTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get limite => $composableBuilder(
+    column: $table.limite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OrcamentoTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OrcamentoTableTable> {
+  $$OrcamentoTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get categoria =>
+      $composableBuilder(column: $table.categoria, builder: (column) => column);
+
+  GeneratedColumn<double> get limite =>
+      $composableBuilder(column: $table.limite, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$OrcamentoTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OrcamentoTableTable,
+          OrcamentoTableData,
+          $$OrcamentoTableTableFilterComposer,
+          $$OrcamentoTableTableOrderingComposer,
+          $$OrcamentoTableTableAnnotationComposer,
+          $$OrcamentoTableTableCreateCompanionBuilder,
+          $$OrcamentoTableTableUpdateCompanionBuilder,
+          (
+            OrcamentoTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $OrcamentoTableTable,
+              OrcamentoTableData
+            >,
+          ),
+          OrcamentoTableData,
+          PrefetchHooks Function()
+        > {
+  $$OrcamentoTableTableTableManager(
+    _$AppDatabase db,
+    $OrcamentoTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OrcamentoTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OrcamentoTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OrcamentoTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> categoria = const Value.absent(),
+                Value<double> limite = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OrcamentoTableCompanion(
+                id: id,
+                categoria: categoria,
+                limite: limite,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String categoria,
+                required double limite,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OrcamentoTableCompanion.insert(
+                id: id,
+                categoria: categoria,
+                limite: limite,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OrcamentoTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OrcamentoTableTable,
+      OrcamentoTableData,
+      $$OrcamentoTableTableFilterComposer,
+      $$OrcamentoTableTableOrderingComposer,
+      $$OrcamentoTableTableAnnotationComposer,
+      $$OrcamentoTableTableCreateCompanionBuilder,
+      $$OrcamentoTableTableUpdateCompanionBuilder,
+      (
+        OrcamentoTableData,
+        BaseReferences<_$AppDatabase, $OrcamentoTableTable, OrcamentoTableData>,
+      ),
+      OrcamentoTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -6612,4 +7109,6 @@ class $AppDatabaseManager {
         _db,
         _db.reconciliationMatchesTable,
       );
+  $$OrcamentoTableTableTableManager get orcamentoTable =>
+      $$OrcamentoTableTableTableManager(_db, _db.orcamentoTable);
 }

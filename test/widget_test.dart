@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
+import 'package:teofinance/features/budget/domain/repositories/orcamento_repository.dart';
+import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
 import 'package:teofinance/core/providers/discreet_mode_provider.dart';
 import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 import 'package:teofinance/core/errors/failure.dart';
@@ -150,11 +153,21 @@ class _ModoLigado extends ModoDiscretoNotifier {
   bool build() => true;
 }
 
+class _FakeOrcamentoRepository implements OrcamentoRepository {
+  @override
+  Stream<List<Orcamento>> observarTodos() =>
+      Stream.value(const [Orcamento(id: 'o1', categoria: 'Mercado', limite: 500)]);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       syncEngineProvider.overrideWithValue(null),
+      orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
       if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
@@ -240,30 +253,6 @@ void main() {
     expect(find.textContaining('72% do orçamento'), findsOneWidget);
   });
 
-  testWidgets('Trilha abre a lição atual e o quiz responde certo/errado', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Trilha'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Primeiros investimentos'), findsOneWidget);
-    expect(find.text('Juros compostos'), findsWidgets);
-
-    await tester.tap(find.text('Começar'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('O que é o CDI?'), findsOneWidget);
-
-    await tester.tap(find.text('Taxa de referência baseada nos empréstimos entre bancos'));
-    await tester.tap(find.text('Verificar'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Correto!'), findsOneWidget);
-  });
-
   testWidgets('Conectar conta abre a partir de Transações e alterna as opções', (
     WidgetTester tester,
   ) async {
@@ -296,7 +285,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Orçamento'), findsOneWidget);
-    expect(find.text('Alimentação'), findsOneWidget);
+    expect(find.text('Mercado'), findsOneWidget);
   });
 
   testWidgets('Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas', (

@@ -163,6 +163,18 @@ class ReconciliationMatchesTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Limite mensal por categoria (orçamento em modo envelope). O limite vale
+/// para todo mês até ser alterado; o gasto é calculado das transações.
+class OrcamentoTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get categoria => text().unique()();
+  RealColumn get limite => real()();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(tables: [
   TransactionsTable,
   PerfilBancoTable,
@@ -171,13 +183,14 @@ class ReconciliationMatchesTable extends Table {
   ParcelamentoTable,
   ExtratoLinhasTable,
   ReconciliationMatchesTable,
+  OrcamentoTable,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -224,6 +237,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 7) {
             await m.addColumn(transactionsTable, transactionsTable.minhaParte);
             await m.addColumn(transactionsTable, transactionsTable.divididoCom);
+          }
+          if (from < 8) {
+            await m.createTable(orcamentoTable);
           }
         },
       );
