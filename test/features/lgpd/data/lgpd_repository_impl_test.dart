@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:teofinance/core/database/app_database.dart';
 import 'package:teofinance/core/errors/failure.dart';
+import 'package:teofinance/core/sync/sync_pausa.dart';
 import 'package:teofinance/features/budget/data/datasources/orcamento_local_datasource.dart';
 import 'package:teofinance/features/lgpd/data/datasources/lgpd_conta_data_source.dart';
 import 'package:teofinance/features/lgpd/data/datasources/lgpd_local_data_source.dart';
@@ -44,11 +45,22 @@ class _ArmazenamentoSeguro implements FlutterSecureStorage {
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #deleteAll) {
+    final nome = invocation.memberName;
+    if (nome == #deleteAll) {
       dados.clear();
       return Future<void>.value();
     }
-    throw UnimplementedError(invocation.memberName.toString());
+    final chave = invocation.namedArguments[#key] as String?;
+    if (nome == #write) {
+      dados[chave!] = invocation.namedArguments[#value] as String;
+      return Future<void>.value();
+    }
+    if (nome == #read) return Future<String?>.value(dados[chave]);
+    if (nome == #delete) {
+      dados.remove(chave);
+      return Future<void>.value();
+    }
+    throw UnimplementedError(nome.toString());
   }
 }
 
@@ -213,6 +225,40 @@ void main() {
       expect(_falha(r).message, contains('Saia, entre de novo'));
       expect(await linhasLocais(), greaterThan(0));
       expect(conta.contaExcluida, isFalse);
+    });
+
+    test('falha ao apagar a conta depois de apagar a nuvem pausa o sync, para não reenviar os dados', () async {
+      await semearLocal();
+      await semearNuvem();
+      conta.falharAoExcluirConta = true;
+
+      await criar().excluirTodosOsDados(senha: 'certa');
+
+      expect(await syncPausado(seguro), isTrue);
+    });
+
+    test('sem conexão o sync não fica pausado, pois a nuvem não foi apagada', () async {
+      await semearLocal();
+
+      await criar(firestore: _FirestoreOffline()).excluirTodosOsDados(senha: 'certa');
+
+      expect(await syncPausado(seguro), isFalse);
+    });
+
+    test('senha errada não pausa o sync', () async {
+      await criar().excluirTodosOsDados(senha: 'errada');
+
+      expect(await syncPausado(seguro), isFalse);
+    });
+
+    test('exclusão concluída deixa o armazenamento limpo, sem pausa residual', () async {
+      await semearLocal();
+      await semearNuvem();
+
+      await criar().excluirTodosOsDados(senha: 'certa');
+
+      expect(await syncPausado(seguro), isFalse);
+      expect(seguro.dados, isEmpty);
     });
 
     test('repetir a exclusão depois de uma falha conclui o trabalho', () async {

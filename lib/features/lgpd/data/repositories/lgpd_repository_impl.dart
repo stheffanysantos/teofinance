@@ -52,9 +52,15 @@ class LgpdRepositoryImpl implements LgpdRepository {
       return const Left(AuthFailure('Não foi possível confirmar sua senha.'));
     }
 
+    // Daqui em diante os dados da nuvem podem sumir; se a conta não for apagada
+    // em seguida, o sync automático não pode reenviar os dados locais.
+    await _local.pausarSync();
     try {
       await _remote.excluirDadosDoUsuario(uid);
     } on FirebaseException catch (_) {
+      // Nada (ou só parte) foi apagado e a conta segue de pé: o sync pode voltar
+      // a reconciliar normalmente.
+      await _local.retomarSync();
       return const Left(ServerFailure(
         'Não foi possível apagar seus dados na nuvem. Verifique a conexão e tente de novo.',
       ));

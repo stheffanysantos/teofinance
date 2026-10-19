@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:teofinance/core/database/app_database.dart';
+import 'package:teofinance/core/sync/sync_pausa.dart' as pausa;
 
 /// Nome de cada tabela interna no arquivo exportado, em português e estável.
 const _nomesExportados = {
@@ -36,6 +37,10 @@ class LgpdLocalDataSource {
     }
     return tudo;
   }
+
+  Future<void> pausarSync() => pausa.pausarSync(_secureStorage);
+
+  Future<void> retomarSync() => pausa.retomarSync(_secureStorage);
 
   /// Esvazia todas as tabelas e o armazenamento seguro (preferências, biometria).
   Future<void> apagarTudo() async {
