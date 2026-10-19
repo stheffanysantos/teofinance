@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
 import 'package:teofinance/core/utils/currency_format.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
+import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
+import 'package:teofinance/features/contas/presentation/screens/conta_form_screen.dart';
 import 'package:teofinance/features/recorrentes/domain/entities/gasto_recorrente.dart';
 import 'package:teofinance/features/recorrentes/presentation/providers/recorrentes_providers.dart';
 
@@ -186,6 +188,28 @@ class _Cartao extends StatelessWidget {
                 if (gasto.variacaoDoUltimo != null) _SeloReajuste(variacao: gasto.variacaoDoUltimo!),
               ],
             ),
+            if (!apagado)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ContaFormScreen(
+                        sugestaoDescricao: gasto.descricao,
+                        sugestaoValor: gasto.valorTipico,
+                        sugestaoVencimento: gasto.proximaData,
+                        sugestaoRecorrencia: switch (gasto.cadencia) {
+                          CadenciaGasto.mensal => RecorrenciaConta.mensal,
+                          CadenciaGasto.anual => RecorrenciaConta.anual,
+                          CadenciaGasto.semanal => RecorrenciaConta.nenhuma,
+                        },
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_alert_outlined, size: 18),
+                  label: const Text('Criar conta a pagar'),
+                ),
+              ),
             Text(
               apagado
                   ? 'Última cobrança em ${_data(gasto.ultimaData)} · ${gasto.ocorrencias} registros'

@@ -160,6 +160,27 @@ void main() {
       expect(find.textContaining('Provavelmente cancelados'), findsNothing);
     });
 
+    testWidgets('gasto ativo oferece criar conta a pagar já preenchida', (tester) async {
+      await tester.pumpWidget(_app(AsyncValue.data([_gasto(descricao: 'NETFLIX', tipico: 39.9)])));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Criar conta a pagar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nova conta'), findsOneWidget);
+      expect(find.widgetWithText(TextField, 'NETFLIX'), findsOneWidget);
+      expect(find.widgetWithText(TextField, '39,90'), findsOneWidget);
+      expect(find.text('05/11/2026'), findsOneWidget); // a próxima cobrança estimada
+      expect(find.text('Todo mês'), findsOneWidget);
+    });
+
+    testWidgets('gasto provavelmente cancelado não oferece criar conta', (tester) async {
+      await tester.pumpWidget(_app(AsyncValue.data([_gasto(ativa: false)])));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Criar conta a pagar'), findsNothing);
+    });
+
     testWidgets('Modo Discreto esconde os valores', (tester) async {
       await tester.pumpWidget(_app(AsyncValue.data([_gasto(ultimo: 39.9)]), discreto: true));
       await tester.pumpAndSettle();

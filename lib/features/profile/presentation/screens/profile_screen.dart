@@ -5,6 +5,9 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
+import '../../../contas/presentation/providers/lembretes_providers.dart';
+import '../../../contas/presentation/screens/contas_screen.dart';
+import '../../../contas/presentation/screens/notificacoes_screen.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../recorrentes/presentation/screens/gastos_recorrentes_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
@@ -102,6 +105,13 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ),
                           SettingsNavTile(
+                            icon: Icon(Icons.receipt_long_outlined, size: 18, color: t.ink),
+                            title: 'Contas a pagar',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ContasScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
                             icon: Icon(Icons.repeat, size: 18, color: t.ink),
                             title: 'Gastos recorrentes',
                             onTap: () => Navigator.of(context).push(
@@ -128,8 +138,10 @@ class ProfileScreen extends ConsumerWidget {
                           SettingsNavTile(
                             icon: Icon(Icons.notifications_none, size: 18, color: t.ink),
                             title: 'Notificações',
-                            trailingText: '3 ativas',
-                            onTap: () {},
+                            trailingText: ref.watch(configLembretesProvider).ativo ? 'Ativas' : 'Desligadas',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const NotificacoesScreen()),
+                            ),
                           ),
                           _ThemeRow(
                             isDark: isDark,
