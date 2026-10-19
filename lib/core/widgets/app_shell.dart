@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/ai_assistant/presentation/screens/chat_screen.dart';
 import '../../features/dashboard/presentation/screens/dashboard_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../../features/trail/presentation/screens/trail_screen.dart';
 import '../../features/transactions/presentation/screens/transactions_screen.dart';
 import '../theme/app_theme.dart';
 import 'app_bottom_nav.dart';
@@ -45,8 +44,6 @@ class AppShell extends ConsumerWidget {
         return const ProfileScreen();
       case AppTab.contas:
         return const TransactionsScreen();
-      case AppTab.trilha:
-        return const TrailScreen();
       case AppTab.ia:
         return const ChatScreen();
     }

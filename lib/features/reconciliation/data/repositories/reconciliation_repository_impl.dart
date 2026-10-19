@@ -49,6 +49,9 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
   }
 
   @override
+  Future<List<ExtratoLinha>> listarLinhasImportadas() => _local.obterTodasAsLinhas();
+
+  @override
   Future<Either<Failure, ReconciliationResultado>> fazerMatching({
     required String userId,
     required DateTime dataInicio,
@@ -196,13 +199,14 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
   }) async {
     try {
       final matches = await _local.obterMatches(dataInicio, dataFim);
+      final transacoes = await _transacaoLocal.listarPorPeriodo(dataInicio, dataFim);
 
       final matched = matches.where((m) => m.isMatched).length;
       final orphans = matches.where((m) => m.isOrphan).length;
       final unmatched = matches.where((m) => m.status == 'unmatched').length;
 
       final status = ReconciliationStatus(
-        totalTransacoes: 0, // TODO: implementar
+        totalTransacoes: transacoes.length,
         totalLinhasExtrato: matches.length,
         matched: matched,
         orphans: orphans,

@@ -3,7 +3,10 @@ import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
 
 import '../../domain/entities/extrato_linha.dart';
 import '../../domain/entities/reconciliation_match.dart';
-import '../../domain/repositories/reconciliation_repository.dart';
+import '../../domain/usecases/aprovar_match_usecase.dart';
+import '../../domain/usecases/fazer_reconciliacao_usecase.dart';
+import '../../domain/usecases/rejeitar_match_usecase.dart';
+import '../../domain/usecases/vincular_manualmente_usecase.dart';
 
 class ReconciliationState {
   final List<ReconciliationMatch> matches;
@@ -41,6 +44,28 @@ class ReconciliationState {
   int get totalOrphans => matches.where((m) => m.isOrphan).length;
   int get totalUnmatched => matches.where((m) => m.status == 'unmatched').length;
 
+  /// Transações do período que não têm nenhuma linha candidata no extrato
+  /// (rejeições não contam como candidata).
+  List<Transacao> get transacoesSemExtrato {
+    final comLinha = matches.map((m) => m.transacaoId).whereType<String>().toSet();
+    return transacoes.values.where((t) => !comLinha.contains(t.id)).toList();
+  }
+
+  /// Soma do que o usuário registrou, no valor que o banco cobra.
+  double get totalRegistrado => transacoes.values.fold(0.0, (soma, t) => soma + t.valorCobrado);
+
+  /// Soma das linhas do extrato do período.
+  double get totalBanco => linhas.values.fold(0.0, (soma, l) => soma + l.valorAsTransacao);
+
+  /// Positivo quando o banco tem mais crédito (ou menos débito) que o registrado.
+  double get diferenca => totalBanco - totalRegistrado;
+
+  /// Quanto saiu do bolso do usuário de verdade: só despesas, contando apenas
+  /// a parte dele nas compras divididas.
+  double get gastoReal => transacoes.values
+      .where((t) => t.valorContabilizado < 0)
+      .fold(0.0, (soma, t) => soma - t.valorContabilizado);
+
   double get percentualReconciliado {
     final total = matches.length;
     if (total == 0) return 0;
@@ -49,9 +74,21 @@ class ReconciliationState {
 }
 
 class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
-  final ReconciliationRepository _repository;
+  final FazerReconciliacaoUseCase _fazerReconciliacao;
+  final AprovarMatchUseCase _aprovarMatch;
+  final RejeitarMatchUseCase _rejeitarMatch;
+  final VincularManualmenteUseCase _vincularManualmente;
 
-  ReconciliationNotifier(this._repository) : super(const ReconciliationState());
+  ReconciliationNotifier({
+    required FazerReconciliacaoUseCase fazerReconciliacao,
+    required AprovarMatchUseCase aprovarMatch,
+    required RejeitarMatchUseCase rejeitarMatch,
+    required VincularManualmenteUseCase vincularManualmente,
+  })  : _fazerReconciliacao = fazerReconciliacao,
+        _aprovarMatch = aprovarMatch,
+        _rejeitarMatch = rejeitarMatch,
+        _vincularManualmente = vincularManualmente,
+        super(const ReconciliationState());
 
   ({String userId, DateTime inicio, DateTime fim})? _periodo;
 
@@ -63,10 +100,8 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
     _periodo = (userId: userId, inicio: dataInicio, fim: dataFim);
     state = state.copyWith(isLoading: true, limparErro: true);
 
-    final result = await _repository.fazerMatching(
-      userId: userId,
-      dataInicio: dataInicio,
-      dataFim: dataFim,
+    final result = await _fazerReconciliacao(
+      FazerReconciliacaoParams(userId: userId, dataInicio: dataInicio, dataFim: dataFim),
     );
 
     result.fold(
@@ -86,9 +121,8 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
     required String transacaoId,
     required String linhaExtratoId,
   }) async {
-    final result = await _repository.criarMatchManual(
-      transacaoId: transacaoId,
-      linhaExtratoId: linhaExtratoId,
+    final result = await _vincularManualmente(
+      VincularManualmenteParams(transacaoId: transacaoId, linhaExtratoId: linhaExtratoId),
     );
 
     final periodo = _periodo;
@@ -129,7 +163,7 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
   }
 
   Future<void> aprovarMatch(String matchId) async {
-    final result = await _repository.aprovarMatch(matchId);
+    final result = await _aprovarMatch(matchId);
     result.fold(
       (failure) => state = state.copyWith(erro: failure.message),
       (_) => _atualizarStatus(matchId, 'manual_matched'),
@@ -137,7 +171,7 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
   }
 
   Future<void> rejeitarMatch(String matchId) async {
-    final result = await _repository.rejeitarMatch(matchId);
+    final result = await _rejeitarMatch(matchId);
     result.fold(
       (failure) => state = state.copyWith(erro: failure.message),
       (_) => state = state.copyWith(

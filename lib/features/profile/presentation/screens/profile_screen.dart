@@ -5,11 +5,20 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
+import '../../../contas/presentation/providers/lembretes_providers.dart';
+import '../../../contas/presentation/screens/contas_screen.dart';
+import '../../../contas/presentation/screens/notificacoes_screen.dart';
+import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
+import '../../../recorrentes/presentation/screens/gastos_recorrentes_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
+import '../../../score/presentation/providers/score_providers.dart';
+import '../../../score/presentation/widgets/como_calculamos_score_sheet.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../../../core/providers/discreet_mode_provider.dart';
+import '../providers/app_info_provider.dart';
 import '../widgets/financial_score_gauge.dart';
 import '../widgets/settings_toggle_tile.dart';
+import 'sobre_screen.dart';
 
 /// Tela de Perfil — implementação fiel a Profile.dc.html (design system
 /// TeoFinance, direção 1: petróleo + lima). Ver `.claude/memory/design-system.md`.
@@ -29,6 +38,8 @@ class ProfileScreen extends ConsumerWidget {
     final iniciais = email.isNotEmpty ? email.substring(0, 1).toUpperCase() : '?';
     final biometriaHabilitada = ref.watch(biometriaHabilitadaProvider).valueOrNull ?? false;
     final syncState = ref.watch(syncUiStateProvider);
+    final appInfo = ref.watch(appInfoProvider);
+    final score = ref.watch(scoreFinanceiroProvider);
 
     return SafeArea(
       bottom: false,
@@ -43,11 +54,10 @@ class ProfileScreen extends ConsumerWidget {
                       memberSince: 'TeoFinance',
                     ),
                     const SizedBox(height: 18),
-                    const FinancialScoreGauge(
-                      score: 742,
-                      maxScore: 1000,
-                      label: 'Bom',
-                      deltaThisMonth: 18,
+                    FinancialScoreGauge(
+                      score: score.valueOrNull,
+                      carregando: score.isLoading,
+                      onTap: () => ComoCalculamosScoreSheet.mostrar(context, score.valueOrNull),
                     ),
                     const SizedBox(height: 18),
                     Text(
@@ -95,6 +105,20 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                           ),
                           SettingsNavTile(
+                            icon: Icon(Icons.receipt_long_outlined, size: 18, color: t.ink),
+                            title: 'Contas a pagar',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ContasScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.repeat, size: 18, color: t.ink),
+                            title: 'Gastos recorrentes',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const GastosRecorrentesScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
                             icon: syncState.estado == SyncExecutionState.sincronizando
                                 ? SizedBox(
                                     width: 16,
@@ -114,8 +138,10 @@ class ProfileScreen extends ConsumerWidget {
                           SettingsNavTile(
                             icon: Icon(Icons.notifications_none, size: 18, color: t.ink),
                             title: 'Notificações',
-                            trailingText: '3 ativas',
-                            onTap: () {},
+                            trailingText: ref.watch(configLembretesProvider).ativo ? 'Ativas' : 'Desligadas',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const NotificacoesScreen()),
+                            ),
                           ),
                           _ThemeRow(
                             isDark: isDark,
@@ -123,15 +149,19 @@ class ProfileScreen extends ConsumerWidget {
                             onDark: themeNotifier.setDark,
                           ),
                           SettingsNavTile(
-                            icon: Icon(Icons.file_download_outlined, size: 18, color: t.ink),
-                            title: 'Exportar dados',
-                            onTap: () {},
+                            icon: Icon(Icons.shield_outlined, size: 18, color: t.ink),
+                            title: 'Privacidade e dados',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const MeusDadosScreen()),
+                            ),
                           ),
                           SettingsNavTile(
                             icon: Icon(Icons.info_outline, size: 18, color: t.ink),
                             title: 'Sobre o app',
-                            trailingText: 'v1.0.0',
-                            onTap: () {},
+                            trailingText: 'v${appInfo.version}',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const SobreScreen()),
+                            ),
                           ),
                           SettingsNavTile(
                             icon: Icon(Icons.logout, size: 18, color: t.neg),

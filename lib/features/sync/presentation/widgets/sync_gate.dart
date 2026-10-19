@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../contas/presentation/providers/lembretes_providers.dart';
 import '../providers/sync_providers.dart';
 
 /// Dispara uma sincronização assim que o `AppShell` é exibido (equivalente
@@ -26,5 +27,9 @@ class _SyncGateState extends ConsumerState<SyncGate> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    // Mantém os lembretes de contas a pagar agendados enquanto o app está aberto.
+    ref.watch(lembretesAutomaticosProvider);
+    return widget.child;
+  }
 }

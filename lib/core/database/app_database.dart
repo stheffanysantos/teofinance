@@ -163,6 +163,52 @@ class ReconciliationMatchesTable extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Limite mensal por categoria (orçamento em modo envelope). O limite vale
+/// para todo mês até ser alterado; o gasto é calculado das transações.
+class OrcamentoTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get remoteId => text().nullable()();
+  TextColumn get categoria => text().unique()();
+  RealColumn get limite => real()();
+  IntColumn get syncStatus => intEnum<SyncStatus>().withDefault(
+        Constant(SyncStatus.pendingCreate.index),
+      )();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Contas a pagar (boletos, mensalidades, impostos) com lembrete de vencimento.
+/// Ao pagar, a conta guarda o vínculo com a transação de despesa criada.
+class ContaTable extends Table {
+  TextColumn get id => text()();
+  TextColumn get remoteId => text().nullable()();
+  TextColumn get descricao => text()();
+  TextColumn get categoria => text().withDefault(const Constant(''))();
+  RealColumn get valor => real()();
+  DateTimeColumn get vencimento => dateTime()();
+
+  /// Dia do mês do primeiro vencimento. Uma conta que vence todo dia 31 volta
+  /// ao 31 depois de fevereiro, em vez de ficar presa no 28.
+  IntColumn get diaBase => integer()();
+
+  /// 'nenhuma' | 'mensal' | 'anual'
+  TextColumn get recorrencia => text().withDefault(const Constant('nenhuma'))();
+  BoolColumn get paga => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get dataPagamento => dateTime().nullable()();
+  RealColumn get valorPago => real().nullable()();
+  IntColumn get diasAntesLembrete => integer().withDefault(const Constant(1))();
+  TextColumn get transacaoId => text().nullable()();
+  IntColumn get syncStatus => intEnum<SyncStatus>().withDefault(
+        Constant(SyncStatus.pendingCreate.index),
+      )();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(tables: [
   TransactionsTable,
   PerfilBancoTable,
@@ -171,13 +217,15 @@ class ReconciliationMatchesTable extends Table {
   ParcelamentoTable,
   ExtratoLinhasTable,
   ReconciliationMatchesTable,
+  OrcamentoTable,
+  ContaTable,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -224,6 +272,18 @@ class AppDatabase extends _$AppDatabase {
           if (from < 7) {
             await m.addColumn(transactionsTable, transactionsTable.minhaParte);
             await m.addColumn(transactionsTable, transactionsTable.divididoCom);
+          }
+          if (from < 8) {
+            await m.createTable(orcamentoTable);
+          }
+          if (from == 8) {
+            // Orçamento passa a sincronizar com o Firestore (remoteId + syncStatus).
+            // Quem vem de antes da v8 já recebeu a tabela com estas colunas em createTable.
+            await m.addColumn(orcamentoTable, orcamentoTable.remoteId);
+            await m.addColumn(orcamentoTable, orcamentoTable.syncStatus);
+          }
+          if (from < 10) {
+            await m.createTable(contaTable);
           }
         },
       );

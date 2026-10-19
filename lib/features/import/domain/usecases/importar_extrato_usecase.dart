@@ -4,6 +4,8 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../entities/campo_coluna.dart';
+import '../entities/extrato_importado.dart';
+import '../entities/formato_extrato.dart';
 import '../entities/perfil_banco.dart';
 import '../entities/preview_arquivo.dart';
 import '../entities/transacao_importada.dart';
@@ -16,6 +18,10 @@ class ImportarExtratoUseCase {
   ImportarExtratoUseCase(this._repository);
 
   final ImportRepository _repository;
+
+  FormatoExtrato detectarFormato(Uint8List bytes) => _repository.detectarFormato(bytes);
+
+  Future<Either<Failure, ExtratoImportado>> importarOfx(Uint8List bytes) => _repository.importarOfx(bytes);
 
   Future<Either<Failure, PreviewArquivo>> analisar(Uint8List bytes) {
     return _repository.analisarArquivo(bytes);

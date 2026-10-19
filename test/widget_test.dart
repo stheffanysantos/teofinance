@@ -5,6 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/features/score/domain/entities/score_financeiro.dart';
+import 'package:teofinance/features/score/presentation/providers/score_providers.dart';
+import 'package:teofinance/features/meta/domain/entities/meta.dart';
+import 'package:teofinance/features/meta/domain/repositories/meta_repository.dart';
+import 'package:teofinance/features/meta/presentation/providers/meta_providers.dart';
+import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
+import 'package:teofinance/features/budget/domain/repositories/orcamento_repository.dart';
+import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
 import 'package:teofinance/core/providers/discreet_mode_provider.dart';
 import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 import 'package:teofinance/core/errors/failure.dart';
@@ -135,6 +143,11 @@ class FakeTransacaoRepository implements TransacaoRepository {
     required bool precisaCategoria,
     double? minhaParte,
     List<String> divididoCom = const [],
+    String? parcelamentoId,
+    int? numeroParcela,
+    double? valorParcela,
+    bool ehParcela = false,
+    String? statusParcela,
   }) async {}
 
   @override
@@ -150,11 +163,35 @@ class _ModoLigado extends ModoDiscretoNotifier {
   bool build() => true;
 }
 
+class _FakeOrcamentoRepository implements OrcamentoRepository {
+  @override
+  Stream<List<Orcamento>> observarTodos() =>
+      Stream.value(const [Orcamento(id: 'o1', categoria: 'Mercado', limite: 500)]);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeMetaRepository implements MetaRepository {
+  @override
+  Stream<List<Meta>> observarTodas() => Stream.value(const []);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       syncEngineProvider.overrideWithValue(null),
+      orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
+      metaRepositoryProvider.overrideWithValue(_FakeMetaRepository()),
+      scoreFinanceiroProvider.overrideWith(
+        (ref) async => const ScoreFinanceiro([
+          ComponenteScore(nome: 'Poupança do mês', peso: 30, fracao: 0.5, detalhe: 'Você guardou 10% da renda.'),
+        ]),
+      ),
       if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
@@ -187,7 +224,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('marina@teofinance.app'), findsOneWidget);
-    expect(find.text('742'), findsOneWidget);
+    expect(find.text('500'), findsOneWidget);
+    expect(find.text('Regular'), findsOneWidget);
 
     await tester.tap(find.text('Escuro'), warnIfMissed: false);
     await tester.pumpAndSettle();
@@ -237,34 +275,10 @@ void main() {
     await tester.tap(find.text('Resumo do mês'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('72% do orçamento'), findsOneWidget);
+    expect(find.textContaining('Não há lançamentos'), findsOneWidget);
   });
 
-  testWidgets('Trilha abre a lição atual e o quiz responde certo/errado', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Trilha'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Primeiros investimentos'), findsOneWidget);
-    expect(find.text('Juros compostos'), findsWidgets);
-
-    await tester.tap(find.text('Começar'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('O que é o CDI?'), findsOneWidget);
-
-    await tester.tap(find.text('Taxa de referência baseada nos empréstimos entre bancos'));
-    await tester.tap(find.text('Verificar'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Correto!'), findsOneWidget);
-  });
-
-  testWidgets('Conectar conta abre a partir de Transações e alterna as opções', (
+  testWidgets('Traga seus dados abre a partir de Transações e leva à importação, sem Open Finance', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_pumpApp());
@@ -277,12 +291,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Traga seus dados'), findsOneWidget);
-    expect(find.text('Escolher meu banco'), findsOneWidget);
+    expect(find.text('Importar arquivo OFX ou CSV'), findsOneWidget);
+    expect(find.textContaining('Open Finance'), findsNothing);
+    expect(find.text('Escolher meu banco'), findsNothing);
 
-    await tester.tap(find.text('Importar arquivo CSV/OFX'));
+    await tester.tap(find.text('Selecionar arquivo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Selecionar arquivo'), findsOneWidget);
+    expect(find.text('Importar extrato'), findsOneWidget);
+    expect(find.textContaining('OFX ou CSV'), findsOneWidget);
   });
 
   testWidgets('Orçamento abre a partir do Dashboard e mostra os envelopes', (
@@ -296,7 +313,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Orçamento'), findsOneWidget);
-    expect(find.text('Alimentação'), findsOneWidget);
+    expect(find.text('Mercado'), findsOneWidget);
   });
 
   testWidgets('Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas', (

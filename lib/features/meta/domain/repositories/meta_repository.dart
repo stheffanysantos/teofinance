@@ -21,6 +21,10 @@ abstract class MetaRepository {
   /// Usado só por `features/sync/`.
   Future<List<Meta>> listarPendentesDeSincronizacao();
 
+  Future<List<Meta>> listarPendentesDeExclusao();
+
+  Future<void> confirmarExclusao(String id);
+
   Future<void> confirmarSincronizacao({required String id, required String remoteId});
 
   Future<void> aplicarRemoto(Meta meta);

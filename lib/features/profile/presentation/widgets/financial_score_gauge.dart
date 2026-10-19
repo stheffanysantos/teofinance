@@ -2,127 +2,115 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../score/domain/entities/score_financeiro.dart';
 
-/// Arco de progresso do score financeiro (0–1000), com rótulo de faixa
-/// ("Bom", "Ótimo"...) e variação do mês. Espelha o cartão hero de
-/// Profile.dc.html.
+/// Arco do score financeiro (0–1000) com a faixa da nota. Mostra "—" quando
+/// ainda não há dado para calcular: nunca exibe uma nota inventada. Tocar abre
+/// a explicação de como a nota é composta.
 class FinancialScoreGauge extends StatelessWidget {
   const FinancialScoreGauge({
     super.key,
     required this.score,
-    required this.maxScore,
-    required this.label,
-    required this.deltaThisMonth,
+    required this.onTap,
+    this.carregando = false,
   });
 
-  final int score;
-  final int maxScore;
-  final String label;
-  final int deltaThisMonth;
+  /// Nulo enquanto carrega ou se o cálculo falhou.
+  final ScoreFinanceiro? score;
+  final bool carregando;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final progress = (score / maxScore).clamp(0.0, 1.0);
+    final pontos = score?.pontos;
+    final faixa = score?.faixa;
+    final progress = pontos == null ? 0.0 : (pontos / ScoreFinanceiro.maximo).clamp(0.0, 1.0);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-      decoration: BoxDecoration(
-        color: t.hero,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Score financeiro',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: .8),
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ),
-          const SizedBox(height: 6),
-          SizedBox(
-            width: 220,
-            height: 124,
-            child: Stack(
-              alignment: Alignment.bottomCenter,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+        decoration: BoxDecoration(color: t.hero, borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          children: [
+            Row(
               children: [
-                CustomPaint(
-                  size: const Size(220, 121),
-                  painter: _GaugeArcPainter(progress: progress),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
+                Expanded(
                   child: Text(
-                    '$score',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 44,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.5,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                    'Score financeiro',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: .8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
                     ),
                   ),
                 ),
+                Icon(Icons.info_outline, size: 16, color: Colors.white.withValues(alpha: .7)),
               ],
             ),
-          ),
-          SizedBox(
-            width: 220,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _endLabel('0'),
-                _endLabel('$maxScore'),
-              ],
+            const SizedBox(height: 6),
+            SizedBox(
+              width: 220,
+              height: 124,
+              child: Stack(
+                alignment: Alignment.bottomCenter,
+                children: [
+                  CustomPaint(
+                    size: const Size(220, 121),
+                    painter: _GaugeArcPainter(progress: progress),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(
+                      carregando ? '…' : (pontos?.toString() ?? '—'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 44,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -1.5,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+            SizedBox(
+              width: 220,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [_endLabel('0'), _endLabel('${ScoreFinanceiro.maximo}')],
+              ),
+            ),
+            const SizedBox(height: 8),
+            if (faixa != null)
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.lima,
-                  borderRadius: BorderRadius.circular(999),
+                decoration: BoxDecoration(color: AppColors.lima, borderRadius: BorderRadius.circular(999)),
+                child: Text(
+                  faixa.rotulo,
+                  style: const TextStyle(color: Color(0xFF1B2300), fontWeight: FontWeight.w800, fontSize: 12),
                 ),
-                child: const Text(
-                  'Bom',
-                  style: TextStyle(
-                    color: Color(0xFF1B2300),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
+              )
+            else if (!carregando)
               Text(
-                '+ $deltaThisMonth pontos este mês',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: .8),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 12,
-                ),
+                score == null
+                    ? 'Não foi possível calcular agora.'
+                    : 'Registre transações, defina limites ou crie metas para ver sua nota.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white.withValues(alpha: .8), fontWeight: FontWeight.w600, fontSize: 12),
               ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _endLabel(String text) => Text(
         text,
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: .7),
-          fontWeight: FontWeight.w600,
-          fontSize: 11,
-        ),
+        style: TextStyle(color: Colors.white.withValues(alpha: .7), fontWeight: FontWeight.w600, fontSize: 11),
       );
 }
 
@@ -150,10 +138,9 @@ class _GaugeArcPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     canvas.drawArc(rect, startAngle, sweepTotal, false, track);
-    canvas.drawArc(rect, startAngle, sweepTotal * progress, false, fill);
+    if (progress > 0) canvas.drawArc(rect, startAngle, sweepTotal * progress, false, fill);
   }
 
   @override
-  bool shouldRepaint(covariant _GaugeArcPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _GaugeArcPainter oldDelegate) => oldDelegate.progress != progress;
 }

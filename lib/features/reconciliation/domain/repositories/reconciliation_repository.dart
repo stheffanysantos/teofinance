@@ -11,6 +11,10 @@ abstract class ReconciliationRepository {
     required List<Map<String, dynamic>> linhas,
   });
 
+  /// Todas as linhas de extrato já importadas (usado só para detectar
+  /// duplicatas ao importar o mesmo extrato de novo).
+  Future<List<ExtratoLinha>> listarLinhasImportadas();
+
   /// Faz matching automático entre transações e linhas do extrato.
   /// Usa algoritmo simples: valor exato + data ±2 dias = match 100%
   Future<Either<Failure, ReconciliationResultado>> fazerMatching({

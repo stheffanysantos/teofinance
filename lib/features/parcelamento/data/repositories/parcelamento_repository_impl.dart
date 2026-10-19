@@ -114,6 +114,19 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
     }
   }
 
+  @override
+  Future<List<Parcelamento>> listarPendentesDeSincronizacao() => _local.listarPendentes();
+
+  @override
+  Future<void> confirmarSincronizacao({required String id, required String remoteId}) {
+    return _local.confirmarSincronizacao(id: id, remoteId: remoteId);
+  }
+
+  @override
+  Future<void> aplicarRemoto(Parcelamento parcelamento) {
+    return _local.aplicarRemoto(ParcelamentoModel.fromDomain(parcelamento));
+  }
+
   Failure _tratarException(dynamic e) {
     if (e is Failure) {
       return e;

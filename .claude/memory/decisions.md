@@ -4,6 +4,28 @@
 
 ---
 
+## 0007 — Open Finance (Pluggy) fora de escopo por enquanto; importação segue sempre manual
+**Status**: accepted
+**Data**: 2026-10-19
+
+Foi sugerido usar o Pluggy (agregador de Open Finance). Decidimos **não adotar nada por enquanto** e manter a decisão 0003: o extrato entra só por arquivo (OFX/CSV) lido no aparelho. A tela "Traga seus dados" perdeu a opção Open Finance, os bancos fictícios e o botão sem efeito, que prometiam uma integração inexistente.
+
+**Se for retomado**: um agregador faz os dados do banco passarem por servidores de terceiros, o que contradiz a promessa de privacidade (`.claude/rules/security.md`, `architecture.md`) e exigiria superar as decisões 0003 e esta, além de um backend para guardar credenciais, fluxo de consentimento LGPD e análise de custo. Nada disso foi pesquisado na documentação do Pluggy.
+
+---
+
+## 0006 — Gemma entra atras de contratos; runtime LiteRT-LM (nao MediaPipe) e download fora de `ai_assistant/`
+**Status**: accepted (integracao do plugin pendente)
+**Data**: 2026-10-19
+
+No contexto de integrar o Gemma local (decisao 0004), pesquisamos o plugin em 2026-10-19: `flutter_gemma` foi descontinuado em favor de `flutter_edge_ai` + `flutter_edge_ai_litertlm`; o motor MediaPipe esta so em manutencao e o plugin recomenda `.litertlm`. As versoes atuais do motor exigem Dart >= 3.12 (o projeto esta em 3.11.3) e Android `minSdk` 30, arm64. O modelo candidato e Gemma-3 1B (~0,5 GB), sem token no Hugging Face. Decidimos preparar tudo atras de contratos (`InferenciaLocal`, `GerenciadorModelo`, `MotorResposta`) com fallback por regras (`MotorRespostaPorRegras`), de modo que o assistente funcione sem o modelo, e manter o **download do modelo fora de `features/ai_assistant/`** (futuro `core/services/`), para o teste de privacidade continuar provando que a inferencia nao usa rede.
+
+**Consequencias**:
+- Positivo: o usuario sempre recebe resposta; trocar o plugin so afeta uma classe e um provider.
+- Pendente: atualizar o Flutter (Dart >= 3.12), escolher onde hospedar o arquivo do modelo (Hugging Face direto ou Firebase Storage), subir `minSdk` para 30 e validar em aparelho de entrada antes de assumir viabilidade.
+
+---
+
 ## 0005 — Monetização adiada; nenhuma decisão de arquitetura de assinatura tomada ainda
 **Status**: accepted
 **Data**: 2026-10-13

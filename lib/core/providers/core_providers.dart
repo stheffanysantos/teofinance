@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../database/app_database.dart';
+import '../services/notificacao_service.dart';
+import '../services/notificacao_service_local.dart';
 
 /// Instância da app Firebase, inicializada em `main.dart` antes de
 /// `runApp` e injetada aqui via `overrideWithValue`.
@@ -41,3 +43,7 @@ final appDatabaseProvider = Provider<AppDatabase>((ref) {
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
   return const FlutterSecureStorage();
 });
+
+/// Notificações locais (lembretes). Nos testes, sobrescreva com
+/// `NotificacaoServiceNulo` ou um fake.
+final notificacaoServiceProvider = Provider<NotificacaoService>((ref) => NotificacaoServiceLocal());

@@ -3,15 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme/app_theme.dart';
 
-enum AppTab { inicio, contas, trilha, ia, perfil }
+enum AppTab { inicio, contas, ia, perfil }
 
 /// Aba atualmente selecionada no `AppShell` — mora aqui (não em
 /// `app_shell.dart`) para evitar um import circular com as features que
 /// precisam trocar de aba programaticamente (ex.: Dashboard → "Ver todas").
 final currentTabProvider = StateProvider<AppTab>((ref) => AppTab.inicio);
 
-/// Barra de navegação inferior nos 5 destinos principais do app, igual ao
-/// desenho replicado em todos os protótipos .dc (Início/Contas/Trilha/IA/Perfil).
+/// Barra de navegação inferior nos 4 destinos principais do app (Início/Contas/IA/Perfil).
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({super.key, required this.current, this.onTap});
 
@@ -24,7 +23,6 @@ class AppBottomNav extends StatelessWidget {
     final items = <_NavItem>[
       _NavItem(AppTab.inicio, 'Início', Icons.home_outlined),
       _NavItem(AppTab.contas, 'Contas', Icons.credit_card_outlined),
-      _NavItem(AppTab.trilha, 'Trilha', Icons.show_chart),
       _NavItem(AppTab.ia, 'IA', Icons.chat_bubble_outline),
       _NavItem(AppTab.perfil, 'Perfil', Icons.person_outline),
     ];

@@ -87,6 +87,11 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
     required bool precisaCategoria,
     double? minhaParte,
     List<String> divididoCom = const [],
+    String? parcelamentoId,
+    int? numeroParcela,
+    double? valorParcela,
+    bool ehParcela = false,
+    String? statusParcela,
   }) {
     return _local.aplicarRemoto(
       remoteId: remoteId,
@@ -97,6 +102,11 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
       precisaCategoria: precisaCategoria,
       minhaParte: minhaParte,
       divididoCom: divididoCom,
+      parcelamentoId: parcelamentoId,
+      numeroParcela: numeroParcela,
+      valorParcela: valorParcela,
+      ehParcela: ehParcela,
+      statusParcela: statusParcela,
     );
   }
 }

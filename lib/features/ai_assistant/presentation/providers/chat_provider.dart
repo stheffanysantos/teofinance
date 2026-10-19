@@ -1,37 +1,35 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:teofinance/features/ai_assistant/presentation/providers/ai_assistant_providers.dart';
 
-/// Mensagem de chat do assistente local.
-///
-/// TODO(fase-4): `reply()` hoje é uma resposta mock baseada em palavras-chave.
-/// Substituir pela inferência real via Gemma/MediaPipe quando
-/// `ai-assistant-engineer` implementar `features/ai_assistant/data/`. A
-/// fronteira de privacidade já modelada aqui (toda resposta é `isLocal: true`,
-/// sem nenhuma chamada de rede) deve ser preservada: ver
-/// `.claude/rules/security.md`.
+/// Mensagem de chat do assistente local. Toda resposta é `isLocal: true`: é
+/// gerada no aparelho, sem chamada de rede (ver `.claude/rules/security.md`).
 class ChatMessage {
   const ChatMessage({
     required this.text,
     required this.isUser,
-    this.showMonthlyStat = false,
     this.isLocal = false,
   });
 
   final String text;
   final bool isUser;
-  final bool showMonthlyStat;
   final bool isLocal;
 }
 
-const kSuggestionChips = ['Gastos com mercado', 'Como está minha reserva?', 'Resumo do mês'];
+const kSuggestionChips = ['Resumo do mês', 'Como estou no orçamento?', 'Como está minha reserva?', 'Gastos com mercado'];
 
 class ChatState {
-  const ChatState({required this.messages, this.draft = ''});
+  const ChatState({required this.messages, this.draft = '', this.respondendo = false});
 
   final List<ChatMessage> messages;
   final String draft;
+  final bool respondendo;
 
-  ChatState copyWith({List<ChatMessage>? messages, String? draft}) {
-    return ChatState(messages: messages ?? this.messages, draft: draft ?? this.draft);
+  ChatState copyWith({List<ChatMessage>? messages, String? draft, bool? respondendo}) {
+    return ChatState(
+      messages: messages ?? this.messages,
+      draft: draft ?? this.draft,
+      respondendo: respondendo ?? this.respondendo,
+    );
   }
 }
 
@@ -42,13 +40,10 @@ class ChatNotifier extends Notifier<ChatState> {
   ChatState build() {
     return const ChatState(
       messages: [
-        ChatMessage(text: 'Quanto gastei com delivery esse mês?', isUser: true),
         ChatMessage(
-          text:
-              'Você gastou R\$ 412,80 com delivery em outubro, em 14 pedidos. '
-              'É 8% a mais que em setembro.',
+          text: 'Oi! Posso falar sobre seus gastos do mês, orçamento e metas. '
+              'Tudo é calculado aqui no seu aparelho.',
           isUser: false,
-          showMonthlyStat: true,
           isLocal: true,
         ),
       ],
@@ -57,30 +52,22 @@ class ChatNotifier extends Notifier<ChatState> {
 
   void setDraft(String value) => state = state.copyWith(draft: value);
 
-  void send([String? text]) {
+  Future<void> send([String? text]) async {
     final question = (text ?? state.draft).trim();
-    if (question.isEmpty) return;
+    if (question.isEmpty || state.respondendo) return;
 
     state = state.copyWith(
       draft: '',
-      messages: [
-        ...state.messages,
-        ChatMessage(text: question, isUser: true),
-        ChatMessage(text: _reply(question), isUser: false, isLocal: true),
-      ],
+      respondendo: true,
+      messages: [...state.messages, ChatMessage(text: question, isUser: true)],
     );
-  }
 
-  String _reply(String question) {
-    final q = question.toLowerCase();
-    if (q.contains('merc')) {
-      return 'Em mercado você gastou R\$ 1.140 este mês, 57% do limite de R\$ 2.000.';
-    }
-    if (q.contains('meta') || q.contains('reserva')) {
-      return 'Sua reserva de emergência está em 68%: R\$ 13.600 de R\$ 20.000. '
-          'No ritmo atual, você chega lá em dezembro de 2026.';
-    }
-    return 'Analisei suas transações de outubro: você gastou R\$ 4.920 até agora, '
-        '72% do orçamento do mês.';
+    final result = await ref.read(responderPerguntaUseCaseProvider)(question);
+    final resposta = result.fold((falha) => falha.message, (texto) => texto);
+
+    state = state.copyWith(
+      respondendo: false,
+      messages: [...state.messages, ChatMessage(text: resposta, isUser: false, isLocal: true)],
+    );
   }
 }

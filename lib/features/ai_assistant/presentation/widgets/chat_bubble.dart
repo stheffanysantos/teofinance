@@ -41,24 +41,6 @@ class ChatBubble extends StatelessWidget {
                 message.text,
                 style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500, height: 1.5, color: fg),
               ),
-              if (message.showMonthlyStat) ...[
-                Container(
-                  margin: const EdgeInsets.only(top: 12),
-                  padding: const EdgeInsets.only(top: 12),
-                  decoration: BoxDecoration(border: Border(top: BorderSide(color: t.line))),
-                  child: Row(
-                    spacing: 16,
-                    children: [
-                      Flexible(
-                        child: _Stat(value: 'R\$ 412,80', label: 'delivery em outubro', color: fg, sub: t.sub),
-                      ),
-                      Flexible(
-                        child: _Stat(value: '14', label: 'pedidos', color: fg, sub: t.sub),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ],
           ),
         ),
@@ -79,43 +61,6 @@ class ChatBubble extends StatelessWidget {
             ),
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _Stat extends StatelessWidget {
-  const _Stat({required this.value, required this.label, required this.color, required this.sub});
-
-  final String value;
-  final String label;
-  final Color color;
-  final Color sub;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -.5,
-            color: color,
-            fontFeatures: const [FontFeature.tabularFigures()],
-          ),
-        ),
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: sub),
-        ),
       ],
     );
   }
