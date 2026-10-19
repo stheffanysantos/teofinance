@@ -13,6 +13,7 @@ import 'package:teofinance/features/import/data/repositories/perfil_banco_reposi
 import 'package:teofinance/features/import/data/services/bank_profile_matcher.dart';
 import 'package:teofinance/features/meta/data/datasources/meta_local_datasource.dart';
 import 'package:teofinance/features/meta/data/repositories/meta_repository_impl.dart';
+import 'package:teofinance/features/meta/domain/entities/meta.dart';
 import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_local_data_source.dart';
 import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_remote_data_source.dart';
 import 'package:teofinance/features/parcelamento/data/repositories/parcelamento_repository_impl.dart';
@@ -58,6 +59,7 @@ class _Aparelho {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     transacoes = TransacaoLocalDataSource(db);
     orcamentos = OrcamentoLocalDataSource(db);
+    metas = MetaLocalDataSource(db);
     final parcelamentoLocal = ParcelamentoLocalDataSourceImpl(db);
     parcelamentoRepo = ParcelamentoRepositoryImpl(
       parcelamentoLocal,
@@ -70,7 +72,7 @@ class _Aparelho {
       transacaoRepository: TransacaoRepositoryImpl(transacoes),
       perfilBancoRepository: PerfilBancoRepositoryImpl(PerfilBancoLocalDataSource(db), BankProfileMatcher()),
       rendaRepository: RendaRepositoryImpl(RendaLocalDataSource(db)),
-      metaRepository: MetaRepositoryImpl(MetaLocalDataSource(db)),
+      metaRepository: MetaRepositoryImpl(metas),
       parcelamentoRepository: parcelamentoRepo,
       orcamentoRepository: (orcamento ?? OrcamentoRepositoryImpl.new)(orcamentos),
     );
@@ -80,6 +82,7 @@ class _Aparelho {
   late final AppDatabase db;
   late final TransacaoLocalDataSource transacoes;
   late final OrcamentoLocalDataSource orcamentos;
+  late final MetaLocalDataSource metas;
   late final ParcelamentoRepositoryImpl parcelamentoRepo;
   late final SyncEngine engine;
 
@@ -271,6 +274,83 @@ void main() {
       final linhas = await a.linhasOrcamento();
       expect(linhas, hasLength(1));
       expect(linhas.single.limite, 800);
+    });
+  });
+
+  group('meta', () {
+    Future<String> criarMeta(_Aparelho a) async {
+      final meta = await a.metas.criar(
+        nome: 'Reserva',
+        valorAlvo: 1000,
+        prazo: DateTime(2027, 12, 1),
+        valorAtual: 100,
+      );
+      return meta.id;
+    }
+
+    Future<List<MetaTableData>> linhasMeta(_Aparelho a) => a.db.select(a.db.metaTable).get();
+
+    test('excluir uma meta já sincronizada apaga o documento remoto e ela não volta no pull', () async {
+      final a = novoAparelho();
+      final id = await criarMeta(a);
+      await a.engine.sincronizarTudo();
+      expect((await _colecao(nuvem, 'metas').get()).docs, hasLength(1));
+
+      await a.metas.excluir(id);
+      expect(await a.metas.observarTodas().first, isEmpty);
+      await a.engine.sincronizarTudo();
+
+      expect((await _colecao(nuvem, 'metas').get()).docs, isEmpty);
+      expect(await linhasMeta(a), isEmpty);
+    });
+
+    test('excluir offline: a meta não ressuscita enquanto a exclusão não chegou ao Firestore', () async {
+      final a = novoAparelho();
+      final id = await criarMeta(a);
+      await a.engine.sincronizarTudo();
+
+      await a.metas.excluir(id);
+      // Pull acontece com o documento remoto ainda existindo (exclusão pendente).
+      await a.metas.aplicarRemoto(
+        Meta(id: '', remoteId: (await linhasMeta(a)).single.remoteId, nome: 'Reserva', valorAtual: 100, valorAlvo: 1000, prazo: DateTime(2027, 12, 1)),
+      );
+
+      expect(await a.metas.observarTodas().first, isEmpty);
+      expect((await linhasMeta(a)).single.syncStatus, SyncStatus.pendingDelete);
+    });
+
+    test('excluir uma meta que nunca foi enviada some só do aparelho', () async {
+      final a = novoAparelho();
+      final id = await criarMeta(a);
+
+      await a.metas.excluir(id);
+
+      expect(await linhasMeta(a), isEmpty);
+    });
+
+    test('a exclusão pendente é enviada na próxima rodada depois de uma falha de conexão', () async {
+      final a = novoAparelho();
+      final id = await criarMeta(a);
+      await a.engine.sincronizarTudo();
+      await a.metas.excluir(id);
+
+      final offline = SyncEngine(
+        firestore: _FirestoreOffline(),
+        uid: 'u1',
+        transacaoRepository: TransacaoRepositoryImpl(a.transacoes),
+        perfilBancoRepository: PerfilBancoRepositoryImpl(PerfilBancoLocalDataSource(a.db), BankProfileMatcher()),
+        rendaRepository: RendaRepositoryImpl(RendaLocalDataSource(a.db)),
+        metaRepository: MetaRepositoryImpl(a.metas),
+        parcelamentoRepository: a.parcelamentoRepo,
+        orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
+      );
+      await offline.sincronizarTudo();
+      expect((await linhasMeta(a)).single.syncStatus, SyncStatus.pendingDelete);
+
+      await a.engine.sincronizarTudo();
+
+      expect((await _colecao(nuvem, 'metas').get()).docs, isEmpty);
+      expect(await linhasMeta(a), isEmpty);
     });
   });
 

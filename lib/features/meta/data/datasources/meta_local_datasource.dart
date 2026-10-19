@@ -14,7 +14,9 @@ class MetaLocalDataSource {
   static const _uuid = Uuid();
 
   Stream<List<Meta>> observarTodas() {
-    final query = _db.select(_db.metaTable)..orderBy([(m) => OrderingTerm.asc(m.prazo)]);
+    final query = _db.select(_db.metaTable)
+      ..where((m) => m.syncStatus.equalsValue(SyncStatus.pendingDelete).not())
+      ..orderBy([(m) => OrderingTerm.asc(m.prazo)]);
     return query.watch().map((linhas) => linhas.map(_paraEntidade).toList());
   }
 
@@ -48,7 +50,33 @@ class MetaLocalDataSource {
     );
   }
 
-  Future<void> excluir(String id) {
+  /// Sem `remoteId` a meta nunca chegou ao Firestore e some de vez; com
+  /// `remoteId` fica marcada para o sync apagar também o documento remoto —
+  /// senão o próximo pull a traria de volta.
+  Future<void> excluir(String id) async {
+    final linha = await (_db.select(_db.metaTable)..where((m) => m.id.equals(id))).getSingleOrNull();
+    if (linha == null) return;
+
+    if (linha.remoteId == null) {
+      await (_db.delete(_db.metaTable)..where((m) => m.id.equals(id))).go();
+      return;
+    }
+    await (_db.update(_db.metaTable)..where((m) => m.id.equals(id))).write(
+      MetaTableCompanion(
+        syncStatus: const Value(SyncStatus.pendingDelete),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<List<Meta>> listarPendentesDeExclusao() async {
+    final linhas = await (_db.select(_db.metaTable)
+          ..where((m) => m.syncStatus.equalsValue(SyncStatus.pendingDelete)))
+        .get();
+    return linhas.map(_paraEntidade).toList();
+  }
+
+  Future<void> confirmarExclusao(String id) {
     return (_db.delete(_db.metaTable)..where((m) => m.id.equals(id))).go();
   }
 

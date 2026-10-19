@@ -236,6 +236,16 @@ class SyncEngine {
   Future<void> _sincronizarMetas() async {
     final colecao = _colecao('metas');
 
+    final paraExcluir = await _metaRepository.listarPendentesDeExclusao();
+    for (final meta in paraExcluir) {
+      try {
+        await colecao.doc(meta.remoteId).delete();
+        await _metaRepository.confirmarExclusao(meta.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
+
     final pendentes = await _metaRepository.listarPendentesDeSincronizacao();
     for (final meta in pendentes) {
       try {

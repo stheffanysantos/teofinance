@@ -53,6 +53,12 @@ class MetaRepositoryImpl implements MetaRepository {
   Future<List<Meta>> listarPendentesDeSincronizacao() => _local.listarPendentes();
 
   @override
+  Future<List<Meta>> listarPendentesDeExclusao() => _local.listarPendentesDeExclusao();
+
+  @override
+  Future<void> confirmarExclusao(String id) => _local.confirmarExclusao(id);
+
+  @override
   Future<void> confirmarSincronizacao({required String id, required String remoteId}) {
     return _local.confirmarSincronizacao(id: id, remoteId: remoteId);
   }
