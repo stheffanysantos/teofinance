@@ -9,8 +9,10 @@ import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../../../core/providers/discreet_mode_provider.dart';
+import '../providers/app_info_provider.dart';
 import '../widgets/financial_score_gauge.dart';
 import '../widgets/settings_toggle_tile.dart';
+import 'sobre_screen.dart';
 
 /// Tela de Perfil — implementação fiel a Profile.dc.html (design system
 /// TeoFinance, direção 1: petróleo + lima). Ver `.claude/memory/design-system.md`.
@@ -30,6 +32,7 @@ class ProfileScreen extends ConsumerWidget {
     final iniciais = email.isNotEmpty ? email.substring(0, 1).toUpperCase() : '?';
     final biometriaHabilitada = ref.watch(biometriaHabilitadaProvider).valueOrNull ?? false;
     final syncState = ref.watch(syncUiStateProvider);
+    final appInfo = ref.watch(appInfoProvider).valueOrNull;
 
     return SafeArea(
       bottom: false,
@@ -133,8 +136,10 @@ class ProfileScreen extends ConsumerWidget {
                           SettingsNavTile(
                             icon: Icon(Icons.info_outline, size: 18, color: t.ink),
                             title: 'Sobre o app',
-                            trailingText: 'v1.0.0',
-                            onTap: () {},
+                            trailingText: appInfo == null ? null : 'v${appInfo.version}',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const SobreScreen()),
+                            ),
                           ),
                           SettingsNavTile(
                             icon: Icon(Icons.logout, size: 18, color: t.neg),

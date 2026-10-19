@@ -50,7 +50,7 @@ class _SelecaoArquivo extends ConsumerWidget {
   Future<void> _escolherArquivo(WidgetRef ref) async {
     final arquivo = await FilePicker.pickFile(
       type: FileType.custom,
-      allowedExtensions: ['csv', 'txt'],
+      allowedExtensions: ['csv', 'ofx', 'qfx', 'txt'],
     );
     if (arquivo == null) return;
 
@@ -73,8 +73,9 @@ class _SelecaoArquivo extends ConsumerWidget {
           children: [
             Icon(Icons.upload_file_outlined, size: 48, color: t.hero),
             Text(
-              'Escolha o arquivo CSV exportado pelo seu banco (Nubank, Banco do Brasil, '
-              'ou qualquer outro — o mapeamento de colunas é feito na próxima tela).',
+              'Escolha o extrato exportado pelo seu banco, em OFX ou CSV. O OFX é lido '
+              'direto; no CSV (Nubank, Banco do Brasil ou qualquer outro) você '
+              'mapeia as colunas na próxima tela.',
               textAlign: TextAlign.center,
               style: TextStyle(color: t.sub, fontSize: 13.5, height: 1.5),
             ),

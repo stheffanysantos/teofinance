@@ -4,6 +4,8 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failure.dart';
 import '../../domain/entities/campo_coluna.dart';
+import '../../domain/entities/extrato_importado.dart';
+import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/perfil_banco.dart';
 import '../../domain/entities/preview_arquivo.dart';
 import '../../domain/entities/transacao_importada.dart';
@@ -12,6 +14,7 @@ import '../../domain/repositories/perfil_banco_repository.dart';
 import '../services/bank_profile_matcher.dart';
 import '../services/csv_dialect_detector.dart';
 import '../services/csv_table_parser.dart';
+import '../services/ofx_parser.dart';
 import '../services/valor_celula_parser.dart';
 
 const _kLinhasAmostra = 5;
@@ -23,17 +26,36 @@ class ImportRepositoryImpl implements ImportRepository {
     required BankProfileMatcher matcher,
     required ValorCelulaParser valorParser,
     required PerfilBancoRepository perfilBancoRepository,
+    OfxParser ofxParser = const OfxParser(),
   }) : _detector = detector,
        _parser = parser,
        _matcher = matcher,
        _valorParser = valorParser,
-       _perfilBancoRepository = perfilBancoRepository;
+       _perfilBancoRepository = perfilBancoRepository,
+       _ofxParser = ofxParser;
 
   final CsvDialectDetector _detector;
   final CsvTableParser _parser;
   final BankProfileMatcher _matcher;
   final ValorCelulaParser _valorParser;
   final PerfilBancoRepository _perfilBancoRepository;
+  final OfxParser _ofxParser;
+
+  @override
+  FormatoExtrato detectarFormato(Uint8List bytes) {
+    return _ofxParser.ehOfx(bytes) ? FormatoExtrato.ofx : FormatoExtrato.csv;
+  }
+
+  @override
+  Future<Either<Failure, ExtratoImportado>> importarOfx(Uint8List bytes) async {
+    try {
+      return Right(_ofxParser.parsear(bytes));
+    } on FormatException catch (e) {
+      return Left(ValidationFailure(e.message));
+    } catch (e) {
+      return Left(ValidationFailure('Não foi possível ler o arquivo OFX: $e'));
+    }
+  }
 
   @override
   Future<Either<Failure, PreviewArquivo>> analisarArquivo(Uint8List bytes) async {

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../../domain/entities/campo_coluna.dart';
+import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/perfil_banco.dart';
 import '../../domain/entities/preview_arquivo.dart';
 import '../../domain/entities/transacao_importada.dart';
@@ -22,6 +23,8 @@ class ImportFlowState {
     this.transacoes = const [],
     this.perfilUsado,
     this.paraReconciliacao = false,
+    this.formato = FormatoExtrato.csv,
+    this.instituicao,
   });
 
   final ImportEtapa etapa;
@@ -40,6 +43,10 @@ class ImportFlowState {
   final List<TransacaoImportada> transacoes;
   final PerfilBanco? perfilUsado;
   final bool paraReconciliacao;
+  final FormatoExtrato formato;
+
+  /// Banco informado pelo próprio arquivo (OFX); no CSV vem do Perfil de Banco.
+  final String? instituicao;
 
   int get quantidadeSemCategoria => transacoes.where((t) => t.precisaCategoria).length;
 
@@ -58,6 +65,8 @@ class ImportFlowState {
     List<TransacaoImportada>? transacoes,
     PerfilBanco? perfilUsado,
     bool? paraReconciliacao,
+    FormatoExtrato? formato,
+    String? instituicao,
   }) {
     return ImportFlowState(
       etapa: etapa ?? this.etapa,
@@ -73,6 +82,8 @@ class ImportFlowState {
       transacoes: transacoes ?? this.transacoes,
       perfilUsado: perfilUsado ?? this.perfilUsado,
       paraReconciliacao: paraReconciliacao ?? this.paraReconciliacao,
+      formato: formato ?? this.formato,
+      instituicao: instituicao ?? this.instituicao,
     );
   }
 }

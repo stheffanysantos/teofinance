@@ -6,6 +6,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
 import '../../domain/entities/campo_coluna.dart';
+import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
 import 'import_flow_state.dart';
@@ -28,7 +29,26 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
       nomeArquivo: nomeArquivo,
     );
 
-    final resultado = await ref.read(importarExtratoUseCaseProvider).analisar(bytes);
+    final usecase = ref.read(importarExtratoUseCaseProvider);
+
+    // OFX já traz cada campo identificado: vai direto para a revisão, sem
+    // mapear colunas nem salvar Perfil de Banco.
+    if (usecase.detectarFormato(bytes) == FormatoExtrato.ofx) {
+      final ofx = await usecase.importarOfx(bytes);
+      ofx.match(
+        (falha) => state = state.copyWith(carregando: false, erro: falha.message),
+        (extrato) => state = state.copyWith(
+          carregando: false,
+          formato: FormatoExtrato.ofx,
+          etapa: ImportEtapa.revisando,
+          transacoes: extrato.transacoes,
+          instituicao: extrato.instituicao,
+        ),
+      );
+      return;
+    }
+
+    final resultado = await usecase.analisar(bytes);
     resultado.match(
       (falha) => state = state.copyWith(carregando: false, erro: falha.message),
       (preview) {
@@ -154,7 +174,7 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
                     'valor': t.valor.abs(),
                     'data': t.data.toIso8601String(),
                     'tipo': t.valor < 0 ? 'D' : 'C',
-                    'nomeBancoOriginal': state.perfilUsado?.nomeBanco ?? '',
+                    'nomeBancoOriginal': state.perfilUsado?.nomeBanco ?? state.instituicao ?? '',
                   })
               .toList(),
         );
