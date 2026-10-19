@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/features/meta/domain/entities/meta.dart';
+import 'package:teofinance/features/meta/domain/repositories/meta_repository.dart';
+import 'package:teofinance/features/meta/presentation/providers/meta_providers.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/domain/repositories/orcamento_repository.dart';
 import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
@@ -162,12 +165,21 @@ class _FakeOrcamentoRepository implements OrcamentoRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _FakeMetaRepository implements MetaRepository {
+  @override
+  Stream<List<Meta>> observarTodas() => Stream.value(const []);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       syncEngineProvider.overrideWithValue(null),
       orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
+      metaRepositoryProvider.overrideWithValue(_FakeMetaRepository()),
       if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
@@ -250,7 +262,7 @@ void main() {
     await tester.tap(find.text('Resumo do mês'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('72% do orçamento'), findsOneWidget);
+    expect(find.textContaining('Não há lançamentos'), findsOneWidget);
   });
 
   testWidgets('Conectar conta abre a partir de Transações e alterna as opções', (
