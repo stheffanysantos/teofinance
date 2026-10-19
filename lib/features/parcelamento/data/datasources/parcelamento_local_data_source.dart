@@ -9,6 +9,8 @@ abstract class ParcelamentoLocalDataSource {
   Future<ParcelamentoModel?> obterPorId(String parcelamentoId);
   Future<void> deletarParcelamento(String parcelamentoId);
   Future<List<ParcelamentoModel>> listarPendentes();
+  Future<List<ParcelamentoModel>> listarPendentesDeExclusao();
+  Future<void> confirmarExclusao(String id);
   Future<void> confirmarSincronizacao({required String id, required String remoteId});
   Future<void> aplicarRemoto(ParcelamentoModel parcelamento);
 }
@@ -32,7 +34,9 @@ class ParcelamentoLocalDataSourceImpl implements ParcelamentoLocalDataSource {
     // Precisamos buscar via FK (transacaoOriginalId) na TransactionsTable.
     // Por enquanto, retornamos todos os parcelamentos.
     // TODO: Melhorar query para filtrar por userId quando tivermos relacionamento explícito.
-    final dados = await database.select(database.parcelamentoTable).get();
+    final dados = await (database.select(database.parcelamentoTable)
+          ..where((tbl) => tbl.syncStatus.equalsValue(SyncStatus.pendingDelete).not()))
+        .get();
     return dados.map(ParcelamentoModel.fromDriftData).toList();
   }
 
@@ -45,11 +49,39 @@ class ParcelamentoLocalDataSourceImpl implements ParcelamentoLocalDataSource {
     return dado != null ? ParcelamentoModel.fromDriftData(dado) : null;
   }
 
+  /// Sem `remoteId` o parcelamento nunca chegou ao Firestore e some de vez; com
+  /// `remoteId` fica marcado para o sync apagar o documento remoto (senão o
+  /// próximo pull o traria de volta).
   @override
   Future<void> deletarParcelamento(String parcelamentoId) async {
-    await (database.delete(database.parcelamentoTable)
+    final linha = await (database.select(database.parcelamentoTable)
           ..where((tbl) => tbl.id.equals(parcelamentoId)))
-        .go();
+        .getSingleOrNull();
+    if (linha == null) return;
+
+    if (linha.remoteId == null) {
+      await confirmarExclusao(parcelamentoId);
+      return;
+    }
+    await (database.update(database.parcelamentoTable)..where((tbl) => tbl.id.equals(parcelamentoId))).write(
+      ParcelamentoTableCompanion(
+        syncStatus: const Value(SyncStatus.pendingDelete),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  @override
+  Future<List<ParcelamentoModel>> listarPendentesDeExclusao() async {
+    final dados = await (database.select(database.parcelamentoTable)
+          ..where((tbl) => tbl.syncStatus.equalsValue(SyncStatus.pendingDelete)))
+        .get();
+    return dados.map(ParcelamentoModel.fromDriftData).toList();
+  }
+
+  @override
+  Future<void> confirmarExclusao(String id) {
+    return (database.delete(database.parcelamentoTable)..where((tbl) => tbl.id.equals(id))).go();
   }
 
   @override

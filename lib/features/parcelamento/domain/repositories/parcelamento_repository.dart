@@ -26,6 +26,10 @@ abstract class ParcelamentoRepository {
   /// Usado só por `features/sync/` — ver `.claude/rules/architecture.md`.
   Future<List<Parcelamento>> listarPendentesDeSincronizacao();
 
+  Future<List<Parcelamento>> listarPendentesDeExclusao();
+
+  Future<void> confirmarExclusao(String id);
+
   Future<void> confirmarSincronizacao({required String id, required String remoteId});
 
   Future<void> aplicarRemoto(Parcelamento parcelamento);

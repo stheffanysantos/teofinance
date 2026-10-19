@@ -90,6 +90,17 @@ class TransacaoLocalDataSource {
     );
   }
 
+  /// Exclui todas as parcelas de um parcelamento, com a mesma regra de [excluir]
+  /// (parcela já sincronizada vira `pendingDelete`; nunca enviada some).
+  Future<void> excluirPorParcelamento(String parcelamentoId) async {
+    final filhas = await (_db.select(_db.transactionsTable)
+          ..where((t) => t.parcelamentoId.equals(parcelamentoId)))
+        .get();
+    for (final f in filhas) {
+      await excluir(f.id);
+    }
+  }
+
   Future<void> confirmarExclusao(String id) {
     return (_db.delete(_db.transactionsTable)..where((t) => t.id.equals(id))).go();
   }

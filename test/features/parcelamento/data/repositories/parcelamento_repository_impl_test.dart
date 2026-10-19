@@ -1,15 +1,10 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:teofinance/core/database/app_database.dart';
+import 'package:teofinance/core/sync/sync_status.dart';
 import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_local_data_source.dart';
-import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_remote_data_source.dart';
 import 'package:teofinance/features/parcelamento/data/repositories/parcelamento_repository_impl.dart';
 import 'package:teofinance/features/transacao/data/datasources/transacao_local_datasource.dart';
-
-class _RemotoNaoUsado implements ParcelamentoRemoteDataSource {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => throw StateError('remoto não deve ser chamado');
-}
 
 void main() {
   late AppDatabase db;
@@ -20,11 +15,7 @@ void main() {
   setUp(() {
     db = AppDatabase.forTesting(NativeDatabase.memory());
     transacoes = TransacaoLocalDataSource(db);
-    repository = ParcelamentoRepositoryImpl(
-      ParcelamentoLocalDataSourceImpl(db),
-      transacoes,
-      _RemotoNaoUsado(),
-    );
+    repository = ParcelamentoRepositoryImpl(ParcelamentoLocalDataSourceImpl(db), transacoes);
   });
 
   tearDown(() => db.close());
@@ -94,5 +85,55 @@ void main() {
     ]);
     expect(parcelas.map((p) => p.valor), [-33.33, -33.33, -33.34]);
     expect(parcelas.map((p) => p.valorParcela), [-33.33, -33.33, -33.34]);
+  });
+
+  group('deletarParcelamento', () {
+    Future<String> criarParcelamento() async {
+      final compra = await transacoes.criar(descricao: 'Notebook', valor: -300, data: dia, categoria: 'Lazer');
+      final r = await repository.criarParcelamento(
+        transacaoId: compra.id,
+        totalOriginal: 300,
+        numeroParcelas: 3,
+        dataPrimeira: dia,
+      );
+      return r.getOrElse((f) => throw StateError(f.message)).id;
+    }
+
+    test('nunca sincronizado: apaga o parcelamento e as parcelas de vez', () async {
+      final id = await criarParcelamento();
+
+      final r = await repository.deletarParcelamento(id);
+
+      expect(r.isRight(), isTrue);
+      expect(await db.select(db.parcelamentoTable).get(), isEmpty);
+      expect(await db.select(db.transactionsTable).get(), isEmpty);
+    });
+
+    test('já sincronizado: some da lista mas fica marcado para o sync apagar o remoto', () async {
+      final id = await criarParcelamento();
+      await repository.confirmarSincronizacao(id: id, remoteId: 'rp1');
+      for (final t in await db.select(db.transactionsTable).get()) {
+        await transacoes.confirmarSincronizacao(id: t.id, remoteId: 'rt-${t.id}');
+      }
+
+      await repository.deletarParcelamento(id);
+
+      final listados = (await repository.listarPorUsuario('u')).getOrElse((_) => []);
+      expect(listados, isEmpty);
+      expect((await repository.listarPendentesDeExclusao()).map((p) => p.id), [id]);
+      final parcelas = await db.select(db.transactionsTable).get();
+      expect(parcelas, hasLength(3));
+      expect(parcelas.every((p) => p.syncStatus == SyncStatus.pendingDelete), isTrue);
+    });
+
+    test('só as parcelas do parcelamento apagado saem; outras transações ficam', () async {
+      final id = await criarParcelamento();
+      await transacoes.criar(descricao: 'Café', valor: -10, data: dia, categoria: 'x');
+
+      await repository.deletarParcelamento(id);
+
+      final restantes = await db.select(db.transactionsTable).get();
+      expect(restantes.map((t) => t.name), ['Café']);
+    });
   });
 }

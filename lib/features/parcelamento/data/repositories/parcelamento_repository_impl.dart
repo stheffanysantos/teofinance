@@ -4,7 +4,6 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failure.dart' show Failure, ServerFailure;
 import '../../../transacao/data/datasources/transacao_local_datasource.dart';
 import '../../data/datasources/parcelamento_local_data_source.dart';
-import '../../data/datasources/parcelamento_remote_data_source.dart';
 import '../../data/models/parcelamento_model.dart';
 import '../../domain/entities/parcelamento.dart';
 import '../../domain/repositories/parcelamento_repository.dart';
@@ -12,15 +11,8 @@ import '../../domain/repositories/parcelamento_repository.dart';
 class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
   final ParcelamentoLocalDataSource _local;
   final TransacaoLocalDataSource _transacaoLocal;
-  // TODO: Integrar com remote datasource após sync estar pronto
-  // final ParcelamentoRemoteDataSource _remote;
 
-  ParcelamentoRepositoryImpl(
-    this._local,
-    this._transacaoLocal,
-    // ignore: unused_element
-    ParcelamentoRemoteDataSource _remote,
-  );
+  ParcelamentoRepositoryImpl(this._local, this._transacaoLocal);
 
   @override
   Future<Either<Failure, Parcelamento>> criarParcelamento({
@@ -106,8 +98,10 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
   Future<Either<Failure, void>> deletarParcelamento(
       String parcelamentoId) async {
     try {
+      // Primeiro as parcelas: se algo falhar no meio, o parcelamento continua
+      // existindo e o usuário pode tentar de novo.
+      await _transacaoLocal.excluirPorParcelamento(parcelamentoId);
       await _local.deletarParcelamento(parcelamentoId);
-      // TODO: Deletar transações-filhas associadas
       return const Right(null);
     } catch (e) {
       return Left(_tratarException(e));
@@ -116,6 +110,12 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
 
   @override
   Future<List<Parcelamento>> listarPendentesDeSincronizacao() => _local.listarPendentes();
+
+  @override
+  Future<List<Parcelamento>> listarPendentesDeExclusao() => _local.listarPendentesDeExclusao();
+
+  @override
+  Future<void> confirmarExclusao(String id) => _local.confirmarExclusao(id);
 
   @override
   Future<void> confirmarSincronizacao({required String id, required String remoteId}) {

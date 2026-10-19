@@ -18,7 +18,6 @@ import 'package:teofinance/features/meta/data/datasources/meta_local_datasource.
 import 'package:teofinance/features/meta/data/repositories/meta_repository_impl.dart';
 import 'package:teofinance/features/meta/domain/entities/meta.dart';
 import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_local_data_source.dart';
-import 'package:teofinance/features/parcelamento/data/datasources/parcelamento_remote_data_source.dart';
 import 'package:teofinance/features/parcelamento/data/repositories/parcelamento_repository_impl.dart';
 import 'package:teofinance/features/renda/data/datasources/renda_local_datasource.dart';
 import 'package:teofinance/features/renda/data/repositories/renda_repository_impl.dart';
@@ -65,11 +64,7 @@ class _Aparelho {
     metas = MetaLocalDataSource(db);
     contas = ContaLocalDataSource(db);
     final parcelamentoLocal = ParcelamentoLocalDataSourceImpl(db);
-    parcelamentoRepo = ParcelamentoRepositoryImpl(
-      parcelamentoLocal,
-      transacoes,
-      ParcelamentoRemoteDataSourceImpl(firestore),
-    );
+    parcelamentoRepo = ParcelamentoRepositoryImpl(parcelamentoLocal, transacoes);
     engine = SyncEngine(
       firestore: firestore,
       uid: 'u1',
@@ -199,6 +194,22 @@ void main() {
       expect(parcelamentos, hasLength(1));
       expect(parcelamentos.single.id, parcelas.first.parcelamentoId);
       expect(parcelamentos.single.syncStatus, SyncStatus.synced);
+    });
+
+    test('apagar um parcelamento sincronizado apaga o documento remoto e as parcelas, e nada volta no pull', () async {
+      final a = novoAparelho();
+      await comprarEmTres(a);
+      await a.engine.sincronizarTudo();
+      final id = (await a.linhasParcelamento()).single.id;
+      expect((await _colecao(nuvem, 'parcelamentos').get()).docs, hasLength(1));
+
+      await a.parcelamentoRepo.deletarParcelamento(id);
+      await a.engine.sincronizarTudo();
+
+      expect((await _colecao(nuvem, 'parcelamentos').get()).docs, isEmpty);
+      expect((await _colecao(nuvem, 'transacoes').get()).docs, isEmpty);
+      expect(await a.linhasParcelamento(), isEmpty);
+      expect(await a.linhasTransacao(), isEmpty);
     });
 
     test('depois de sincronizar, o parcelamento deixa de estar pendente', () async {
@@ -535,6 +546,30 @@ void main() {
       await a.engine.sincronizarTudo();
       expect((await linhas(a)).single.syncStatus, SyncStatus.synced);
     });
+  });
+
+  test('sync pausado não envia nem recebe nada', () async {
+    final a = novoAparelho();
+    await a.orcamentos.definirLimite(categoria: 'Mercado', limite: 500);
+    await _colecao(nuvem, 'orcamentos').doc('r1').set({'categoria': 'Lazer', 'limite': 100});
+    final pausado = SyncEngine(
+      firestore: nuvem,
+      uid: 'u1',
+      transacaoRepository: TransacaoRepositoryImpl(a.transacoes),
+      perfilBancoRepository: PerfilBancoRepositoryImpl(PerfilBancoLocalDataSource(a.db), BankProfileMatcher()),
+      rendaRepository: RendaRepositoryImpl(RendaLocalDataSource(a.db)),
+      metaRepository: MetaRepositoryImpl(a.metas),
+      parcelamentoRepository: a.parcelamentoRepo,
+      orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
+      contaRepository: ContaRepositoryImpl(a.contas),
+      pausado: () async => true,
+    );
+
+    await pausado.sincronizarTudo();
+
+    expect((await _colecao(nuvem, 'orcamentos').get()).docs.map((d) => d.id), ['r1']); // nada enviado
+    expect((await a.linhasOrcamento()).single.syncStatus, SyncStatus.pendingCreate); // nada recebido nem confirmado
+    expect(await a.orcamentos.observarTodos().first, hasLength(1));
   });
 
   group('sem conexão e falha parcial', () {

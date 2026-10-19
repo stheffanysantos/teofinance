@@ -33,6 +33,7 @@ class SyncEngine {
     required ParcelamentoRepository parcelamentoRepository,
     required OrcamentoRepository orcamentoRepository,
     required ContaRepository contaRepository,
+    Future<bool> Function()? pausado,
   }) : _firestore = firestore,
        _uid = uid,
        _transacaoRepository = transacaoRepository,
@@ -41,7 +42,8 @@ class SyncEngine {
        _metaRepository = metaRepository,
        _parcelamentoRepository = parcelamentoRepository,
        _orcamentoRepository = orcamentoRepository,
-       _contaRepository = contaRepository;
+       _contaRepository = contaRepository,
+       _pausado = pausado;
 
   final FirebaseFirestore _firestore;
   final String _uid;
@@ -53,11 +55,16 @@ class SyncEngine {
   final OrcamentoRepository _orcamentoRepository;
   final ContaRepository _contaRepository;
 
+  /// Quando devolve `true` o sync não roda (exclusão de conta interrompida).
+  final Future<bool> Function()? _pausado;
+
   CollectionReference<Map<String, dynamic>> _colecao(String nome) {
     return _firestore.collection('users').doc(_uid).collection(nome);
   }
 
   Future<void> sincronizarTudo() async {
+    if (_pausado != null && await _pausado()) return;
+
     // Cada entidade roda isoladamente — uma falhar não impede as outras.
     // Parcelamentos antes das transações: as parcelas apontam para eles.
     await _tentar(_sincronizarParcelamentos);
@@ -292,6 +299,16 @@ class SyncEngine {
   /// (datas como texto ISO, só as chaves permitidas).
   Future<void> _sincronizarParcelamentos() async {
     final colecao = _colecao('parcelamentos');
+
+    final paraExcluir = await _parcelamentoRepository.listarPendentesDeExclusao();
+    for (final parcelamento in paraExcluir) {
+      try {
+        await colecao.doc(parcelamento.remoteId).delete();
+        await _parcelamentoRepository.confirmarExclusao(parcelamento.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
 
     final pendentes = await _parcelamentoRepository.listarPendentesDeSincronizacao();
     for (final parcelamento in pendentes) {

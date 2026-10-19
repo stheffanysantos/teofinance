@@ -1,0 +1,18 @@
+#!/bin/sh
+# Hook real do git (terminal, IDE ou Claude Code): bloqueia o commit se
+# `dart analyze --fatal-infos` ou `flutter test` falharem.
+# Ativar uma vez por clone:  git config core.hooksPath .githooks
+# Ver .claude/rules/git-workflow.md. Nunca contornar com --no-verify.
+
+set -e
+
+if ! command -v dart >/dev/null 2>&1; then
+  echo "pre-commit: 'dart' nao encontrado no PATH - commit bloqueado." >&2
+  exit 1
+fi
+
+echo "pre-commit: dart analyze --fatal-infos"
+dart analyze --fatal-infos
+
+echo "pre-commit: flutter test"
+flutter test
