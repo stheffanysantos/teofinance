@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
+import '../../../recorrentes/presentation/screens/gastos_recorrentes_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
 import '../../../score/presentation/providers/score_providers.dart';
 import '../../../score/presentation/widgets/como_calculamos_score_sheet.dart';
@@ -98,6 +99,13 @@ class ProfileScreen extends ConsumerWidget {
                             title: 'Minhas rendas',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const RendaScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.repeat, size: 18, color: t.ink),
+                            title: 'Gastos recorrentes',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const GastosRecorrentesScreen()),
                             ),
                           ),
                           SettingsNavTile(
