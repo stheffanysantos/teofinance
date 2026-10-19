@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.41.5
+          channel: stable
+          cache: true
+
+      - name: Instalar dependências
+        run: flutter pub get
+
+      - name: Código gerado está em dia
+        run: |
+          dart run build_runner build --delete-conflicting-outputs
+          git diff --exit-code -- '*.g.dart' '*.freezed.dart' \
+            || (echo "::error::Arquivos gerados desatualizados. Rode 'dart run build_runner build --delete-conflicting-outputs' e commite." && exit 1)
+
+      - name: Análise estática
+        run: dart analyze --fatal-infos
+
+      - name: Testes
+        run: flutter test
