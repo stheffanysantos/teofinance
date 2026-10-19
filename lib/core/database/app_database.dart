@@ -167,8 +167,12 @@ class ReconciliationMatchesTable extends Table {
 /// para todo mês até ser alterado; o gasto é calculado das transações.
 class OrcamentoTable extends Table {
   TextColumn get id => text()();
+  TextColumn get remoteId => text().nullable()();
   TextColumn get categoria => text().unique()();
   RealColumn get limite => real()();
+  IntColumn get syncStatus => intEnum<SyncStatus>().withDefault(
+        Constant(SyncStatus.pendingCreate.index),
+      )();
   DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -190,7 +194,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -240,6 +244,12 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 8) {
             await m.createTable(orcamentoTable);
+          }
+          if (from == 8) {
+            // Orçamento passa a sincronizar com o Firestore (remoteId + syncStatus).
+            // Quem vem de antes da v8 já recebeu a tabela com estas colunas em createTable.
+            await m.addColumn(orcamentoTable, orcamentoTable.remoteId);
+            await m.addColumn(orcamentoTable, orcamentoTable.syncStatus);
           }
         },
       );

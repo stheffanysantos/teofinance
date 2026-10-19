@@ -1,8 +1,11 @@
 /// Limite mensal definido pelo usuário para uma categoria.
 class Orcamento {
-  const Orcamento({required this.id, required this.categoria, required this.limite});
+  const Orcamento({required this.id, required this.categoria, required this.limite, this.remoteId});
 
   final String id;
+
+  /// Id do documento no Firestore; nulo até a primeira sincronização.
+  final String? remoteId;
   final String categoria;
   final double limite;
 }

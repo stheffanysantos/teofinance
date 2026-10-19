@@ -44,5 +44,10 @@ abstract class TransacaoRepository {
     required bool precisaCategoria,
     double? minhaParte,
     List<String> divididoCom,
+    String? parcelamentoId,
+    int? numeroParcela,
+    double? valorParcela,
+    bool ehParcela,
+    String? statusParcela,
   });
 }

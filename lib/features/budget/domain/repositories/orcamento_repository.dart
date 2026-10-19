@@ -12,4 +12,19 @@ abstract class OrcamentoRepository {
   });
 
   Future<Either<Failure, Unit>> excluir(String id);
+
+  /// Usado só por `features/sync/` — ver `.claude/rules/architecture.md`.
+  Future<List<Orcamento>> listarPendentesDeSincronizacao();
+
+  Future<List<Orcamento>> listarPendentesDeExclusao();
+
+  Future<void> confirmarSincronizacao({required String id, required String remoteId});
+
+  Future<void> confirmarExclusao(String id);
+
+  Future<void> aplicarRemoto({
+    required String remoteId,
+    required String categoria,
+    required double limite,
+  });
 }

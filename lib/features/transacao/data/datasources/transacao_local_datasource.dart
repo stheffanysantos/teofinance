@@ -134,6 +134,11 @@ class TransacaoLocalDataSource {
     required bool precisaCategoria,
     double? minhaParte,
     List<String> divididoCom = const [],
+    String? parcelamentoId,
+    int? numeroParcela,
+    double? valorParcela,
+    bool ehParcela = false,
+    String? statusParcela,
   }) async {
     final existente =
         await (_db.select(_db.transactionsTable)..where((t) => t.remoteId.equals(remoteId)))
@@ -155,6 +160,11 @@ class TransacaoLocalDataSource {
             needsCategory: Value(precisaCategoria),
             minhaParte: Value(minhaParte),
             divididoCom: Value(minhaParte == null ? null : jsonEncode(divididoCom)),
+            parcelamentoId: Value(parcelamentoId),
+            numeroParcela: Value(numeroParcela),
+            valorParcela: Value(valorParcela),
+            ehParcela: Value(ehParcela),
+            statusParcela: Value(statusParcela),
             syncStatus: const Value(SyncStatus.synced),
           ),
         );

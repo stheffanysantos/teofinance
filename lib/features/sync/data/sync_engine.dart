@@ -1,16 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../budget/domain/repositories/orcamento_repository.dart';
 import '../../import/domain/entities/campo_coluna.dart';
 import '../../import/domain/entities/perfil_banco.dart';
 import '../../import/domain/repositories/perfil_banco_repository.dart';
 import '../../meta/domain/entities/meta.dart';
 import '../../meta/domain/repositories/meta_repository.dart';
+import '../../parcelamento/domain/entities/parcelamento.dart';
+import '../../parcelamento/domain/repositories/parcelamento_repository.dart';
 import '../../renda/domain/entities/renda.dart';
 import '../../renda/domain/repositories/renda_repository.dart';
 import '../../transacao/domain/repositories/transacao_repository.dart';
 
 /// Orquestra push (envio de pendências locais) e pull (aplicação de dados
-/// remotos) para as 4 entidades sincronizáveis do MVP — nenhuma outra
+/// remotos) para as entidades sincronizáveis — nenhuma outra
 /// feature implementa sua própria lógica de sincronização (ver
 /// `.claude/rules/architecture.md`, regra de sincronização, e
 /// `.claude/agents/firebase-sync-engineer.md`).
@@ -25,12 +28,16 @@ class SyncEngine {
     required PerfilBancoRepository perfilBancoRepository,
     required RendaRepository rendaRepository,
     required MetaRepository metaRepository,
+    required ParcelamentoRepository parcelamentoRepository,
+    required OrcamentoRepository orcamentoRepository,
   }) : _firestore = firestore,
        _uid = uid,
        _transacaoRepository = transacaoRepository,
        _perfilBancoRepository = perfilBancoRepository,
        _rendaRepository = rendaRepository,
-       _metaRepository = metaRepository;
+       _metaRepository = metaRepository,
+       _parcelamentoRepository = parcelamentoRepository,
+       _orcamentoRepository = orcamentoRepository;
 
   final FirebaseFirestore _firestore;
   final String _uid;
@@ -38,6 +45,8 @@ class SyncEngine {
   final PerfilBancoRepository _perfilBancoRepository;
   final RendaRepository _rendaRepository;
   final MetaRepository _metaRepository;
+  final ParcelamentoRepository _parcelamentoRepository;
+  final OrcamentoRepository _orcamentoRepository;
 
   CollectionReference<Map<String, dynamic>> _colecao(String nome) {
     return _firestore.collection('users').doc(_uid).collection(nome);
@@ -45,10 +54,13 @@ class SyncEngine {
 
   Future<void> sincronizarTudo() async {
     // Cada entidade roda isoladamente — uma falhar não impede as outras.
+    // Parcelamentos antes das transações: as parcelas apontam para eles.
+    await _tentar(_sincronizarParcelamentos);
     await _tentar(_sincronizarTransacoes);
     await _tentar(_sincronizarPerfisBanco);
     await _tentar(_sincronizarRendas);
     await _tentar(_sincronizarMetas);
+    await _tentar(_sincronizarOrcamentos);
   }
 
   Future<void> _tentar(Future<void> Function() sincronizar) async {
@@ -88,6 +100,11 @@ class SyncEngine {
           'data': Timestamp.fromDate(transacao.data),
           'minhaParte': transacao.minhaParte,
           'divididoCom': transacao.divididoCom,
+          'parcelamentoId': transacao.parcelamentoId,
+          'numeroParcela': transacao.numeroParcela,
+          'valorParcela': transacao.valorParcela,
+          'ehParcela': transacao.ehParcela,
+          'statusParcela': transacao.statusParcela,
         });
         await _transacaoRepository.confirmarSincronizacao(id: transacao.id, remoteId: doc.id);
       } catch (_) {
@@ -108,6 +125,11 @@ class SyncEngine {
           precisaCategoria: (dados['categoria'] as String? ?? '').trim().isEmpty,
           minhaParte: (dados['minhaParte'] as num?)?.toDouble(),
           divididoCom: ((dados['divididoCom'] as List?) ?? const []).cast<String>(),
+          parcelamentoId: dados['parcelamentoId'] as String?,
+          numeroParcela: (dados['numeroParcela'] as num?)?.toInt(),
+          valorParcela: (dados['valorParcela'] as num?)?.toDouble(),
+          ehParcela: dados['ehParcela'] as bool? ?? false,
+          statusParcela: dados['statusParcela'] as String?,
         );
       } catch (_) {}
     }
@@ -241,6 +263,92 @@ class SyncEngine {
             valorAlvo: (dados['valorAlvo'] as num?)?.toDouble() ?? 0,
             prazo: (dados['prazo'] as Timestamp?)?.toDate() ?? DateTime.now(),
           ),
+        );
+      } catch (_) {}
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Parcelamentos
+  // ---------------------------------------------------------------------
+
+  /// O documento segue exatamente o formato validado por `firestore.rules`
+  /// (datas como texto ISO, só as chaves permitidas).
+  Future<void> _sincronizarParcelamentos() async {
+    final colecao = _colecao('parcelamentos');
+
+    final pendentes = await _parcelamentoRepository.listarPendentesDeSincronizacao();
+    for (final parcelamento in pendentes) {
+      try {
+        final doc = colecao.doc(parcelamento.id);
+        await doc.set({
+          'id': parcelamento.id,
+          'transacaoOriginalId': parcelamento.transacaoOriginalId,
+          'totalOriginal': parcelamento.totalOriginal,
+          'numeroParcelas': parcelamento.numeroParcelas,
+          'dataPrimeiraParc': parcelamento.dataPrimeiraParc.toIso8601String(),
+          'updatedAt': parcelamento.updatedAt.toIso8601String(),
+        });
+        await _parcelamentoRepository.confirmarSincronizacao(id: parcelamento.id, remoteId: doc.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    for (final doc in remotos.docs) {
+      try {
+        final dados = doc.data();
+        await _parcelamentoRepository.aplicarRemoto(
+          Parcelamento(
+            id: dados['id'] as String? ?? doc.id,
+            remoteId: doc.id,
+            transacaoOriginalId: dados['transacaoOriginalId'] as String,
+            totalOriginal: (dados['totalOriginal'] as num).toDouble(),
+            numeroParcelas: (dados['numeroParcelas'] as num).toInt(),
+            dataPrimeiraParc: DateTime.parse(dados['dataPrimeiraParc'] as String),
+            updatedAt: DateTime.parse(dados['updatedAt'] as String),
+          ),
+        );
+      } catch (_) {}
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Orçamento (limites por categoria)
+  // ---------------------------------------------------------------------
+
+  Future<void> _sincronizarOrcamentos() async {
+    final colecao = _colecao('orcamentos');
+
+    final paraExcluir = await _orcamentoRepository.listarPendentesDeExclusao();
+    for (final orcamento in paraExcluir) {
+      try {
+        await colecao.doc(orcamento.remoteId).delete();
+        await _orcamentoRepository.confirmarExclusao(orcamento.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
+
+    final pendentes = await _orcamentoRepository.listarPendentesDeSincronizacao();
+    for (final orcamento in pendentes) {
+      try {
+        final doc = colecao.doc(orcamento.remoteId ?? orcamento.id);
+        await doc.set({
+          'categoria': orcamento.categoria,
+          'limite': orcamento.limite,
+        });
+        await _orcamentoRepository.confirmarSincronizacao(id: orcamento.id, remoteId: doc.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    for (final doc in remotos.docs) {
+      try {
+        final dados = doc.data();
+        await _orcamentoRepository.aplicarRemoto(
+          remoteId: doc.id,
+          categoria: dados['categoria'] as String,
+          limite: (dados['limite'] as num).toDouble(),
         );
       } catch (_) {}
     }

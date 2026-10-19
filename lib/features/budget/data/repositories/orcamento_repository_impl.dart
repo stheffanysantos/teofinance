@@ -33,4 +33,27 @@ class OrcamentoRepositoryImpl implements OrcamentoRepository {
       return const Left(CacheFailure('Não foi possível excluir o limite.'));
     }
   }
+
+  @override
+  Future<List<Orcamento>> listarPendentesDeSincronizacao() => _local.listarPendentes();
+
+  @override
+  Future<List<Orcamento>> listarPendentesDeExclusao() => _local.listarPendentesDeExclusao();
+
+  @override
+  Future<void> confirmarSincronizacao({required String id, required String remoteId}) {
+    return _local.confirmarSincronizacao(id: id, remoteId: remoteId);
+  }
+
+  @override
+  Future<void> confirmarExclusao(String id) => _local.confirmarExclusao(id);
+
+  @override
+  Future<void> aplicarRemoto({
+    required String remoteId,
+    required String categoria,
+    required double limite,
+  }) {
+    return _local.aplicarRemoto(remoteId: remoteId, categoria: categoria, limite: limite);
+  }
 }

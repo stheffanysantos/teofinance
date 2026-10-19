@@ -4403,6 +4403,17 @@ class $OrcamentoTableTable extends OrcamentoTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _categoriaMeta = const VerificationMeta(
     'categoria',
   );
@@ -4424,6 +4435,16 @@ class $OrcamentoTableTable extends OrcamentoTable
     type: DriftSqlType.double,
     requiredDuringInsert: true,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: Constant(SyncStatus.pendingCreate.index),
+      ).withConverter<SyncStatus>($OrcamentoTableTable.$convertersyncStatus);
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
     'updatedAt',
   );
@@ -4437,7 +4458,14 @@ class $OrcamentoTableTable extends OrcamentoTable
     defaultValue: currentDateAndTime,
   );
   @override
-  List<GeneratedColumn> get $columns => [id, categoria, limite, updatedAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    categoria,
+    limite,
+    syncStatus,
+    updatedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -4454,6 +4482,12 @@ class $OrcamentoTableTable extends OrcamentoTable
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
     }
     if (data.containsKey('categoria')) {
       context.handle(
@@ -4490,6 +4524,10 @@ class $OrcamentoTableTable extends OrcamentoTable
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
       categoria: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}categoria'],
@@ -4498,6 +4536,12 @@ class $OrcamentoTableTable extends OrcamentoTable
         DriftSqlType.double,
         data['${effectivePrefix}limite'],
       )!,
+      syncStatus: $OrcamentoTableTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
       updatedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
@@ -4509,26 +4553,41 @@ class $OrcamentoTableTable extends OrcamentoTable
   $OrcamentoTableTable createAlias(String alias) {
     return $OrcamentoTableTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const EnumIndexConverter<SyncStatus>(SyncStatus.values);
 }
 
 class OrcamentoTableData extends DataClass
     implements Insertable<OrcamentoTableData> {
   final String id;
+  final String? remoteId;
   final String categoria;
   final double limite;
+  final SyncStatus syncStatus;
   final DateTime updatedAt;
   const OrcamentoTableData({
     required this.id,
+    this.remoteId,
     required this.categoria,
     required this.limite,
+    required this.syncStatus,
     required this.updatedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
     map['categoria'] = Variable<String>(categoria);
     map['limite'] = Variable<double>(limite);
+    {
+      map['sync_status'] = Variable<int>(
+        $OrcamentoTableTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
     map['updated_at'] = Variable<DateTime>(updatedAt);
     return map;
   }
@@ -4536,8 +4595,12 @@ class OrcamentoTableData extends DataClass
   OrcamentoTableCompanion toCompanion(bool nullToAbsent) {
     return OrcamentoTableCompanion(
       id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
       categoria: Value(categoria),
       limite: Value(limite),
+      syncStatus: Value(syncStatus),
       updatedAt: Value(updatedAt),
     );
   }
@@ -4549,8 +4612,12 @@ class OrcamentoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return OrcamentoTableData(
       id: serializer.fromJson<String>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
       categoria: serializer.fromJson<String>(json['categoria']),
       limite: serializer.fromJson<double>(json['limite']),
+      syncStatus: $OrcamentoTableTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
     );
   }
@@ -4559,28 +4626,40 @@ class OrcamentoTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
       'categoria': serializer.toJson<String>(categoria),
       'limite': serializer.toJson<double>(limite),
+      'syncStatus': serializer.toJson<int>(
+        $OrcamentoTableTable.$convertersyncStatus.toJson(syncStatus),
+      ),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
   OrcamentoTableData copyWith({
     String? id,
+    Value<String?> remoteId = const Value.absent(),
     String? categoria,
     double? limite,
+    SyncStatus? syncStatus,
     DateTime? updatedAt,
   }) => OrcamentoTableData(
     id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
     categoria: categoria ?? this.categoria,
     limite: limite ?? this.limite,
+    syncStatus: syncStatus ?? this.syncStatus,
     updatedAt: updatedAt ?? this.updatedAt,
   );
   OrcamentoTableData copyWithCompanion(OrcamentoTableCompanion data) {
     return OrcamentoTableData(
       id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
       categoria: data.categoria.present ? data.categoria.value : this.categoria,
       limite: data.limite.present ? data.limite.value : this.limite,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
     );
   }
@@ -4589,42 +4668,53 @@ class OrcamentoTableData extends DataClass
   String toString() {
     return (StringBuffer('OrcamentoTableData(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('categoria: $categoria, ')
           ..write('limite: $limite, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, categoria, limite, updatedAt);
+  int get hashCode =>
+      Object.hash(id, remoteId, categoria, limite, syncStatus, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is OrcamentoTableData &&
           other.id == this.id &&
+          other.remoteId == this.remoteId &&
           other.categoria == this.categoria &&
           other.limite == this.limite &&
+          other.syncStatus == this.syncStatus &&
           other.updatedAt == this.updatedAt);
 }
 
 class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
   final Value<String> id;
+  final Value<String?> remoteId;
   final Value<String> categoria;
   final Value<double> limite;
+  final Value<SyncStatus> syncStatus;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
   const OrcamentoTableCompanion({
     this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
     this.categoria = const Value.absent(),
     this.limite = const Value.absent(),
+    this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   OrcamentoTableCompanion.insert({
     required String id,
+    this.remoteId = const Value.absent(),
     required String categoria,
     required double limite,
+    this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -4632,15 +4722,19 @@ class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
        limite = Value(limite);
   static Insertable<OrcamentoTableData> custom({
     Expression<String>? id,
+    Expression<String>? remoteId,
     Expression<String>? categoria,
     Expression<double>? limite,
+    Expression<int>? syncStatus,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
       if (categoria != null) 'categoria': categoria,
       if (limite != null) 'limite': limite,
+      if (syncStatus != null) 'sync_status': syncStatus,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4648,15 +4742,19 @@ class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
 
   OrcamentoTableCompanion copyWith({
     Value<String>? id,
+    Value<String?>? remoteId,
     Value<String>? categoria,
     Value<double>? limite,
+    Value<SyncStatus>? syncStatus,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
   }) {
     return OrcamentoTableCompanion(
       id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
       categoria: categoria ?? this.categoria,
       limite: limite ?? this.limite,
+      syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4668,11 +4766,19 @@ class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
     if (id.present) {
       map['id'] = Variable<String>(id.value);
     }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
     if (categoria.present) {
       map['categoria'] = Variable<String>(categoria.value);
     }
     if (limite.present) {
       map['limite'] = Variable<double>(limite.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(
+        $OrcamentoTableTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
@@ -4687,8 +4793,10 @@ class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
   String toString() {
     return (StringBuffer('OrcamentoTableCompanion(')
           ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
           ..write('categoria: $categoria, ')
           ..write('limite: $limite, ')
+          ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -6903,16 +7011,20 @@ typedef $$ReconciliationMatchesTableTableProcessedTableManager =
 typedef $$OrcamentoTableTableCreateCompanionBuilder =
     OrcamentoTableCompanion Function({
       required String id,
+      Value<String?> remoteId,
       required String categoria,
       required double limite,
+      Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
 typedef $$OrcamentoTableTableUpdateCompanionBuilder =
     OrcamentoTableCompanion Function({
       Value<String> id,
+      Value<String?> remoteId,
       Value<String> categoria,
       Value<double> limite,
+      Value<SyncStatus> syncStatus,
       Value<DateTime> updatedAt,
       Value<int> rowid,
     });
@@ -6931,6 +7043,11 @@ class $$OrcamentoTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get categoria => $composableBuilder(
     column: $table.categoria,
     builder: (column) => ColumnFilters(column),
@@ -6940,6 +7057,12 @@ class $$OrcamentoTableTableFilterComposer
     column: $table.limite,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
@@ -6961,6 +7084,11 @@ class $$OrcamentoTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get categoria => $composableBuilder(
     column: $table.categoria,
     builder: (column) => ColumnOrderings(column),
@@ -6968,6 +7096,11 @@ class $$OrcamentoTableTableOrderingComposer
 
   ColumnOrderings<double> get limite => $composableBuilder(
     column: $table.limite,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -6989,11 +7122,20 @@ class $$OrcamentoTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
   GeneratedColumn<String> get categoria =>
       $composableBuilder(column: $table.categoria, builder: (column) => column);
 
   GeneratedColumn<double> get limite =>
       $composableBuilder(column: $table.limite, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
@@ -7037,28 +7179,36 @@ class $$OrcamentoTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
                 Value<String> categoria = const Value.absent(),
                 Value<double> limite = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OrcamentoTableCompanion(
                 id: id,
+                remoteId: remoteId,
                 categoria: categoria,
                 limite: limite,
+                syncStatus: syncStatus,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> remoteId = const Value.absent(),
                 required String categoria,
                 required double limite,
+                Value<SyncStatus> syncStatus = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => OrcamentoTableCompanion.insert(
                 id: id,
+                remoteId: remoteId,
                 categoria: categoria,
                 limite: limite,
+                syncStatus: syncStatus,
                 updatedAt: updatedAt,
                 rowid: rowid,
               ),

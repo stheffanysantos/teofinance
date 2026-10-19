@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/core_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
+import '../../../budget/presentation/providers/budget_providers.dart';
 import '../../../import/presentation/providers/import_providers.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
+import '../../../parcelamento/presentation/providers/parcelamento_providers.dart';
 import '../../../renda/presentation/providers/renda_providers.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../data/sync_engine.dart';
@@ -20,6 +22,8 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     perfilBancoRepository: ref.watch(perfilBancoRepositoryProvider),
     rendaRepository: ref.watch(rendaRepositoryProvider),
     metaRepository: ref.watch(metaRepositoryProvider),
+    parcelamentoRepository: ref.watch(parcelamentoRepositoryProvider),
+    orcamentoRepository: ref.watch(orcamentoRepositoryProvider),
   );
 });
 

@@ -22,4 +22,11 @@ abstract class ParcelamentoRepository {
 
   /// Deleta um parcelamento e suas transações-filhas associadas.
   Future<Either<Failure, void>> deletarParcelamento(String parcelamentoId);
+
+  /// Usado só por `features/sync/` — ver `.claude/rules/architecture.md`.
+  Future<List<Parcelamento>> listarPendentesDeSincronizacao();
+
+  Future<void> confirmarSincronizacao({required String id, required String remoteId});
+
+  Future<void> aplicarRemoto(Parcelamento parcelamento);
 }

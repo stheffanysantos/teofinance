@@ -141,6 +141,11 @@ class FakeTransacaoRepository implements TransacaoRepository {
     required bool precisaCategoria,
     double? minhaParte,
     List<String> divididoCom = const [],
+    String? parcelamentoId,
+    int? numeroParcela,
+    double? valorParcela,
+    bool ehParcela = false,
+    String? statusParcela,
   }) async {}
 
   @override
