@@ -20,7 +20,14 @@
 - Descrição = `NAME` e/ou `MEMO` (unidos quando diferem; `Sem descrição` se ambos faltam).
 - Qualquer transação sem data/valor ou com valor/data inválido **interrompe a importação inteira** apontando o número da transação — nunca se pula ou corrige em silêncio.
 - A instituição (`<ORG>`) segue para a reconciliação como `nomeBancoOriginal`.
-- Limitação conhecida: não há detecção de duplicatas (nem para CSV) ao importar o mesmo extrato duas vezes; o `FITID` do OFX permitiria isso no futuro.
+
+## Duplicatas (passo 6)
+Ao confirmar, o app compara o arquivo com o que já existe e, se houver repetidas, pergunta: *importar só as novas*, *importar todas* ou *cancelar*. Nada é descartado sem o usuário escolher.
+- Chave de comparação: **dia + centavos + descrição** (sem diferença de caixa/espaços). Mesma data e valor com descrição diferente não é duplicata.
+- A comparação **conta ocorrências**: duas compras iguais no mesmo dia são legítimas. Com 1 já existente e 2 no arquivo, só uma é duplicata.
+- O acervo comparado depende do destino. *Transações*: compara com as transações existentes. *Reconciliação*: compara **só com linhas de extrato já importadas** — comparar com as transações seria errado, porque casar o extrato com os lançamentos é o objetivo da reconciliação.
+- Se não for possível ler o acervo, a checagem é ignorada (nunca bloqueia a importação).
+- Limitação: o `FITID` do OFX daria uma identidade exata, mas hoje não é guardado nas transações; a chave é a heurística acima, então o mesmo lançamento com descrição editada no banco não é reconhecido.
 
 ## Detecção de incompatibilidade (passo 3)
 Se um Perfil de Banco é aplicado mas o número de colunas do arquivo atual não bate com o esperado pelo perfil, a importação **para** nesse ponto com um erro explícito — nunca mapeia colunas erradas silenciosamente e nunca gera transações a partir de um mapeamento que não bateu. O usuário é levado de volta ao passo 4 (remapeamento), com a opção de salvar como um perfil separado se preferir manter o antigo.
