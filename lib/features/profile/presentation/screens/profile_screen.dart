@@ -7,6 +7,8 @@ import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
+import '../../../score/presentation/providers/score_providers.dart';
+import '../../../score/presentation/widgets/como_calculamos_score_sheet.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../../../core/providers/discreet_mode_provider.dart';
 import '../providers/app_info_provider.dart';
@@ -33,6 +35,7 @@ class ProfileScreen extends ConsumerWidget {
     final biometriaHabilitada = ref.watch(biometriaHabilitadaProvider).valueOrNull ?? false;
     final syncState = ref.watch(syncUiStateProvider);
     final appInfo = ref.watch(appInfoProvider).valueOrNull;
+    final score = ref.watch(scoreFinanceiroProvider);
 
     return SafeArea(
       bottom: false,
@@ -47,11 +50,10 @@ class ProfileScreen extends ConsumerWidget {
                       memberSince: 'TeoFinance',
                     ),
                     const SizedBox(height: 18),
-                    const FinancialScoreGauge(
-                      score: 742,
-                      maxScore: 1000,
-                      label: 'Bom',
-                      deltaThisMonth: 18,
+                    FinancialScoreGauge(
+                      score: score.valueOrNull,
+                      carregando: score.isLoading,
+                      onTap: () => ComoCalculamosScoreSheet.mostrar(context, score.valueOrNull),
                     ),
                     const SizedBox(height: 18),
                     Text(

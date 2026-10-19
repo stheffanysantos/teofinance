@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 
+import 'package:teofinance/features/score/domain/entities/score_financeiro.dart';
+import 'package:teofinance/features/score/presentation/providers/score_providers.dart';
 import 'package:teofinance/features/meta/domain/entities/meta.dart';
 import 'package:teofinance/features/meta/domain/repositories/meta_repository.dart';
 import 'package:teofinance/features/meta/presentation/providers/meta_providers.dart';
@@ -185,6 +187,11 @@ ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto 
       syncEngineProvider.overrideWithValue(null),
       orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
       metaRepositoryProvider.overrideWithValue(_FakeMetaRepository()),
+      scoreFinanceiroProvider.overrideWith(
+        (ref) async => const ScoreFinanceiro([
+          ComponenteScore(nome: 'Poupança do mês', peso: 30, fracao: 0.5, detalhe: 'Você guardou 10% da renda.'),
+        ]),
+      ),
       if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
         transacaoRepository ?? FakeTransacaoRepository(),
@@ -217,7 +224,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('marina@teofinance.app'), findsOneWidget);
-    expect(find.text('742'), findsOneWidget);
+    expect(find.text('500'), findsOneWidget);
+    expect(find.text('Regular'), findsOneWidget);
 
     await tester.tap(find.text('Escuro'), warnIfMissed: false);
     await tester.pumpAndSettle();
