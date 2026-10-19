@@ -10,6 +10,7 @@ const _nomesExportados = {
   'meta_table': 'metas',
   'parcelamento_table': 'parcelamentos',
   'orcamento_table': 'orcamentos',
+  'conta_table': 'contas',
   'extrato_linhas_table': 'extrato_linhas',
   'reconciliation_matches_table': 'reconciliacao_vinculos',
 };

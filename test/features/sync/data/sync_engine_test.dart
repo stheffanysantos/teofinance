@@ -8,6 +8,9 @@ import 'package:teofinance/features/budget/data/datasources/orcamento_local_data
 import 'package:teofinance/features/budget/data/repositories/orcamento_repository_impl.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/domain/repositories/orcamento_repository.dart';
+import 'package:teofinance/features/contas/data/datasources/conta_local_datasource.dart';
+import 'package:teofinance/features/contas/data/repositories/conta_repository_impl.dart';
+import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/import/data/datasources/perfil_banco_local_datasource.dart';
 import 'package:teofinance/features/import/data/repositories/perfil_banco_repository_impl.dart';
 import 'package:teofinance/features/import/data/services/bank_profile_matcher.dart';
@@ -60,6 +63,7 @@ class _Aparelho {
     transacoes = TransacaoLocalDataSource(db);
     orcamentos = OrcamentoLocalDataSource(db);
     metas = MetaLocalDataSource(db);
+    contas = ContaLocalDataSource(db);
     final parcelamentoLocal = ParcelamentoLocalDataSourceImpl(db);
     parcelamentoRepo = ParcelamentoRepositoryImpl(
       parcelamentoLocal,
@@ -75,6 +79,7 @@ class _Aparelho {
       metaRepository: MetaRepositoryImpl(metas),
       parcelamentoRepository: parcelamentoRepo,
       orcamentoRepository: (orcamento ?? OrcamentoRepositoryImpl.new)(orcamentos),
+      contaRepository: ContaRepositoryImpl(contas),
     );
   }
 
@@ -83,6 +88,7 @@ class _Aparelho {
   late final TransacaoLocalDataSource transacoes;
   late final OrcamentoLocalDataSource orcamentos;
   late final MetaLocalDataSource metas;
+  late final ContaLocalDataSource contas;
   late final ParcelamentoRepositoryImpl parcelamentoRepo;
   late final SyncEngine engine;
 
@@ -95,6 +101,22 @@ class _Aparelho {
 
 CollectionReference<Map<String, dynamic>> _colecao(FirebaseFirestore f, String nome) =>
     f.collection('users').doc('u1').collection(nome);
+
+extension on ContaAPagar {
+  /// `copyWith` não carrega o remoteId; o teste de conflito precisa dele para
+  /// simular uma edição de uma conta já sincronizada.
+  ContaAPagar copyWithRemoto(String remoteId) => ContaAPagar(
+        id: id,
+        remoteId: remoteId,
+        descricao: descricao,
+        categoria: categoria,
+        valor: valor,
+        vencimento: vencimento,
+        diaBase: diaBase,
+        recorrencia: recorrencia,
+        diasAntesLembrete: diasAntesLembrete,
+      );
+}
 
 void main() {
   late FakeFirebaseFirestore nuvem;
@@ -343,6 +365,7 @@ void main() {
         metaRepository: MetaRepositoryImpl(a.metas),
         parcelamentoRepository: a.parcelamentoRepo,
         orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
+        contaRepository: ContaRepositoryImpl(a.contas),
       );
       await offline.sincronizarTudo();
       expect((await linhasMeta(a)).single.syncStatus, SyncStatus.pendingDelete);
@@ -351,6 +374,166 @@ void main() {
 
       expect((await _colecao(nuvem, 'metas').get()).docs, isEmpty);
       expect(await linhasMeta(a), isEmpty);
+    });
+  });
+
+  group('contas a pagar', () {
+    Future<List<ContaTableData>> linhas(_Aparelho a) => a.db.select(a.db.contaTable).get();
+
+    Future<ContaAPagar> criarConta(_Aparelho a, {String descricao = 'Aluguel', double valor = 1500}) {
+      return a.contas.criar(
+        descricao: descricao,
+        valor: valor,
+        vencimento: DateTime(2026, 11, 10),
+        categoria: 'Moradia',
+        recorrencia: RecorrenciaConta.mensal,
+        diasAntesLembrete: 2,
+      );
+    }
+
+    test('envia a conta com todos os campos e confirma como sincronizada', () async {
+      final a = novoAparelho();
+      await criarConta(a);
+
+      await a.engine.sincronizarTudo();
+
+      final doc = (await _colecao(nuvem, 'contas').get()).docs.single.data();
+      expect(doc['descricao'], 'Aluguel');
+      expect(doc['valor'], 1500.0);
+      expect(doc['recorrencia'], 'mensal');
+      expect(doc['diaBase'], 10);
+      expect(doc['paga'], false);
+      expect(doc['diasAntesLembrete'], 2);
+      expect((await linhas(a)).single.syncStatus, SyncStatus.synced);
+    });
+
+    test('pagar depois de sincronizada reenvia o pagamento e o vínculo com a despesa', () async {
+      final a = novoAparelho();
+      final conta = await criarConta(a);
+      await a.engine.sincronizarTudo();
+
+      await a.contas.marcarComoPaga(
+        id: conta.id,
+        valorPago: 1480,
+        dataPagamento: DateTime(2026, 11, 9),
+        transacaoId: 'tx1',
+      );
+      expect((await linhas(a)).single.syncStatus, SyncStatus.pendingUpdate);
+      await a.engine.sincronizarTudo();
+
+      final docs = (await _colecao(nuvem, 'contas').get()).docs;
+      expect(docs, hasLength(1));
+      expect(docs.single.data()['paga'], true);
+      expect(docs.single.data()['valorPago'], 1480.0);
+      expect(docs.single.data()['transacaoId'], 'tx1');
+    });
+
+    test('um segundo aparelho recebe a conta com recorrência, dia-base e pagamento', () async {
+      final a = novoAparelho();
+      final conta = await a.contas.criar(
+        descricao: 'Seguro',
+        valor: 90,
+        vencimento: DateTime(2026, 1, 31),
+        categoria: 'Moradia',
+        recorrencia: RecorrenciaConta.mensal,
+        diasAntesLembrete: 3,
+      );
+      await a.contas.marcarComoPaga(id: conta.id, valorPago: 88, dataPagamento: DateTime(2026, 1, 30));
+      await a.engine.sincronizarTudo();
+
+      final b = novoAparelho();
+      await b.engine.sincronizarTudo();
+
+      final recebida = (await b.contas.observarTodas().first).single;
+      expect(recebida.descricao, 'Seguro');
+      expect(recebida.vencimento, DateTime(2026, 1, 31));
+      expect(recebida.diaBase, 31);
+      expect(recebida.recorrencia, RecorrenciaConta.mensal);
+      expect(recebida.paga, isTrue);
+      expect(recebida.valorPago, 88);
+      expect(recebida.diasAntesLembrete, 3);
+    });
+
+    test('excluir uma conta já sincronizada apaga o documento remoto e ela não volta no pull', () async {
+      final a = novoAparelho();
+      final conta = await criarConta(a);
+      await a.engine.sincronizarTudo();
+
+      await a.contas.excluir(conta.id);
+      expect(await a.contas.observarTodas().first, isEmpty);
+      await a.engine.sincronizarTudo();
+
+      expect((await _colecao(nuvem, 'contas').get()).docs, isEmpty);
+      expect(await linhas(a), isEmpty);
+    });
+
+    test('excluir uma conta que nunca foi enviada some só do aparelho', () async {
+      final a = novoAparelho();
+      final conta = await criarConta(a);
+
+      await a.contas.excluir(conta.id);
+
+      expect(await linhas(a), isEmpty);
+    });
+
+    test('conflito: a edição local ainda não enviada vence o documento remoto', () async {
+      final a = novoAparelho();
+      final conta = await criarConta(a);
+      await a.engine.sincronizarTudo();
+      final remoteId = (await linhas(a)).single.remoteId!;
+
+      await a.contas.atualizar(conta.copyWith(valor: 1700).copyWithRemoto(remoteId));
+      await a.contas.aplicarRemoto(
+        ContaAPagar(
+          id: '',
+          remoteId: remoteId,
+          descricao: 'Aluguel',
+          valor: 1000,
+          vencimento: DateTime(2026, 11, 10),
+          diaBase: 10,
+        ),
+      );
+
+      expect((await linhas(a)).single.valor, 1700);
+    });
+
+    test('documento remoto malformado é ignorado sem derrubar o restante', () async {
+      await _colecao(nuvem, 'contas').doc('ruim').set({'descricao': 'Sem valor'});
+      await _colecao(nuvem, 'contas').doc('bom').set({
+        'descricao': 'Internet',
+        'valor': 120,
+        'vencimento': Timestamp.fromDate(DateTime(2026, 11, 15)),
+      });
+
+      final a = novoAparelho();
+      await a.engine.sincronizarTudo();
+
+      final contas = await a.contas.observarTodas().first;
+      expect(contas.map((c) => c.descricao), ['Internet']);
+      expect(contas.single.diaBase, 15);
+      expect(contas.single.diasAntesLembrete, 1);
+    });
+
+    test('sem conexão a conta continua pendente e a próxima rodada envia', () async {
+      final a = novoAparelho();
+      await criarConta(a);
+      final offline = SyncEngine(
+        firestore: _FirestoreOffline(),
+        uid: 'u1',
+        transacaoRepository: TransacaoRepositoryImpl(a.transacoes),
+        perfilBancoRepository: PerfilBancoRepositoryImpl(PerfilBancoLocalDataSource(a.db), BankProfileMatcher()),
+        rendaRepository: RendaRepositoryImpl(RendaLocalDataSource(a.db)),
+        metaRepository: MetaRepositoryImpl(a.metas),
+        parcelamentoRepository: a.parcelamentoRepo,
+        orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
+        contaRepository: ContaRepositoryImpl(a.contas),
+      );
+
+      await offline.sincronizarTudo();
+      expect((await linhas(a)).single.syncStatus, SyncStatus.pendingCreate);
+
+      await a.engine.sincronizarTudo();
+      expect((await linhas(a)).single.syncStatus, SyncStatus.synced);
     });
   });
 
@@ -375,6 +558,7 @@ void main() {
         metaRepository: MetaRepositoryImpl(MetaLocalDataSource(a.db)),
         parcelamentoRepository: a.parcelamentoRepo,
         orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
+        contaRepository: ContaRepositoryImpl(a.contas),
       );
       await mesmoBanco.sincronizarTudo();
 

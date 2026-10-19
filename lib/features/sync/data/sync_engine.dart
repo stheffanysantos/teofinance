@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../budget/domain/repositories/orcamento_repository.dart';
+import '../../contas/domain/entities/conta_a_pagar.dart';
+import '../../contas/domain/repositories/conta_repository.dart';
 import '../../import/domain/entities/campo_coluna.dart';
 import '../../import/domain/entities/perfil_banco.dart';
 import '../../import/domain/repositories/perfil_banco_repository.dart';
@@ -30,6 +32,7 @@ class SyncEngine {
     required MetaRepository metaRepository,
     required ParcelamentoRepository parcelamentoRepository,
     required OrcamentoRepository orcamentoRepository,
+    required ContaRepository contaRepository,
   }) : _firestore = firestore,
        _uid = uid,
        _transacaoRepository = transacaoRepository,
@@ -37,7 +40,8 @@ class SyncEngine {
        _rendaRepository = rendaRepository,
        _metaRepository = metaRepository,
        _parcelamentoRepository = parcelamentoRepository,
-       _orcamentoRepository = orcamentoRepository;
+       _orcamentoRepository = orcamentoRepository,
+       _contaRepository = contaRepository;
 
   final FirebaseFirestore _firestore;
   final String _uid;
@@ -47,6 +51,7 @@ class SyncEngine {
   final MetaRepository _metaRepository;
   final ParcelamentoRepository _parcelamentoRepository;
   final OrcamentoRepository _orcamentoRepository;
+  final ContaRepository _contaRepository;
 
   CollectionReference<Map<String, dynamic>> _colecao(String nome) {
     return _firestore.collection('users').doc(_uid).collection(nome);
@@ -61,6 +66,7 @@ class SyncEngine {
     await _tentar(_sincronizarRendas);
     await _tentar(_sincronizarMetas);
     await _tentar(_sincronizarOrcamentos);
+    await _tentar(_sincronizarContas);
   }
 
   Future<void> _tentar(Future<void> Function() sincronizar) async {
@@ -359,6 +365,70 @@ class SyncEngine {
           remoteId: doc.id,
           categoria: dados['categoria'] as String,
           limite: (dados['limite'] as num).toDouble(),
+        );
+      } catch (_) {}
+    }
+  }
+
+  // ---------------------------------------------------------------------
+  // Contas a pagar
+  // ---------------------------------------------------------------------
+
+  Future<void> _sincronizarContas() async {
+    final colecao = _colecao('contas');
+
+    final paraExcluir = await _contaRepository.listarPendentesDeExclusao();
+    for (final conta in paraExcluir) {
+      try {
+        await colecao.doc(conta.remoteId).delete();
+        await _contaRepository.confirmarExclusao(conta.id);
+      } catch (_) {
+        // mantém pendingDelete — a próxima rodada tenta de novo.
+      }
+    }
+
+    final pendentes = await _contaRepository.listarPendentesDeSincronizacao();
+    for (final conta in pendentes) {
+      try {
+        final doc = colecao.doc(conta.remoteId ?? conta.id);
+        await doc.set({
+          'descricao': conta.descricao,
+          'categoria': conta.categoria,
+          'valor': conta.valor,
+          'vencimento': Timestamp.fromDate(conta.vencimento),
+          'diaBase': conta.diaBase,
+          'recorrencia': conta.recorrencia.name,
+          'paga': conta.paga,
+          'dataPagamento': conta.dataPagamento == null ? null : Timestamp.fromDate(conta.dataPagamento!),
+          'valorPago': conta.valorPago,
+          'diasAntesLembrete': conta.diasAntesLembrete,
+          'transacaoId': conta.transacaoId,
+        });
+        await _contaRepository.confirmarSincronizacao(id: conta.id, remoteId: doc.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    for (final doc in remotos.docs) {
+      try {
+        final dados = doc.data();
+        final vencimento = (dados['vencimento'] as Timestamp).toDate();
+        await _contaRepository.aplicarRemoto(
+          ContaAPagar(
+            id: '',
+            remoteId: doc.id,
+            descricao: dados['descricao'] as String,
+            categoria: dados['categoria'] as String? ?? '',
+            valor: (dados['valor'] as num).toDouble(),
+            vencimento: vencimento,
+            diaBase: (dados['diaBase'] as num?)?.toInt() ?? vencimento.day,
+            recorrencia: RecorrenciaConta.values.asNameMap()[dados['recorrencia']] ?? RecorrenciaConta.nenhuma,
+            paga: dados['paga'] as bool? ?? false,
+            dataPagamento: (dados['dataPagamento'] as Timestamp?)?.toDate(),
+            valorPago: (dados['valorPago'] as num?)?.toDouble(),
+            diasAntesLembrete: (dados['diasAntesLembrete'] as num?)?.toInt() ?? 1,
+            transacaoId: dados['transacaoId'] as String?,
+          ),
         );
       } catch (_) {}
     }

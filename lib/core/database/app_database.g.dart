@@ -4804,6 +4804,884 @@ class OrcamentoTableCompanion extends UpdateCompanion<OrcamentoTableData> {
   }
 }
 
+class $ContaTableTable extends ContaTable
+    with TableInfo<$ContaTableTable, ContaTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ContaTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remoteIdMeta = const VerificationMeta(
+    'remoteId',
+  );
+  @override
+  late final GeneratedColumn<String> remoteId = GeneratedColumn<String>(
+    'remote_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _descricaoMeta = const VerificationMeta(
+    'descricao',
+  );
+  @override
+  late final GeneratedColumn<String> descricao = GeneratedColumn<String>(
+    'descricao',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoriaMeta = const VerificationMeta(
+    'categoria',
+  );
+  @override
+  late final GeneratedColumn<String> categoria = GeneratedColumn<String>(
+    'categoria',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _valorMeta = const VerificationMeta('valor');
+  @override
+  late final GeneratedColumn<double> valor = GeneratedColumn<double>(
+    'valor',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _vencimentoMeta = const VerificationMeta(
+    'vencimento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> vencimento = GeneratedColumn<DateTime>(
+    'vencimento',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _diaBaseMeta = const VerificationMeta(
+    'diaBase',
+  );
+  @override
+  late final GeneratedColumn<int> diaBase = GeneratedColumn<int>(
+    'dia_base',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _recorrenciaMeta = const VerificationMeta(
+    'recorrencia',
+  );
+  @override
+  late final GeneratedColumn<String> recorrencia = GeneratedColumn<String>(
+    'recorrencia',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('nenhuma'),
+  );
+  static const VerificationMeta _pagaMeta = const VerificationMeta('paga');
+  @override
+  late final GeneratedColumn<bool> paga = GeneratedColumn<bool>(
+    'paga',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("paga" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _dataPagamentoMeta = const VerificationMeta(
+    'dataPagamento',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dataPagamento =
+      GeneratedColumn<DateTime>(
+        'data_pagamento',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _valorPagoMeta = const VerificationMeta(
+    'valorPago',
+  );
+  @override
+  late final GeneratedColumn<double> valorPago = GeneratedColumn<double>(
+    'valor_pago',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _diasAntesLembreteMeta = const VerificationMeta(
+    'diasAntesLembrete',
+  );
+  @override
+  late final GeneratedColumn<int> diasAntesLembrete = GeneratedColumn<int>(
+    'dias_antes_lembrete',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _transacaoIdMeta = const VerificationMeta(
+    'transacaoId',
+  );
+  @override
+  late final GeneratedColumn<String> transacaoId = GeneratedColumn<String>(
+    'transacao_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
+      GeneratedColumn<int>(
+        'sync_status',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: Constant(SyncStatus.pendingCreate.index),
+      ).withConverter<SyncStatus>($ContaTableTable.$convertersyncStatus);
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    remoteId,
+    descricao,
+    categoria,
+    valor,
+    vencimento,
+    diaBase,
+    recorrencia,
+    paga,
+    dataPagamento,
+    valorPago,
+    diasAntesLembrete,
+    transacaoId,
+    syncStatus,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'conta_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ContaTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('remote_id')) {
+      context.handle(
+        _remoteIdMeta,
+        remoteId.isAcceptableOrUnknown(data['remote_id']!, _remoteIdMeta),
+      );
+    }
+    if (data.containsKey('descricao')) {
+      context.handle(
+        _descricaoMeta,
+        descricao.isAcceptableOrUnknown(data['descricao']!, _descricaoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_descricaoMeta);
+    }
+    if (data.containsKey('categoria')) {
+      context.handle(
+        _categoriaMeta,
+        categoria.isAcceptableOrUnknown(data['categoria']!, _categoriaMeta),
+      );
+    }
+    if (data.containsKey('valor')) {
+      context.handle(
+        _valorMeta,
+        valor.isAcceptableOrUnknown(data['valor']!, _valorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valorMeta);
+    }
+    if (data.containsKey('vencimento')) {
+      context.handle(
+        _vencimentoMeta,
+        vencimento.isAcceptableOrUnknown(data['vencimento']!, _vencimentoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_vencimentoMeta);
+    }
+    if (data.containsKey('dia_base')) {
+      context.handle(
+        _diaBaseMeta,
+        diaBase.isAcceptableOrUnknown(data['dia_base']!, _diaBaseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_diaBaseMeta);
+    }
+    if (data.containsKey('recorrencia')) {
+      context.handle(
+        _recorrenciaMeta,
+        recorrencia.isAcceptableOrUnknown(
+          data['recorrencia']!,
+          _recorrenciaMeta,
+        ),
+      );
+    }
+    if (data.containsKey('paga')) {
+      context.handle(
+        _pagaMeta,
+        paga.isAcceptableOrUnknown(data['paga']!, _pagaMeta),
+      );
+    }
+    if (data.containsKey('data_pagamento')) {
+      context.handle(
+        _dataPagamentoMeta,
+        dataPagamento.isAcceptableOrUnknown(
+          data['data_pagamento']!,
+          _dataPagamentoMeta,
+        ),
+      );
+    }
+    if (data.containsKey('valor_pago')) {
+      context.handle(
+        _valorPagoMeta,
+        valorPago.isAcceptableOrUnknown(data['valor_pago']!, _valorPagoMeta),
+      );
+    }
+    if (data.containsKey('dias_antes_lembrete')) {
+      context.handle(
+        _diasAntesLembreteMeta,
+        diasAntesLembrete.isAcceptableOrUnknown(
+          data['dias_antes_lembrete']!,
+          _diasAntesLembreteMeta,
+        ),
+      );
+    }
+    if (data.containsKey('transacao_id')) {
+      context.handle(
+        _transacaoIdMeta,
+        transacaoId.isAcceptableOrUnknown(
+          data['transacao_id']!,
+          _transacaoIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ContaTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ContaTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      remoteId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_id'],
+      ),
+      descricao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}descricao'],
+      )!,
+      categoria: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}categoria'],
+      )!,
+      valor: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor'],
+      )!,
+      vencimento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}vencimento'],
+      )!,
+      diaBase: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dia_base'],
+      )!,
+      recorrencia: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}recorrencia'],
+      )!,
+      paga: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}paga'],
+      )!,
+      dataPagamento: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}data_pagamento'],
+      ),
+      valorPago: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}valor_pago'],
+      ),
+      diasAntesLembrete: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}dias_antes_lembrete'],
+      )!,
+      transacaoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transacao_id'],
+      ),
+      syncStatus: $ContaTableTable.$convertersyncStatus.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}sync_status'],
+        )!,
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ContaTableTable createAlias(String alias) {
+    return $ContaTableTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<SyncStatus, int, int> $convertersyncStatus =
+      const EnumIndexConverter<SyncStatus>(SyncStatus.values);
+}
+
+class ContaTableData extends DataClass implements Insertable<ContaTableData> {
+  final String id;
+  final String? remoteId;
+  final String descricao;
+  final String categoria;
+  final double valor;
+  final DateTime vencimento;
+
+  /// Dia do mês do primeiro vencimento. Uma conta que vence todo dia 31 volta
+  /// ao 31 depois de fevereiro, em vez de ficar presa no 28.
+  final int diaBase;
+
+  /// 'nenhuma' | 'mensal' | 'anual'
+  final String recorrencia;
+  final bool paga;
+  final DateTime? dataPagamento;
+  final double? valorPago;
+  final int diasAntesLembrete;
+  final String? transacaoId;
+  final SyncStatus syncStatus;
+  final DateTime updatedAt;
+  const ContaTableData({
+    required this.id,
+    this.remoteId,
+    required this.descricao,
+    required this.categoria,
+    required this.valor,
+    required this.vencimento,
+    required this.diaBase,
+    required this.recorrencia,
+    required this.paga,
+    this.dataPagamento,
+    this.valorPago,
+    required this.diasAntesLembrete,
+    this.transacaoId,
+    required this.syncStatus,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    if (!nullToAbsent || remoteId != null) {
+      map['remote_id'] = Variable<String>(remoteId);
+    }
+    map['descricao'] = Variable<String>(descricao);
+    map['categoria'] = Variable<String>(categoria);
+    map['valor'] = Variable<double>(valor);
+    map['vencimento'] = Variable<DateTime>(vencimento);
+    map['dia_base'] = Variable<int>(diaBase);
+    map['recorrencia'] = Variable<String>(recorrencia);
+    map['paga'] = Variable<bool>(paga);
+    if (!nullToAbsent || dataPagamento != null) {
+      map['data_pagamento'] = Variable<DateTime>(dataPagamento);
+    }
+    if (!nullToAbsent || valorPago != null) {
+      map['valor_pago'] = Variable<double>(valorPago);
+    }
+    map['dias_antes_lembrete'] = Variable<int>(diasAntesLembrete);
+    if (!nullToAbsent || transacaoId != null) {
+      map['transacao_id'] = Variable<String>(transacaoId);
+    }
+    {
+      map['sync_status'] = Variable<int>(
+        $ContaTableTable.$convertersyncStatus.toSql(syncStatus),
+      );
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ContaTableCompanion toCompanion(bool nullToAbsent) {
+    return ContaTableCompanion(
+      id: Value(id),
+      remoteId: remoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteId),
+      descricao: Value(descricao),
+      categoria: Value(categoria),
+      valor: Value(valor),
+      vencimento: Value(vencimento),
+      diaBase: Value(diaBase),
+      recorrencia: Value(recorrencia),
+      paga: Value(paga),
+      dataPagamento: dataPagamento == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dataPagamento),
+      valorPago: valorPago == null && nullToAbsent
+          ? const Value.absent()
+          : Value(valorPago),
+      diasAntesLembrete: Value(diasAntesLembrete),
+      transacaoId: transacaoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transacaoId),
+      syncStatus: Value(syncStatus),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ContaTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ContaTableData(
+      id: serializer.fromJson<String>(json['id']),
+      remoteId: serializer.fromJson<String?>(json['remoteId']),
+      descricao: serializer.fromJson<String>(json['descricao']),
+      categoria: serializer.fromJson<String>(json['categoria']),
+      valor: serializer.fromJson<double>(json['valor']),
+      vencimento: serializer.fromJson<DateTime>(json['vencimento']),
+      diaBase: serializer.fromJson<int>(json['diaBase']),
+      recorrencia: serializer.fromJson<String>(json['recorrencia']),
+      paga: serializer.fromJson<bool>(json['paga']),
+      dataPagamento: serializer.fromJson<DateTime?>(json['dataPagamento']),
+      valorPago: serializer.fromJson<double?>(json['valorPago']),
+      diasAntesLembrete: serializer.fromJson<int>(json['diasAntesLembrete']),
+      transacaoId: serializer.fromJson<String?>(json['transacaoId']),
+      syncStatus: $ContaTableTable.$convertersyncStatus.fromJson(
+        serializer.fromJson<int>(json['syncStatus']),
+      ),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'remoteId': serializer.toJson<String?>(remoteId),
+      'descricao': serializer.toJson<String>(descricao),
+      'categoria': serializer.toJson<String>(categoria),
+      'valor': serializer.toJson<double>(valor),
+      'vencimento': serializer.toJson<DateTime>(vencimento),
+      'diaBase': serializer.toJson<int>(diaBase),
+      'recorrencia': serializer.toJson<String>(recorrencia),
+      'paga': serializer.toJson<bool>(paga),
+      'dataPagamento': serializer.toJson<DateTime?>(dataPagamento),
+      'valorPago': serializer.toJson<double?>(valorPago),
+      'diasAntesLembrete': serializer.toJson<int>(diasAntesLembrete),
+      'transacaoId': serializer.toJson<String?>(transacaoId),
+      'syncStatus': serializer.toJson<int>(
+        $ContaTableTable.$convertersyncStatus.toJson(syncStatus),
+      ),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ContaTableData copyWith({
+    String? id,
+    Value<String?> remoteId = const Value.absent(),
+    String? descricao,
+    String? categoria,
+    double? valor,
+    DateTime? vencimento,
+    int? diaBase,
+    String? recorrencia,
+    bool? paga,
+    Value<DateTime?> dataPagamento = const Value.absent(),
+    Value<double?> valorPago = const Value.absent(),
+    int? diasAntesLembrete,
+    Value<String?> transacaoId = const Value.absent(),
+    SyncStatus? syncStatus,
+    DateTime? updatedAt,
+  }) => ContaTableData(
+    id: id ?? this.id,
+    remoteId: remoteId.present ? remoteId.value : this.remoteId,
+    descricao: descricao ?? this.descricao,
+    categoria: categoria ?? this.categoria,
+    valor: valor ?? this.valor,
+    vencimento: vencimento ?? this.vencimento,
+    diaBase: diaBase ?? this.diaBase,
+    recorrencia: recorrencia ?? this.recorrencia,
+    paga: paga ?? this.paga,
+    dataPagamento: dataPagamento.present
+        ? dataPagamento.value
+        : this.dataPagamento,
+    valorPago: valorPago.present ? valorPago.value : this.valorPago,
+    diasAntesLembrete: diasAntesLembrete ?? this.diasAntesLembrete,
+    transacaoId: transacaoId.present ? transacaoId.value : this.transacaoId,
+    syncStatus: syncStatus ?? this.syncStatus,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ContaTableData copyWithCompanion(ContaTableCompanion data) {
+    return ContaTableData(
+      id: data.id.present ? data.id.value : this.id,
+      remoteId: data.remoteId.present ? data.remoteId.value : this.remoteId,
+      descricao: data.descricao.present ? data.descricao.value : this.descricao,
+      categoria: data.categoria.present ? data.categoria.value : this.categoria,
+      valor: data.valor.present ? data.valor.value : this.valor,
+      vencimento: data.vencimento.present
+          ? data.vencimento.value
+          : this.vencimento,
+      diaBase: data.diaBase.present ? data.diaBase.value : this.diaBase,
+      recorrencia: data.recorrencia.present
+          ? data.recorrencia.value
+          : this.recorrencia,
+      paga: data.paga.present ? data.paga.value : this.paga,
+      dataPagamento: data.dataPagamento.present
+          ? data.dataPagamento.value
+          : this.dataPagamento,
+      valorPago: data.valorPago.present ? data.valorPago.value : this.valorPago,
+      diasAntesLembrete: data.diasAntesLembrete.present
+          ? data.diasAntesLembrete.value
+          : this.diasAntesLembrete,
+      transacaoId: data.transacaoId.present
+          ? data.transacaoId.value
+          : this.transacaoId,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContaTableData(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('descricao: $descricao, ')
+          ..write('categoria: $categoria, ')
+          ..write('valor: $valor, ')
+          ..write('vencimento: $vencimento, ')
+          ..write('diaBase: $diaBase, ')
+          ..write('recorrencia: $recorrencia, ')
+          ..write('paga: $paga, ')
+          ..write('dataPagamento: $dataPagamento, ')
+          ..write('valorPago: $valorPago, ')
+          ..write('diasAntesLembrete: $diasAntesLembrete, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    remoteId,
+    descricao,
+    categoria,
+    valor,
+    vencimento,
+    diaBase,
+    recorrencia,
+    paga,
+    dataPagamento,
+    valorPago,
+    diasAntesLembrete,
+    transacaoId,
+    syncStatus,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ContaTableData &&
+          other.id == this.id &&
+          other.remoteId == this.remoteId &&
+          other.descricao == this.descricao &&
+          other.categoria == this.categoria &&
+          other.valor == this.valor &&
+          other.vencimento == this.vencimento &&
+          other.diaBase == this.diaBase &&
+          other.recorrencia == this.recorrencia &&
+          other.paga == this.paga &&
+          other.dataPagamento == this.dataPagamento &&
+          other.valorPago == this.valorPago &&
+          other.diasAntesLembrete == this.diasAntesLembrete &&
+          other.transacaoId == this.transacaoId &&
+          other.syncStatus == this.syncStatus &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ContaTableCompanion extends UpdateCompanion<ContaTableData> {
+  final Value<String> id;
+  final Value<String?> remoteId;
+  final Value<String> descricao;
+  final Value<String> categoria;
+  final Value<double> valor;
+  final Value<DateTime> vencimento;
+  final Value<int> diaBase;
+  final Value<String> recorrencia;
+  final Value<bool> paga;
+  final Value<DateTime?> dataPagamento;
+  final Value<double?> valorPago;
+  final Value<int> diasAntesLembrete;
+  final Value<String?> transacaoId;
+  final Value<SyncStatus> syncStatus;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ContaTableCompanion({
+    this.id = const Value.absent(),
+    this.remoteId = const Value.absent(),
+    this.descricao = const Value.absent(),
+    this.categoria = const Value.absent(),
+    this.valor = const Value.absent(),
+    this.vencimento = const Value.absent(),
+    this.diaBase = const Value.absent(),
+    this.recorrencia = const Value.absent(),
+    this.paga = const Value.absent(),
+    this.dataPagamento = const Value.absent(),
+    this.valorPago = const Value.absent(),
+    this.diasAntesLembrete = const Value.absent(),
+    this.transacaoId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ContaTableCompanion.insert({
+    required String id,
+    this.remoteId = const Value.absent(),
+    required String descricao,
+    this.categoria = const Value.absent(),
+    required double valor,
+    required DateTime vencimento,
+    required int diaBase,
+    this.recorrencia = const Value.absent(),
+    this.paga = const Value.absent(),
+    this.dataPagamento = const Value.absent(),
+    this.valorPago = const Value.absent(),
+    this.diasAntesLembrete = const Value.absent(),
+    this.transacaoId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       descricao = Value(descricao),
+       valor = Value(valor),
+       vencimento = Value(vencimento),
+       diaBase = Value(diaBase);
+  static Insertable<ContaTableData> custom({
+    Expression<String>? id,
+    Expression<String>? remoteId,
+    Expression<String>? descricao,
+    Expression<String>? categoria,
+    Expression<double>? valor,
+    Expression<DateTime>? vencimento,
+    Expression<int>? diaBase,
+    Expression<String>? recorrencia,
+    Expression<bool>? paga,
+    Expression<DateTime>? dataPagamento,
+    Expression<double>? valorPago,
+    Expression<int>? diasAntesLembrete,
+    Expression<String>? transacaoId,
+    Expression<int>? syncStatus,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (remoteId != null) 'remote_id': remoteId,
+      if (descricao != null) 'descricao': descricao,
+      if (categoria != null) 'categoria': categoria,
+      if (valor != null) 'valor': valor,
+      if (vencimento != null) 'vencimento': vencimento,
+      if (diaBase != null) 'dia_base': diaBase,
+      if (recorrencia != null) 'recorrencia': recorrencia,
+      if (paga != null) 'paga': paga,
+      if (dataPagamento != null) 'data_pagamento': dataPagamento,
+      if (valorPago != null) 'valor_pago': valorPago,
+      if (diasAntesLembrete != null) 'dias_antes_lembrete': diasAntesLembrete,
+      if (transacaoId != null) 'transacao_id': transacaoId,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ContaTableCompanion copyWith({
+    Value<String>? id,
+    Value<String?>? remoteId,
+    Value<String>? descricao,
+    Value<String>? categoria,
+    Value<double>? valor,
+    Value<DateTime>? vencimento,
+    Value<int>? diaBase,
+    Value<String>? recorrencia,
+    Value<bool>? paga,
+    Value<DateTime?>? dataPagamento,
+    Value<double?>? valorPago,
+    Value<int>? diasAntesLembrete,
+    Value<String?>? transacaoId,
+    Value<SyncStatus>? syncStatus,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ContaTableCompanion(
+      id: id ?? this.id,
+      remoteId: remoteId ?? this.remoteId,
+      descricao: descricao ?? this.descricao,
+      categoria: categoria ?? this.categoria,
+      valor: valor ?? this.valor,
+      vencimento: vencimento ?? this.vencimento,
+      diaBase: diaBase ?? this.diaBase,
+      recorrencia: recorrencia ?? this.recorrencia,
+      paga: paga ?? this.paga,
+      dataPagamento: dataPagamento ?? this.dataPagamento,
+      valorPago: valorPago ?? this.valorPago,
+      diasAntesLembrete: diasAntesLembrete ?? this.diasAntesLembrete,
+      transacaoId: transacaoId ?? this.transacaoId,
+      syncStatus: syncStatus ?? this.syncStatus,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (remoteId.present) {
+      map['remote_id'] = Variable<String>(remoteId.value);
+    }
+    if (descricao.present) {
+      map['descricao'] = Variable<String>(descricao.value);
+    }
+    if (categoria.present) {
+      map['categoria'] = Variable<String>(categoria.value);
+    }
+    if (valor.present) {
+      map['valor'] = Variable<double>(valor.value);
+    }
+    if (vencimento.present) {
+      map['vencimento'] = Variable<DateTime>(vencimento.value);
+    }
+    if (diaBase.present) {
+      map['dia_base'] = Variable<int>(diaBase.value);
+    }
+    if (recorrencia.present) {
+      map['recorrencia'] = Variable<String>(recorrencia.value);
+    }
+    if (paga.present) {
+      map['paga'] = Variable<bool>(paga.value);
+    }
+    if (dataPagamento.present) {
+      map['data_pagamento'] = Variable<DateTime>(dataPagamento.value);
+    }
+    if (valorPago.present) {
+      map['valor_pago'] = Variable<double>(valorPago.value);
+    }
+    if (diasAntesLembrete.present) {
+      map['dias_antes_lembrete'] = Variable<int>(diasAntesLembrete.value);
+    }
+    if (transacaoId.present) {
+      map['transacao_id'] = Variable<String>(transacaoId.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<int>(
+        $ContaTableTable.$convertersyncStatus.toSql(syncStatus.value),
+      );
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ContaTableCompanion(')
+          ..write('id: $id, ')
+          ..write('remoteId: $remoteId, ')
+          ..write('descricao: $descricao, ')
+          ..write('categoria: $categoria, ')
+          ..write('valor: $valor, ')
+          ..write('vencimento: $vencimento, ')
+          ..write('diaBase: $diaBase, ')
+          ..write('recorrencia: $recorrencia, ')
+          ..write('paga: $paga, ')
+          ..write('dataPagamento: $dataPagamento, ')
+          ..write('valorPago: $valorPago, ')
+          ..write('diasAntesLembrete: $diasAntesLembrete, ')
+          ..write('transacaoId: $transacaoId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4821,6 +5699,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ReconciliationMatchesTableTable reconciliationMatchesTable =
       $ReconciliationMatchesTableTable(this);
   late final $OrcamentoTableTable orcamentoTable = $OrcamentoTableTable(this);
+  late final $ContaTableTable contaTable = $ContaTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4834,6 +5713,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     extratoLinhasTable,
     reconciliationMatchesTable,
     orcamentoTable,
+    contaTable,
   ];
 }
 
@@ -7237,6 +8117,410 @@ typedef $$OrcamentoTableTableProcessedTableManager =
       OrcamentoTableData,
       PrefetchHooks Function()
     >;
+typedef $$ContaTableTableCreateCompanionBuilder =
+    ContaTableCompanion Function({
+      required String id,
+      Value<String?> remoteId,
+      required String descricao,
+      Value<String> categoria,
+      required double valor,
+      required DateTime vencimento,
+      required int diaBase,
+      Value<String> recorrencia,
+      Value<bool> paga,
+      Value<DateTime?> dataPagamento,
+      Value<double?> valorPago,
+      Value<int> diasAntesLembrete,
+      Value<String?> transacaoId,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ContaTableTableUpdateCompanionBuilder =
+    ContaTableCompanion Function({
+      Value<String> id,
+      Value<String?> remoteId,
+      Value<String> descricao,
+      Value<String> categoria,
+      Value<double> valor,
+      Value<DateTime> vencimento,
+      Value<int> diaBase,
+      Value<String> recorrencia,
+      Value<bool> paga,
+      Value<DateTime?> dataPagamento,
+      Value<double?> valorPago,
+      Value<int> diasAntesLembrete,
+      Value<String?> transacaoId,
+      Value<SyncStatus> syncStatus,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ContaTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ContaTableTable> {
+  $$ContaTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get vencimento => $composableBuilder(
+    column: $table.vencimento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get diaBase => $composableBuilder(
+    column: $table.diaBase,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get paga => $composableBuilder(
+    column: $table.paga,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dataPagamento => $composableBuilder(
+    column: $table.dataPagamento,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get valorPago => $composableBuilder(
+    column: $table.valorPago,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get diasAntesLembrete => $composableBuilder(
+    column: $table.diasAntesLembrete,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<SyncStatus, SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ContaTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ContaTableTable> {
+  $$ContaTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteId => $composableBuilder(
+    column: $table.remoteId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get descricao => $composableBuilder(
+    column: $table.descricao,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoria => $composableBuilder(
+    column: $table.categoria,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valor => $composableBuilder(
+    column: $table.valor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get vencimento => $composableBuilder(
+    column: $table.vencimento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get diaBase => $composableBuilder(
+    column: $table.diaBase,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get paga => $composableBuilder(
+    column: $table.paga,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dataPagamento => $composableBuilder(
+    column: $table.dataPagamento,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get valorPago => $composableBuilder(
+    column: $table.valorPago,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get diasAntesLembrete => $composableBuilder(
+    column: $table.diasAntesLembrete,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ContaTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ContaTableTable> {
+  $$ContaTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get remoteId =>
+      $composableBuilder(column: $table.remoteId, builder: (column) => column);
+
+  GeneratedColumn<String> get descricao =>
+      $composableBuilder(column: $table.descricao, builder: (column) => column);
+
+  GeneratedColumn<String> get categoria =>
+      $composableBuilder(column: $table.categoria, builder: (column) => column);
+
+  GeneratedColumn<double> get valor =>
+      $composableBuilder(column: $table.valor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get vencimento => $composableBuilder(
+    column: $table.vencimento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get diaBase =>
+      $composableBuilder(column: $table.diaBase, builder: (column) => column);
+
+  GeneratedColumn<String> get recorrencia => $composableBuilder(
+    column: $table.recorrencia,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get paga =>
+      $composableBuilder(column: $table.paga, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get dataPagamento => $composableBuilder(
+    column: $table.dataPagamento,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get valorPago =>
+      $composableBuilder(column: $table.valorPago, builder: (column) => column);
+
+  GeneratedColumn<int> get diasAntesLembrete => $composableBuilder(
+    column: $table.diasAntesLembrete,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get transacaoId => $composableBuilder(
+    column: $table.transacaoId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<SyncStatus, int> get syncStatus =>
+      $composableBuilder(
+        column: $table.syncStatus,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ContaTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ContaTableTable,
+          ContaTableData,
+          $$ContaTableTableFilterComposer,
+          $$ContaTableTableOrderingComposer,
+          $$ContaTableTableAnnotationComposer,
+          $$ContaTableTableCreateCompanionBuilder,
+          $$ContaTableTableUpdateCompanionBuilder,
+          (
+            ContaTableData,
+            BaseReferences<_$AppDatabase, $ContaTableTable, ContaTableData>,
+          ),
+          ContaTableData,
+          PrefetchHooks Function()
+        > {
+  $$ContaTableTableTableManager(_$AppDatabase db, $ContaTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ContaTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ContaTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ContaTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String?> remoteId = const Value.absent(),
+                Value<String> descricao = const Value.absent(),
+                Value<String> categoria = const Value.absent(),
+                Value<double> valor = const Value.absent(),
+                Value<DateTime> vencimento = const Value.absent(),
+                Value<int> diaBase = const Value.absent(),
+                Value<String> recorrencia = const Value.absent(),
+                Value<bool> paga = const Value.absent(),
+                Value<DateTime?> dataPagamento = const Value.absent(),
+                Value<double?> valorPago = const Value.absent(),
+                Value<int> diasAntesLembrete = const Value.absent(),
+                Value<String?> transacaoId = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContaTableCompanion(
+                id: id,
+                remoteId: remoteId,
+                descricao: descricao,
+                categoria: categoria,
+                valor: valor,
+                vencimento: vencimento,
+                diaBase: diaBase,
+                recorrencia: recorrencia,
+                paga: paga,
+                dataPagamento: dataPagamento,
+                valorPago: valorPago,
+                diasAntesLembrete: diasAntesLembrete,
+                transacaoId: transacaoId,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                Value<String?> remoteId = const Value.absent(),
+                required String descricao,
+                Value<String> categoria = const Value.absent(),
+                required double valor,
+                required DateTime vencimento,
+                required int diaBase,
+                Value<String> recorrencia = const Value.absent(),
+                Value<bool> paga = const Value.absent(),
+                Value<DateTime?> dataPagamento = const Value.absent(),
+                Value<double?> valorPago = const Value.absent(),
+                Value<int> diasAntesLembrete = const Value.absent(),
+                Value<String?> transacaoId = const Value.absent(),
+                Value<SyncStatus> syncStatus = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ContaTableCompanion.insert(
+                id: id,
+                remoteId: remoteId,
+                descricao: descricao,
+                categoria: categoria,
+                valor: valor,
+                vencimento: vencimento,
+                diaBase: diaBase,
+                recorrencia: recorrencia,
+                paga: paga,
+                dataPagamento: dataPagamento,
+                valorPago: valorPago,
+                diasAntesLembrete: diasAntesLembrete,
+                transacaoId: transacaoId,
+                syncStatus: syncStatus,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ContaTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ContaTableTable,
+      ContaTableData,
+      $$ContaTableTableFilterComposer,
+      $$ContaTableTableOrderingComposer,
+      $$ContaTableTableAnnotationComposer,
+      $$ContaTableTableCreateCompanionBuilder,
+      $$ContaTableTableUpdateCompanionBuilder,
+      (
+        ContaTableData,
+        BaseReferences<_$AppDatabase, $ContaTableTable, ContaTableData>,
+      ),
+      ContaTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7261,4 +8545,6 @@ class $AppDatabaseManager {
       );
   $$OrcamentoTableTableTableManager get orcamentoTable =>
       $$OrcamentoTableTableTableManager(_db, _db.orcamentoTable);
+  $$ContaTableTableTableManager get contaTable =>
+      $$ContaTableTableTableManager(_db, _db.contaTable);
 }

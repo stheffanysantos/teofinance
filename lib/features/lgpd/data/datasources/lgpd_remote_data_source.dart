@@ -16,6 +16,7 @@ class LgpdRemoteDataSource {
     'metas',
     'parcelamentos',
     'orcamentos',
+    'contas',
   ];
 
   static const _tamanhoDoLote = 400;

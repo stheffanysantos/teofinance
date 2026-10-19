@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../budget/presentation/providers/budget_providers.dart';
+import '../../../contas/presentation/providers/conta_providers.dart';
 import '../../../import/presentation/providers/import_providers.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
 import '../../../parcelamento/presentation/providers/parcelamento_providers.dart';
@@ -24,6 +25,7 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     metaRepository: ref.watch(metaRepositoryProvider),
     parcelamentoRepository: ref.watch(parcelamentoRepositoryProvider),
     orcamentoRepository: ref.watch(orcamentoRepositoryProvider),
+    contaRepository: ref.watch(contaRepositoryProvider),
   );
 });
 
