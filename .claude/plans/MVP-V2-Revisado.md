@@ -1,6 +1,6 @@
 # MVP V2 — Escopo Revisado (Reconciliação + Parcelamento)
 
-> Atualizado: 2026-10-15
+> Atualizado: 2026-10-19 — **MVP V2 entregue**. O estado atual e o que falta estão em `Backlog.md`; este arquivo registra o escopo e as decisões da época.
 > Mudança: Remover simulação (portfolio/trail), focar em reconciliação e parcelamento — o que resolve o problema real de controle financeiro.
 
 ## Dentro do Escopo
@@ -27,7 +27,7 @@
     - IA local (depois) para matching semântico
 
 ### 📦 Fora do MVP V2 (Fase 2+)
-- `divisao_despesa/` (split bill com amigos) — Fase 2
+- ~~`divisao_despesa/`~~ — **entregue**: a divisão mora em `features/transacao/` (campos `minhaParte`/`divididoCom`), contando só a parte do usuário.
 - Open Finance (download automático de extrato) — Fase 2
 - Modo Simulação / Carteira Fictícia — REMOVIDO
 - Gamificação (trail) — REMOVIDO
@@ -113,6 +113,9 @@ Um usuário consegue:
 ---
 
 ## Próximas Ações
-- [ ] Expandir schema do Drift (tabelas `parcelamento` e `reconciliation_match`)
-- [ ] Atualizar Firestore rules para novas coleções
-- [ ] Começar Sprint 02: feature `parcelamento/`
+Concluídas: schema Drift (parcelamento, reconciliação, orçamento, contas), sync dos novos dados, features `parcelamento/` e `reconciliation/`.
+
+**Diferenças em relação ao plano original** (decididas durante a implementação):
+- `extrato_linhas` e `reconciliation_matches` **não** vão ao Firestore: o conteúdo do extrato nunca sai do aparelho.
+- A tabela de matches não tem `userId` e ganhou o status `rejected` (par recusado não volta a ser sugerido).
+- Regras do Firestore: as da `develop` isolam `users/{uid}/**` ao dono e bastam para o app pessoal; a versão mais restrita está na branch `feature/firestore-rules`.

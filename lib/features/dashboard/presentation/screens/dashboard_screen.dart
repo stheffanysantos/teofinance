@@ -14,7 +14,7 @@ import '../../../goals/presentation/screens/goals_screen.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
 import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
 import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
-import '../providers/dashboard_mock_provider.dart';
+import '../providers/dashboard_view_providers.dart';
 import '../providers/dashboard_summary_provider.dart';
 import '../widgets/balance_hero_card.dart';
 import '../widgets/contas_a_vencer_card.dart';

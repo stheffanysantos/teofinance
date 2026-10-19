@@ -9,7 +9,7 @@ import '../../../reconciliation/presentation/screens/reconciliation_screen.dart'
 import '../../../transacao/presentation/screens/nova_transacao_screen.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../../transacao/presentation/screens/dividir_transacao_screen.dart';
-import '../providers/transactions_mock_provider.dart';
+import '../providers/transactions_view_providers.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';

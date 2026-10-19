@@ -14,7 +14,9 @@ Hooks do Claude Code são **comandos de shell determinísticos** disparados por 
 | Início de sessão: injeta lembrete curto do checklist obrigatório | `session_start_briefing.py` | Injeta contexto |
 
 ## Dependência técnica
-Scripts usam **Python 3** (`python3` no PATH). Se não disponível em outra máquina, adaptar/reescrever (Dart/Node) e documentar no onboarding.
+Scripts usam **Python 3**, chamado como `python` em `.claude/settings.json`. No Windows `python3` costuma ser só o atalho da Microsoft Store (não executa nada e o erro não bloqueia, então os hooks parecem ativos mas nunca rodam); por isso o comando é `python`. Em outra máquina, ajuste o comando em `settings.json` se o Python 3 tiver outro nome, ou reescreva os scripts (Dart/Node) e documente no onboarding.
+
+O hook **real do git** (`.githooks/pre-commit`: `dart analyze --fatal-infos` + `flutter test`) vale para qualquer commit, não só os do Claude Code. Ative uma vez por clone: `git config core.hooksPath .githooks`.
 
 ## Onde estão
 - Configuração: `.claude/settings.json` (chave `"hooks"`).

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
-import '../providers/transactions_mock_provider.dart';
+import '../providers/transactions_view_providers.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Linha de transação com badge de categoria (ou aviso "Sem categoria" com

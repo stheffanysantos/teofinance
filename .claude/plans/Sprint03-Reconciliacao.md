@@ -1,5 +1,13 @@
 # Sprint 03 — Reconciliação de Transações
 
+> **Status: entregue (2026-10-19).** O desenho abaixo é o plano original; o implementado difere nestes pontos:
+> - **Não há sync da reconciliação** (nem datasource remoto, nem `userId`): o extrato nunca sai do aparelho (ver `.claude/rules/security.md`). As tabelas `ExtratoLinhasTable` e `ReconciliationMatchesTable` são só locais.
+> - O matching é por **valor + data** (+ similaridade de descrição como reforço), com limiar de 0,95 para `auto_matched`; o resto vira candidato `unmatched` para o usuário aprovar ou rejeitar. Há o status extra `rejected` e o **vínculo manual** de uma linha órfã a uma transação.
+> - Casos de uso em `domain/usecases/` (`FazerReconciliacao`, `AprovarMatch`, `RejeitarMatch`, `VincularManualmente`, `ObterStatusReconciliacao`); o notifier é `StateNotifier`, não `@riverpod`.
+> - O Dashboard mostra o card "Reconciliação do mês"; a tela traz o relatório registrado × banco e as transações fora do extrato.
+> - O matching semântico por IA depende do Gemma (decisão 0006).
+> O checklist no fim deste arquivo está histórico; não o use como lista de pendências.
+
 > Objetivo: Fim do mês, usuário importa novo extrato → App compara automaticamente transações inseridas manualmente com linhas do extrato → Exibe relatório com matches, orphans (só no extrato) e unmatched.
 
 ## Arquitetura

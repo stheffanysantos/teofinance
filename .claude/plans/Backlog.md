@@ -1,44 +1,25 @@
-# Backlog — O que falta até o app "completo"
+# Backlog — estado atual e o que falta
 
-> Registrado em 2026-10-13, no fechamento da primeira versão (MVP/Fase 1) antes do primeiro commit. Ver `.claude/plans/MVP.md` para o escopo já entregue e `.claude/plans/Roadmap.md` para a visão de fases completa.
+> Atualizado em 2026-10-19. O app é **pessoal (um único usuário)**: flavors dev/prod, LGPD como obrigação legal, monetização e suporte a aparelhos antigos não são prioridade. Escopo: ver `MVP-V2-Revisado.md` (simulação/gamificação removidas) e decisões 0003 (importação sempre manual), 0006 (Gemma) e 0007 (sem Open Finance) em `.claude/memory/decisions.md`.
 
-## Estado desta versão (Fase 1 — MVP): ✅ completo
-- `core/` (tema, Firebase, Drift, secure storage)
-- `auth` (login/cadastro e-mail+senha, biometria local)
-- `import` (CSV genérico com Perfil de Banco reaproveitável — qualquer banco, não só Nubank/BB)
-- `transacao` (listagem real via stream do Drift, cadastro manual, categorização)
-- `renda` (fixa com recorrência + variável)
-- `dashboard` (saldo, receitas/despesas do mês, patrimônio líquido, últimas transações — tudo calculado a partir de dados reais)
-- `meta` (criação, aporte, progresso — persistido)
-- `sync` (push/pull Firestore ↔ Drift, `SyncStatus` enum, gatilho automático + botão manual)
+## Entregue
+- **Base:** `core/` (tema, Firebase, Drift schema v10, secure storage), `auth` (e-mail+senha, biometria), `sync` (push/pull Firestore ↔ Drift, `SyncStatus`, exclusão por `pendingDelete`, pausa durante exclusão de conta).
+- **Dados:** `transacao` (com divisão de despesa com amigos), `parcelamento` (meses de calendário, centavos fecham o total, exclusão propaga), `renda`, `meta`, `budget` (limites por categoria persistidos e sincronizados), `contas` (a pagar, recorrência com dia-base, lembretes locais).
+- **Importação:** CSV com Perfil de Banco e **OFX** (1.x/2.x), detecção de duplicatas ao reimportar.
+- **Reconciliação:** extrato × lançamentos, vínculo manual, relatório do período, card no Dashboard. Extrato e vínculos ficam **só no aparelho** (não sincronizam, de propósito).
+- **Inteligência:** Score financeiro calculado (orçamento, poupança, metas, extrato conferido), gastos recorrentes/assinaturas com reajuste, assistente por regras sobre dados reais com contratos prontos para o Gemma.
+- **Privacidade/dados:** Modo Discreto, exportar e excluir todos os dados (`lgpd`), tela Sobre.
+- **Infra:** CI (`.github/workflows/ci.yml`), `.githooks/pre-commit`, hooks do Claude Code funcionando (`python`).
 
-### Pendência técnica conhecida desta versão
-- `test/widget_test.dart`: os testes de widget que passam por `SyncGate`/`AppShell` quebraram porque o fake de teste não sobrescreve `firebaseAppProvider`/`syncEngineProvider`. Corrigir antes (ou logo depois) do commit — não é um bug de produto, só o fake de teste desatualizado.
+## Pendente
+- **Gemma local** — contratos e fallback por regras prontos (decisão 0006). Falta o plugin: exige Flutter com Dart ≥ 3.12, `minSdk` 30 e escolher onde hospedar o modelo.
+- **Exportação de relatórios em PDF/CSV** (diferente da exportação JSON de dados).
+- **Validação em aparelho:** sync com Firebase real, biometria, OFX com extrato real, lembretes (botão de teste em Perfil → Notificações), widget de home screen.
 
-## Fase 2 — Expansão de importação + Orçamento/Limites
-- [ ] Orçamento (modo envelope) **real e persistido** — hoje `BudgetScreen` é mock, sem tabela própria no Drift/Firestore.
-- [ ] Mais Perfis de Banco testados + suporte a OFX (hoje só CSV).
-- [ ] Contas a pagar com lembretes (depende de `features/notificacoes/` + FCM + `flutter_local_notifications`).
-- [ ] Divisão de contas/gastos compartilhados (split).
-- [ ] Histórico de preço de itens recorrentes.
-- [ ] Detecção de gastos recorrentes/assinaturas.
-- [ ] Exportação de relatórios em PDF/CSV.
+## Dívida técnica conhecida
+- `package_info_plus` 10.x quebra o `build_runner` e a 9.x conflita com `flutter_secure_storage`; a versão do app vem de `lib/core/app_info.dart` (validada por teste contra o `pubspec.yaml`). Reavaliar após atualizar o Flutter.
+- Dois aparelhos que criem limite de orçamento da mesma categoria com ids diferentes resultam em um só limite aplicado.
+- A deduplicação de importação usa dia + centavos + descrição; o `FITID` do OFX daria identidade exata, mas não é guardado.
 
-## Fase 3 — Gamificação e Educação Financeira
-- [ ] Trilhas de aprendizado reais e persistidas (hoje só uma lição estática de exemplo, sem progresso salvo).
-- [ ] Indicadores econômicos (Selic, CDI, IPCA) conectados ao contexto do usuário.
-- [ ] Simulador de juros compostos, comparador de investimentos (CDB vs. Tesouro vs. Fundos).
-- [ ] Carteira simulada com dados de mercado **reais** (hoje é mock estático).
-- [ ] Streaks, badges, Score Financeiro **real** (hoje é um número fixo no Perfil), desafios.
-- [ ] Desafios em grupo opcionais.
-
-## Fase 4 — IA Local (Gemma)
-- [ ] Assistente conversacional via MediaPipe/Gemma on-device (hoje o Chat responde por regra de palavra-chave, não por inferência real).
-- [ ] Insights automáticos, sugestões de economia, detecção de gasto por impulso.
-- [ ] Widget de home screen (saldo/gasto do dia/progresso de meta).
-
-## Transversal (qualquer fase, ainda pendente)
-- [ ] Modo Discreto funcional — o toggle existe na tela de Perfil, mas ainda não oculta valores monetários de fato em nenhuma tela.
-- [ ] Exportação/exclusão de dados sob demanda (LGPD).
-- [ ] Flavors dev/prod do Firebase (hoje só existe um projeto, `teofinance-142e3`, usado para tudo).
-- [ ] Botões "Notificações" e "Sobre o app" no Perfil ainda são `onTap: () {}` (vazios).
+## Fora do escopo (decidido)
+Open Finance/agregadores (0007), carteira simulada e gamificação, FCM/push de servidor, flavors dev/prod, monetização (0005).
