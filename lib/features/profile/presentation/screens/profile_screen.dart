@@ -5,6 +5,7 @@ import '../../../../core/providers/theme_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_session_providers.dart';
+import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../../../core/providers/discreet_mode_provider.dart';
@@ -123,9 +124,11 @@ class ProfileScreen extends ConsumerWidget {
                             onDark: themeNotifier.setDark,
                           ),
                           SettingsNavTile(
-                            icon: Icon(Icons.file_download_outlined, size: 18, color: t.ink),
-                            title: 'Exportar dados',
-                            onTap: () {},
+                            icon: Icon(Icons.shield_outlined, size: 18, color: t.ink),
+                            title: 'Privacidade e dados',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const MeusDadosScreen()),
+                            ),
                           ),
                           SettingsNavTile(
                             icon: Icon(Icons.info_outline, size: 18, color: t.ink),

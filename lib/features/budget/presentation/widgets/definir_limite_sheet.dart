@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/constants/categorias.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_confirm_dialog.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
 
@@ -62,18 +63,14 @@ class _DefinirLimiteSheetState extends ConsumerState<DefinirLimiteSheet> {
   }
 
   Future<void> _excluir() async {
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Excluir limite?'),
-        content: Text('O envelope de ${widget.existente!.categoria} deixa de existir. Suas transações não são afetadas.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Excluir')),
-        ],
-      ),
+    final confirmar = await AppConfirmDialog.mostrar(
+      context,
+      titulo: 'Excluir limite?',
+      mensagem: 'O envelope de ${widget.existente!.categoria} deixa de existir. Suas transações não são afetadas.',
+      rotuloConfirmar: 'Excluir',
+      destrutivo: true,
     );
-    if (confirmar != true || !mounted) return;
+    if (!confirmar || !mounted) return;
 
     final result = await ref.read(excluirLimiteOrcamentoUseCaseProvider)(widget.existente!.id);
     if (!mounted) return;
