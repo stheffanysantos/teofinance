@@ -278,7 +278,7 @@ void main() {
     expect(find.textContaining('Não há lançamentos'), findsOneWidget);
   });
 
-  testWidgets('Conectar conta abre a partir de Transações e alterna as opções', (
+  testWidgets('Traga seus dados abre a partir de Transações e leva à importação, sem Open Finance', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(_pumpApp());
@@ -291,12 +291,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Traga seus dados'), findsOneWidget);
-    expect(find.text('Escolher meu banco'), findsOneWidget);
+    expect(find.text('Importar arquivo OFX ou CSV'), findsOneWidget);
+    expect(find.textContaining('Open Finance'), findsNothing);
+    expect(find.text('Escolher meu banco'), findsNothing);
 
-    await tester.tap(find.text('Importar arquivo CSV/OFX'));
+    await tester.tap(find.text('Selecionar arquivo'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Selecionar arquivo'), findsOneWidget);
+    expect(find.text('Importar extrato'), findsOneWidget);
+    expect(find.textContaining('OFX ou CSV'), findsOneWidget);
   });
 
   testWidgets('Orçamento abre a partir do Dashboard e mostra os envelopes', (

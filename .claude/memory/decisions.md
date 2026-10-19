@@ -4,6 +4,16 @@
 
 ---
 
+## 0007 — Open Finance (Pluggy) fora de escopo por enquanto; importação segue sempre manual
+**Status**: accepted
+**Data**: 2026-10-19
+
+Foi sugerido usar o Pluggy (agregador de Open Finance). Decidimos **não adotar nada por enquanto** e manter a decisão 0003: o extrato entra só por arquivo (OFX/CSV) lido no aparelho. A tela "Traga seus dados" perdeu a opção Open Finance, os bancos fictícios e o botão sem efeito, que prometiam uma integração inexistente.
+
+**Se for retomado**: um agregador faz os dados do banco passarem por servidores de terceiros, o que contradiz a promessa de privacidade (`.claude/rules/security.md`, `architecture.md`) e exigiria superar as decisões 0003 e esta, além de um backend para guardar credenciais, fluxo de consentimento LGPD e análise de custo. Nada disso foi pesquisado na documentação do Pluggy.
+
+---
+
 ## 0006 — Gemma entra atras de contratos; runtime LiteRT-LM (nao MediaPipe) e download fora de `ai_assistant/`
 **Status**: accepted (integracao do plugin pendente)
 **Data**: 2026-10-19
