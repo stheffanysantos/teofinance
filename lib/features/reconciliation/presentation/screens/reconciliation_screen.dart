@@ -11,7 +11,9 @@ import '../notifiers/reconciliation_notifier.dart';
 import '../providers/reconciliation_providers.dart';
 import '../widgets/match_card.dart';
 import '../widgets/orphan_card.dart';
+import '../widgets/reconciliation_report_card.dart';
 import '../widgets/reconciliation_summary.dart';
+import '../widgets/sem_extrato_card.dart';
 
 const _meses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -190,10 +192,27 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
       padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
       children: [
         ReconciliationSummary(state: state),
+        const SizedBox(height: 12),
+        ReconciliationReportCard(state: state),
         secao('unmatched', 'Para revisar', aprovar: true, rejeitar: true),
         secao('orphan', 'No extrato, sem lançamento'),
         secao('auto_matched', 'Combinados automaticamente', rejeitar: true),
         secao('manual_matched', 'Aprovados', rejeitar: true),
+        if (state.transacoesSemExtrato.isNotEmpty)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 8,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Registradas, mas fora do extrato (${state.transacoesSemExtrato.length})',
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.ink),
+                ),
+              ),
+              for (final tr in state.transacoesSemExtrato) SemExtratoCard(transacao: tr),
+            ],
+          ),
       ],
     );
   }

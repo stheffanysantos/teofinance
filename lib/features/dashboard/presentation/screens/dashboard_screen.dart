@@ -10,12 +10,15 @@ import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../budget/presentation/screens/budget_screen.dart';
 import '../../../goals/presentation/screens/goals_screen.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
+import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
+import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
 import '../providers/dashboard_mock_provider.dart';
 import '../providers/dashboard_summary_provider.dart';
 import '../widgets/balance_hero_card.dart';
 import '../widgets/goal_ring_card.dart';
 import '../widgets/income_expense_stat_card.dart';
 import '../widgets/net_worth_chart_card.dart';
+import '../widgets/reconciliation_status_card.dart';
 import '../widgets/transaction_list_tile.dart';
 
 /// Tela inicial — implementação fiel a Dashboard.dc.html.
@@ -27,6 +30,7 @@ class DashboardScreen extends ConsumerWidget {
     final t = context.tokens;
     final summary = ref.watch(dashboardSummaryProvider);
     final metas = ref.watch(metasStreamProvider).valueOrNull ?? [];
+    final reconciliacao = ref.watch(statusReconciliacaoMesProvider).valueOrNull;
     final saldoFormatado = formatCurrency(summary.saldoTotal).split(',');
 
     return SafeArea(
@@ -75,6 +79,14 @@ class DashboardScreen extends ConsumerWidget {
                           ),
                         ),
                       ],
+                    ),
+                    ReconciliationStatusCard(
+                      reconciliadas: reconciliacao?.matched ?? 0,
+                      totalLinhas: reconciliacao?.totalLinhasExtrato ?? 0,
+                      pendentes: (reconciliacao?.orphans ?? 0) + (reconciliacao?.unmatched ?? 0),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ReconciliationScreen()),
+                      ).then((_) => ref.invalidate(statusReconciliacaoMesProvider)),
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

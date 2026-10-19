@@ -140,4 +140,22 @@ void main() {
       expect(liberada.linhaExtratoId, candidato.linhaExtratoId);
     });
   });
+
+  group('obterStatusPeriodo', () {
+    test('conta as transações do período e as linhas reconciliadas', () async {
+      await transacoes.criar(descricao: 'Café', valor: -50, data: dia, categoria: 'x');
+      await transacoes.criar(descricao: 'Sem extrato', valor: -10, data: dia, categoria: 'x');
+      await linha(50, dia);
+      await linha(999, dia);
+      await reconciliar();
+
+      final status = (await repository.obterStatusPeriodo(userId: 'u', dataInicio: inicio, dataFim: fim))
+          .getOrElse((f) => throw StateError(f.message));
+
+      expect(status.totalTransacoes, 2);
+      expect(status.totalLinhasExtrato, 2);
+      expect(status.matched, 1);
+      expect(status.orphans, 1);
+    });
+  });
 }
