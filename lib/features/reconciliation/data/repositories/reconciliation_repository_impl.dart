@@ -49,6 +49,9 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
   }
 
   @override
+  Future<List<ExtratoLinha>> listarLinhasImportadas() => _local.obterTodasAsLinhas();
+
+  @override
   Future<Either<Failure, ReconciliationResultado>> fazerMatching({
     required String userId,
     required DateTime dataInicio,

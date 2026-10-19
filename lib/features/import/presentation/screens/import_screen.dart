@@ -7,6 +7,7 @@ import '../../../reconciliation/presentation/screens/reconciliation_screen.dart'
 import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
+import '../../domain/usecases/detectar_duplicatas_usecase.dart';
 import '../providers/import_flow_notifier.dart';
 import '../providers/import_flow_state.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
@@ -285,11 +286,33 @@ class _Revisao extends ConsumerWidget {
 
   final ImportFlowState state;
 
+  /// Se parte do arquivo já foi importada, pergunta antes de duplicar. Nunca
+  /// descarta nada sozinho: quem decide é o usuário.
+  Future<void> _confirmar(BuildContext context, WidgetRef ref, DestinoImportacao destino) async {
+    final notifier = ref.read(importFlowProvider.notifier);
+    final repetidas = await notifier.contarDuplicadas(destino);
+    if (!context.mounted) return;
+
+    var pular = false;
+    if (repetidas > 0) {
+      final escolha = await showDialog<_EscolhaDuplicadas>(
+        context: context,
+        builder: (_) => _DuplicadasDialog(repetidas: repetidas, total: state.transacoes.length),
+      );
+      if (escolha == null || escolha == _EscolhaDuplicadas.cancelar) return;
+      pular = escolha == _EscolhaDuplicadas.soNovas;
+    }
+
+    if (destino == DestinoImportacao.transacoes) {
+      await notifier.confirmarImportacao(pularDuplicadas: pular);
+    } else {
+      await notifier.confirmarParaReconciliacao(pularDuplicadas: pular);
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
-    final notifier = ref.read(importFlowProvider.notifier);
-
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -332,7 +355,7 @@ class _Revisao extends ConsumerWidget {
             ),
           ),
           FilledButton(
-            onPressed: notifier.confirmarImportacao,
+            onPressed: () => _confirmar(context, ref, DestinoImportacao.transacoes),
             style: FilledButton.styleFrom(
               backgroundColor: t.hero,
               minimumSize: const Size.fromHeight(50),
@@ -341,7 +364,7 @@ class _Revisao extends ConsumerWidget {
             child: const Text('Confirmar importação'),
           ),
           OutlinedButton(
-            onPressed: notifier.confirmarParaReconciliacao,
+            onPressed: () => _confirmar(context, ref, DestinoImportacao.reconciliacao),
             style: OutlinedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -350,6 +373,41 @@ class _Revisao extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+enum _EscolhaDuplicadas { soNovas, todas, cancelar }
+
+class _DuplicadasDialog extends StatelessWidget {
+  const _DuplicadasDialog({required this.repetidas, required this.total});
+
+  final int repetidas;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final novas = total - repetidas;
+    return AlertDialog(
+      title: const Text('Parte do arquivo já foi importada'),
+      content: Text(
+        '$repetidas de $total linhas têm a mesma data, valor e descrição de algo que já está no app. '
+        '${novas == 0 ? 'Nenhuma é nova.' : 'Só $novas ${novas == 1 ? 'é nova' : 'são novas'}.'}',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_EscolhaDuplicadas.cancelar),
+          child: const Text('Cancelar'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(_EscolhaDuplicadas.todas),
+          child: const Text('Importar todas'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(context).pop(_EscolhaDuplicadas.soNovas),
+          child: Text(novas == 0 ? 'Não importar' : 'Só as novas'),
+        ),
+      ],
     );
   }
 }

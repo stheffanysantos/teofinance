@@ -9,6 +9,8 @@ import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
+import '../../domain/entities/transacao_importada.dart';
+import '../../domain/usecases/detectar_duplicatas_usecase.dart';
 import 'import_flow_state.dart';
 import 'import_providers.dart';
 
@@ -134,18 +136,43 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
     );
   }
 
+  /// Quantas linhas do arquivo já foram importadas antes para o [destino].
+  /// A tela usa isto para perguntar antes de duplicar.
+  Future<int> contarDuplicadas(DestinoImportacao destino) async {
+    final duplicadas = await ref.read(detectarDuplicatasUseCaseProvider)(
+      importadas: state.transacoes,
+      destino: destino,
+    );
+    return duplicadas.length;
+  }
+
+  /// Linhas que seguem para o [destino]: todas, ou só as novas.
+  Future<List<TransacaoImportada>> _paraConfirmar(DestinoImportacao destino, {required bool pularDuplicadas}) async {
+    if (!pularDuplicadas) return state.transacoes;
+
+    final duplicadas = await ref.read(detectarDuplicatasUseCaseProvider)(
+      importadas: state.transacoes,
+      destino: destino,
+    );
+    return [
+      for (var i = 0; i < state.transacoes.length; i++)
+        if (!duplicadas.contains(i)) state.transacoes[i],
+    ];
+  }
+
   /// Persiste as transações revisadas localmente (`pendingSync = true`),
   /// para `features/sync/` enviar ao Firestore quando houver conexão.
   ///
   /// TODO(fase-1): mover para um `TransacaoRepository` dedicado quando
   /// `features/transacao/` existir — por ora grava direto na tabela do
   /// `core/database` para fechar o fluxo ponta a ponta do MVP.
-  Future<void> confirmarImportacao() async {
+  Future<void> confirmarImportacao({bool pularDuplicadas = false}) async {
+    final aImportar = await _paraConfirmar(DestinoImportacao.transacoes, pularDuplicadas: pularDuplicadas);
     final db = ref.read(appDatabaseProvider);
     await db.batch((batch) {
       batch.insertAll(
         db.transactionsTable,
-        state.transacoes.map((t) {
+        aImportar.map((t) {
           return TransactionsTableCompanion.insert(
             id: _uuid.v4(),
             name: t.descricao,
@@ -158,17 +185,18 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
       );
     });
 
-    state = state.copyWith(etapa: ImportEtapa.concluido);
+    state = state.copyWith(etapa: ImportEtapa.concluido, transacoes: aImportar);
   }
 
   /// Guarda o extrato como linhas separadas (sem criar transações), para
   /// comparar com os lançamentos manuais em `features/reconciliation/`.
-  Future<void> confirmarParaReconciliacao() async {
+  Future<void> confirmarParaReconciliacao({bool pularDuplicadas = false}) async {
     state = state.copyWith(carregando: true, limparErro: true);
 
+    final aImportar = await _paraConfirmar(DestinoImportacao.reconciliacao, pularDuplicadas: pularDuplicadas);
     final resultado = await ref.read(reconciliationRepositoryProvider).importarExtrato(
           importId: _uuid.v4(),
-          linhas: state.transacoes
+          linhas: aImportar
               .map((t) => {
                     'descricao': t.descricao,
                     'valor': t.valor.abs(),
@@ -185,6 +213,7 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
         carregando: false,
         etapa: ImportEtapa.concluido,
         paraReconciliacao: true,
+        transacoes: aImportar,
       ),
     );
   }

@@ -73,6 +73,9 @@ class _FakeRepository implements ReconciliationRepository {
   }
 
   @override
+  Future<List<ExtratoLinha>> listarLinhasImportadas() async => const [];
+
+  @override
   Future<Either<Failure, List<ExtratoLinha>>> importarExtrato({
     required String importId,
     required List<Map<String, dynamic>> linhas,

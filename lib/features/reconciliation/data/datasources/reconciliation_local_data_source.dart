@@ -7,6 +7,7 @@ abstract class ReconciliationLocalDataSource {
   Future<List<ExtratoLinha>> salvarLinhasExtrato(List<ExtratoLinhasTableCompanion> linhas);
   Future<List<ReconciliationMatch>> salvarMatches(List<ReconciliationMatchesTableCompanion> matches);
   Future<List<ExtratoLinha>> obterLinhasExtrato(String importId);
+  Future<List<ExtratoLinha>> obterTodasAsLinhas();
   Future<List<ReconciliationMatch>> obterMatches(DateTime dataInicio, DateTime dataFim);
   Future<void> atualizarStatusMatch(String matchId, String novoStatus);
   Future<List<ExtratoLinha>> obterLinhasPorPeriodo(DateTime inicio, DateTime fim);
@@ -66,6 +67,23 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
     final dados = await (_db.select(_db.extratoLinhasTable)
           ..where((t) => t.importId.equals(importId)))
         .get();
+
+    return dados
+        .map((d) => ExtratoLinha(
+              id: d.id,
+              importId: d.importId,
+              descricao: d.descricao,
+              valor: d.valor,
+              data: d.data,
+              tipo: d.tipo,
+              nomeBancoOriginal: d.nomeBancoOriginal,
+            ))
+        .toList();
+  }
+
+  @override
+  Future<List<ExtratoLinha>> obterTodasAsLinhas() async {
+    final dados = await _db.select(_db.extratoLinhasTable).get();
 
     return dados
         .map((d) => ExtratoLinha(
