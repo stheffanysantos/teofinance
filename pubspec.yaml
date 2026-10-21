@@ -53,6 +53,7 @@ dependencies:
   flutter_local_notifications: ^22.3.2
   timezone: ^0.11.2
   flutter_timezone: ^5.1.1
+  pdf: ^3.12.0
 
 dev_dependencies:
   flutter_test:
@@ -109,3 +110,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  # pdf limita archive a <4.1.0, e image >=4.11 exige um archive mais novo.
+  image: 4.10.0

@@ -9,6 +9,7 @@ import '../../../contas/presentation/providers/lembretes_providers.dart';
 import '../../../contas/presentation/screens/contas_screen.dart';
 import '../../../contas/presentation/screens/notificacoes_screen.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
+import '../../../relatorio/presentation/screens/relatorios_screen.dart';
 import '../../../recorrentes/presentation/screens/gastos_recorrentes_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
 import '../../../score/presentation/providers/score_providers.dart';
@@ -147,6 +148,13 @@ class ProfileScreen extends ConsumerWidget {
                             isDark: isDark,
                             onLight: themeNotifier.setLight,
                             onDark: themeNotifier.setDark,
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.assessment_outlined, size: 18, color: t.ink),
+                            title: 'Relatórios (PDF/CSV)',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const RelatoriosScreen()),
+                            ),
                           ),
                           SettingsNavTile(
                             icon: Icon(Icons.shield_outlined, size: 18, color: t.ink),
