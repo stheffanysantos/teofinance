@@ -39,7 +39,7 @@ const parcelamentoValido = {
 };
 
 describe('coleções sincronizadas hoje', () => {
-  for (const colecao of ['transacoes', 'perfis_banco', 'rendas', 'metas']) {
+  for (const colecao of ['transacoes', 'perfis_banco', 'rendas', 'metas', 'orcamentos', 'contas']) {
     test(`${colecao}: dono lê e escreve`, async () => {
       const ref = doc(dono(), `users/alice/${colecao}/x`);
       await assertSucceeds(setDoc(ref, { qualquer: 1 }));
