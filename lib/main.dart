@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_edge_ai/flutter_edge_ai.dart';
+import 'package:flutter_edge_ai_litertlm/flutter_edge_ai_litertlm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/providers/core_providers.dart';
@@ -13,6 +15,12 @@ void main() async {
   final firebaseApp = await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Motor do assistente local. Se falhar (aparelho sem suporte), o app segue e o
+  // assistente responde só pelas regras.
+  try {
+    await FlutterEdgeAi.initialize(inferenceEngines: [LiteRtLmEngine()]);
+  } catch (_) {}
 
   runApp(
     ProviderScope(

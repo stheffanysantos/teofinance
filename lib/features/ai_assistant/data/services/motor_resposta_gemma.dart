@@ -26,7 +26,7 @@ class MotorRespostaGemma implements MotorResposta {
     required ContextoFinanceiro contexto,
   }) async {
     try {
-      if (!await _inferencia.estaPronta()) return _porRegras(pergunta, contexto);
+      if (!await _inferencia.estaPronta()) return await _porRegras(pergunta, contexto);
 
       final prompt = montarPrompt(pergunta: pergunta, contexto: contexto);
       final resultado = await _inferencia
@@ -34,7 +34,7 @@ class MotorRespostaGemma implements MotorResposta {
           .timeout(limiteDeTempo);
 
       final texto = resultado.fold((_) => null, (t) => t.trim());
-      if (texto == null || texto.isEmpty) return _porRegras(pergunta, contexto);
+      if (texto == null || texto.isEmpty) return await _porRegras(pergunta, contexto);
       return Right(texto);
     } catch (_) {
       return _porRegras(pergunta, contexto);

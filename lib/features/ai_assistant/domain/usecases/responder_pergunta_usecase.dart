@@ -40,7 +40,7 @@ class ResponderPerguntaUseCase {
         metas: await _metas.observarTodas().first,
         mes: _agora(),
       );
-      return _motor.responder(pergunta: texto, contexto: contexto);
+      return await _motor.responder(pergunta: texto, contexto: contexto);
     } catch (_) {
       return const Left(CacheFailure('Não consegui ler seus dados agora.'));
     }

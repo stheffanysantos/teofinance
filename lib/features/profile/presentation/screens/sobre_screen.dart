@@ -115,18 +115,23 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
+    // Material próprio (e não um DecoratedBox colorido) para o ListTile pintar
+    // fundo e ondulação; o Flutter 3.47 trata o contrário como erro.
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
         color: t.card,
-        border: Border.all(color: t.line),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: ListTile(
-        leading: Icon(icone, color: t.ink),
-        title: Text(titulo, style: TextStyle(fontWeight: FontWeight.w600, color: t.ink)),
-        trailing: Icon(Icons.chevron_right, color: t.sub),
-        onTap: onTap,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: t.line),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ListTile(
+          leading: Icon(icone, color: t.ink),
+          title: Text(titulo, style: TextStyle(fontWeight: FontWeight.w600, color: t.ink)),
+          trailing: Icon(Icons.chevron_right, color: t.sub),
+          onTap: onTap,
+        ),
       ),
     );
   }

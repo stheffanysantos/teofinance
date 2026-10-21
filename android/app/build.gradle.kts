@@ -28,7 +28,8 @@ android {
         applicationId = "com.example.teofinance"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // O motor LiteRT-LM do assistente local exige Android 11 (API 30), arm64.
+        minSdk = 30
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
