@@ -74,3 +74,5 @@ android/key.properties
 windows/flutter/ephemeral/
 linux/flutter/ephemeral/
 macos/Flutter/ephemeral/
+
+firestore_rules_test/node_modules/

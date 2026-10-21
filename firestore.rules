@@ -1,20 +1,56 @@
 rules_version = '2';
 
-// Cada usuário só lê/escreve os próprios dados. Estrutura: toda coleção
-// financeira vive sob users/{uid}/..., então o isolamento é feito pela
-// própria hierarquia de documentos, reforçado pela checagem de auth.uid.
+// Cada usuário só lê/escreve os próprios dados, sempre sob users/{uid}/...
+// Toda coleção é declarada explicitamente (sem curinga em users/{uid}), para
+// que uma coleção nova nunca fique liberada por acidente.
 // Ver `.claude/rules/security.md`.
+//
+// Ficam FORA do Firestore de propósito (só Drift local): extrato_linhas e
+// reconciliation_matches — conteúdo de extrato bancário nunca sai do aparelho.
 service cloud.firestore {
   match /databases/{database}/documents {
     function isOwner(uid) {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    function validParcelamento(d) {
+      return d.keys().hasOnly([
+               'id', 'remoteId', 'transacaoOriginalId', 'totalOriginal',
+               'numeroParcelas', 'dataPrimeiraParc', 'updatedAt'
+             ])
+             && d.keys().hasAll([
+               'id', 'transacaoOriginalId', 'totalOriginal',
+               'numeroParcelas', 'dataPrimeiraParc', 'updatedAt'
+             ])
+             && d.totalOriginal is number && d.totalOriginal > 0
+             && d.numeroParcelas is int
+             && d.numeroParcelas >= 2 && d.numeroParcelas <= 12
+             && d.dataPrimeiraParc is string
+             && d.updatedAt is string;
+    }
+
     match /users/{uid} {
       allow read, write: if isOwner(uid);
 
-      match /{document=**} {
+      match /transacoes/{id} {
         allow read, write: if isOwner(uid);
+      }
+
+      match /perfis_banco/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /rendas/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /metas/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /parcelamentos/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && validParcelamento(request.resource.data);
       }
     }
 
