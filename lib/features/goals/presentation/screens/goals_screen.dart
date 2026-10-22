@@ -106,8 +106,8 @@ class GoalsScreen extends ConsumerWidget {
                     ),
                   ),
             Positioned(
-              right: 0,
-              bottom: 10,
+              right: 16,
+              bottom: 16,
               child: GestureDetector(
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const NovaMetaScreen()),
