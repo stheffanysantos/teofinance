@@ -116,6 +116,15 @@ class ImportRepositoryImpl implements ImportRepository {
         );
       }
 
+      if (perfil.mapeamentoColunas.keys.any((i) => i < 0 || i >= perfil.numeroColunasEsperado)) {
+        return Left(
+          ValidationFailure(
+            'O perfil "${perfil.nomeBanco}" mapeia uma coluna que não existe neste arquivo '
+            '(${perfil.numeroColunasEsperado} colunas). Remapeie as colunas.',
+          ),
+        );
+      }
+
       final indiceData = _indicePara(perfil, CampoColuna.data);
       final indiceDescricao = _indicePara(perfil, CampoColuna.descricao);
       final indiceValor = _indicePara(perfil, CampoColuna.valor);

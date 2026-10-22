@@ -21,6 +21,17 @@ class SalvarPerfilBancoUseCase {
         const Left(ValidationFailure('Mapeie ao menos as colunas de Data e Valor antes de salvar.')),
       );
     }
+    final colunas = perfil.numeroColunasEsperado;
+    if (perfil.mapeamentoColunas.keys.any((indice) => indice < 0 || indice >= colunas)) {
+      return Future.value(
+        Left(
+          ValidationFailure(
+            'O mapeamento usa uma coluna que o arquivo não tem (o arquivo tem $colunas colunas). '
+            'Remapeie manualmente em vez de usar um modelo de outro banco.',
+          ),
+        ),
+      );
+    }
     return _repository.salvar(perfil);
   }
 }
