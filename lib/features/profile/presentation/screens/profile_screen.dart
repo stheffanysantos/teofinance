@@ -91,6 +91,19 @@ class ProfileScreen extends ConsumerWidget {
                             subtitle: 'Desbloquear com digital ou rosto',
                             value: biometriaHabilitada,
                             onChanged: (novoValor) async {
+                              if (novoValor &&
+                                  !await ref.read(authRepositoryProvider).biometriaDisponivel()) {
+                                if (!context.mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Este aparelho não tem biometria cadastrada. '
+                                      'Cadastre uma digital ou rosto nas configurações do Android.',
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
                               await ref
                                   .read(authRepositoryProvider)
                                   .definirBiometriaHabilitada(novoValor);

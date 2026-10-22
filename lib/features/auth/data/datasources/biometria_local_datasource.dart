@@ -15,7 +15,10 @@ class BiometriaLocalDataSource {
   Future<bool> disponivel() async {
     final suportado = await _localAuth.isDeviceSupported();
     final podeChecar = await _localAuth.canCheckBiometrics;
-    return suportado && podeChecar;
+    if (!suportado || !podeChecar) return false;
+    // `canCheckBiometrics` pode ser true só pelo hardware; exige ao menos uma
+    // biometria realmente cadastrada.
+    return (await _localAuth.getAvailableBiometrics()).isNotEmpty;
   }
 
   Future<bool> habilitada() async {
