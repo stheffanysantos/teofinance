@@ -51,6 +51,7 @@ final reconciliationNotifierProvider =
     aprovarMatch: ref.watch(aprovarMatchUseCaseProvider),
     rejeitarMatch: ref.watch(rejeitarMatchUseCaseProvider),
     vincularManualmente: ref.watch(vincularManualmenteUseCaseProvider),
+    criarTransacao: ref.watch(criarTransacaoUseCaseProvider),
   );
 });
 

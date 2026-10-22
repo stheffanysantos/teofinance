@@ -175,6 +175,11 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
                 onVincular: state.linhas[m.linhaExtratoId] == null
                     ? null
                     : () => _vincular(state.linhas[m.linhaExtratoId]!),
+                onCriar: state.linhas[m.linhaExtratoId] == null
+                    ? null
+                    : () => ref
+                        .read(reconciliationNotifierProvider.notifier)
+                        .criarTransacaoDaLinha(state.linhas[m.linhaExtratoId]!),
               )
             else
               MatchCard(

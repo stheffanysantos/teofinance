@@ -7,6 +7,7 @@ import '../../domain/usecases/aprovar_match_usecase.dart';
 import '../../domain/usecases/fazer_reconciliacao_usecase.dart';
 import '../../domain/usecases/rejeitar_match_usecase.dart';
 import '../../domain/usecases/vincular_manualmente_usecase.dart';
+import 'package:teofinance/features/transacao/domain/usecases/criar_transacao_usecase.dart';
 
 class ReconciliationState {
   final List<ReconciliationMatch> matches;
@@ -78,16 +79,19 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
   final AprovarMatchUseCase _aprovarMatch;
   final RejeitarMatchUseCase _rejeitarMatch;
   final VincularManualmenteUseCase _vincularManualmente;
+  final CriarTransacaoUseCase _criarTransacao;
 
   ReconciliationNotifier({
     required FazerReconciliacaoUseCase fazerReconciliacao,
     required AprovarMatchUseCase aprovarMatch,
     required RejeitarMatchUseCase rejeitarMatch,
     required VincularManualmenteUseCase vincularManualmente,
+    required CriarTransacaoUseCase criarTransacao,
   })  : _fazerReconciliacao = fazerReconciliacao,
         _aprovarMatch = aprovarMatch,
         _rejeitarMatch = rejeitarMatch,
         _vincularManualmente = vincularManualmente,
+        _criarTransacao = criarTransacao,
         super(const ReconciliationState());
 
   ({String userId, DateTime inicio, DateTime fim})? _periodo;
@@ -137,6 +141,23 @@ class ReconciliationNotifier extends StateNotifier<ReconciliationState> {
         );
       },
     );
+  }
+
+  /// Cria uma transação a partir de [linha] (descrição, valor e data do
+  /// extrato) e já a vincula a ela — evita ir ao cadastro manual e voltar.
+  Future<void> criarTransacaoDaLinha(ExtratoLinha linha) async {
+    final criada = await _criarTransacao(
+      descricao: linha.descricao,
+      valor: linha.valorAsTransacao,
+      data: linha.data,
+    );
+    final transacao = criada.fold<Transacao?>((failure) {
+      state = state.copyWith(erro: failure.message);
+      return null;
+    }, (t) => t);
+    if (transacao == null) return;
+
+    await vincularManualmente(transacaoId: transacao.id, linhaExtratoId: linha.id);
   }
 
   /// Transações do período que ainda podem ser ligadas a [linha], da mais

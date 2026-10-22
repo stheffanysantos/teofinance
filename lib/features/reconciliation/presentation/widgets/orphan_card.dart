@@ -10,8 +10,15 @@ class OrphanCard extends StatelessWidget {
   final ReconciliationMatch match;
   final ExtratoLinha? linha;
   final VoidCallback? onVincular;
+  final VoidCallback? onCriar;
 
-  const OrphanCard({required this.match, this.linha, this.onVincular, super.key});
+  const OrphanCard({
+    required this.match,
+    this.linha,
+    this.onVincular,
+    this.onCriar,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +72,12 @@ class OrphanCard extends StatelessWidget {
                 ),
             ],
           ),
+          if (onCriar != null)
+            FilledButton.icon(
+              onPressed: onCriar,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('Criar transação com estes dados'),
+            ),
           if (onVincular != null)
             OutlinedButton.icon(
               onPressed: onVincular,
