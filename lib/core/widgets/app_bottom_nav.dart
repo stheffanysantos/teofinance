@@ -43,10 +43,14 @@ class AppBottomNav extends StatelessWidget {
                 final selected = item.tab == current;
                 final color = selected ? t.ink : t.sub;
                 return GestureDetector(
+                  // opaque: o toque vale em toda a área da aba, não só sobre o ícone/texto.
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => onTap?.call(item.tab),
                   child: SizedBox(
-                    width: 52,
+                    width: 72,
+                    height: 48,
                     child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(item.icon, size: 22, color: color),
                         const SizedBox(height: 4),
