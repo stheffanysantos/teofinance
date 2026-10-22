@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failure.dart';
@@ -24,7 +25,8 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
       return Right(
         await _local.criar(descricao: descricao, valor: valor, data: data, categoria: categoria),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('TransacaoRepositoryImpl.criar falhou: ${e.runtimeType}: $e');
       return const Left(CacheFailure('Não foi possível salvar a transação.'));
     }
   }
