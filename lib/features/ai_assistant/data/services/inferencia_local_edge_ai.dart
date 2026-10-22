@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_edge_ai/flutter_edge_ai.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:teofinance/core/errors/failure.dart';
@@ -28,7 +29,8 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
   Future<bool> estaPronta() async {
     try {
       return await _verificarInstalacao();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('InferenciaLocalEdgeAi.estaPronta falhou: ${e.runtimeType}: $e');
       return false;
     }
   }
@@ -40,7 +42,10 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
   }) async {
     try {
       return Right(await _executar(instrucoes, mensagem));
-    } catch (_) {
+    } catch (e) {
+      // O assistente cai para o motor por regras; o log guarda o motivo real
+      // (ex.: falta de memória para carregar o modelo neste aparelho).
+      debugPrint('InferenciaLocalEdgeAi.gerar falhou: ${e.runtimeType}: $e');
       return const Left(
         CacheFailure('Não consegui gerar a resposta com o modelo local.'),
       );

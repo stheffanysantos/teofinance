@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/estado_modelo.dart';
 import 'package:teofinance/features/ai_assistant/domain/services/gerenciador_modelo.dart';
 import 'package:teofinance/features/ai_model/data/services/modelo_local_edge_ai.dart';
@@ -60,15 +61,21 @@ class GerenciadorModeloEdgeAi implements GerenciadorModelo {
         (p) => _emitir(ModeloBaixando(p.clamp(0, 100) / 100)),
       );
       _emitir(const ModeloPronto());
-    } catch (_) {
-      _emitir(
-        const ModeloComErro(
-          'verifique a conexão e o espaço livre no aparelho.',
-        ),
-      );
+    } catch (e) {
+      // Mostra a causa real (tipo + trecho da mensagem do plugin) em vez de
+      // sempre culpar conexão/espaço: sem isso não dá para diagnosticar um
+      // aparelho específico. Só texto de erro do plugin, nenhum dado do usuário.
+      debugPrint('GerenciadorModeloEdgeAi.baixar falhou: ${e.runtimeType}: $e');
+      _emitir(ModeloComErro('${_resumir(e)} (verifique a conexão e o espaço livre).'));
     } finally {
       _baixando = false;
     }
+  }
+
+  static String _resumir(Object e) {
+    final texto = e.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+    final corpo = texto.length > 140 ? '${texto.substring(0, 140)}…' : texto;
+    return '${e.runtimeType}: $corpo';
   }
 
   @override
