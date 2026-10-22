@@ -69,7 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   margin: const EdgeInsets.only(bottom: 8),
                   decoration: BoxDecoration(color: t.hero, borderRadius: BorderRadius.circular(18)),
                   alignment: Alignment.center,
-                  child: Icon(Icons.savings_outlined, color: t.accent, size: 30),
+                  child: Image.asset('assets/images/teo_gatinho.png', width: 46, height: 46),
                 ),
                 Text(
                   _isCadastro ? 'Criar conta' : 'Entrar no TeoFinance',

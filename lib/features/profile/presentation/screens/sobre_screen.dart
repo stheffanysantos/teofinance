@@ -36,7 +36,8 @@ class SobreScreen extends ConsumerWidget {
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(color: t.hero, borderRadius: BorderRadius.circular(16)),
-                    child: Icon(Icons.account_balance_wallet_outlined, color: t.accent, size: 32),
+                    alignment: Alignment.center,
+                    child: Image.asset('assets/images/teo_gatinho.png', width: 46, height: 46),
                   ),
                   const SizedBox(height: 4),
                   Text(
