@@ -3,6 +3,9 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/errors/failure.dart';
 import '../entities/transacao.dart';
 
+/// Dados de uma transação a criar; o id é gerado na camada de dados.
+typedef NovaTransacao = ({String descricao, double valor, DateTime data, String categoria});
+
 abstract class TransacaoRepository {
   /// Todas as transações, mais recentes primeiro — atualiza automaticamente
   /// quando uma importação ou cadastro manual altera a tabela local.
@@ -14,6 +17,10 @@ abstract class TransacaoRepository {
     required DateTime data,
     String categoria,
   });
+
+  /// Cria várias transações de uma vez, atomicamente (tudo ou nada) — usado pela
+  /// confirmação de uma importação. Categoria vazia marca `precisaCategoria`.
+  Future<Either<Failure, Unit>> criarEmLote(List<NovaTransacao> itens);
 
   Future<Either<Failure, Unit>> categorizar({required String id, required String categoria});
 

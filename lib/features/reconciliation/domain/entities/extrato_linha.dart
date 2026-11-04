@@ -9,6 +9,7 @@ class ExtratoLinha {
     required this.data,
     required this.tipo,
     required this.nomeBancoOriginal,
+    this.fitid,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class ExtratoLinha {
   final DateTime data;
   final String tipo; // 'D' (débito) | 'C' (crédito)
   final String nomeBancoOriginal; // Como veio do banco
+  final String? fitid; // FITID do OFX (identidade exata); nulo se veio de CSV
 
   bool get isDebito => tipo == 'D';
   bool get isCredito => tipo == 'C';

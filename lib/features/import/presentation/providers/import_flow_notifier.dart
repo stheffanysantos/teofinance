@@ -2,9 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../../core/database/app_database.dart';
-import '../../../../core/providers/core_providers.dart';
 import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
+import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
@@ -160,32 +159,26 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
     ];
   }
 
-  /// Persiste as transações revisadas localmente (`pendingSync = true`),
-  /// para `features/sync/` enviar ao Firestore quando houver conexão.
-  ///
-  /// TODO(fase-1): mover para um `TransacaoRepository` dedicado quando
-  /// `features/transacao/` existir — por ora grava direto na tabela do
-  /// `core/database` para fechar o fluxo ponta a ponta do MVP.
+  /// Persiste as transações revisadas localmente (já marcadas para o
+  /// `features/sync/` enviar ao Firestore quando houver conexão).
   Future<void> confirmarImportacao({bool pularDuplicadas = false}) async {
-    final aImportar = await _paraConfirmar(DestinoImportacao.transacoes, pularDuplicadas: pularDuplicadas);
-    final db = ref.read(appDatabaseProvider);
-    await db.batch((batch) {
-      batch.insertAll(
-        db.transactionsTable,
-        aImportar.map((t) {
-          return TransactionsTableCompanion.insert(
-            id: _uuid.v4(),
-            name: t.descricao,
-            category: (t.categoria?.trim().isEmpty ?? true) ? '' : t.categoria!.trim(),
-            value: t.valor,
-            occurredAt: t.data,
-            needsCategory: Value(t.precisaCategoria),
-          );
-        }).toList(),
-      );
-    });
+    state = state.copyWith(carregando: true, limparErro: true);
 
-    state = state.copyWith(etapa: ImportEtapa.concluido, transacoes: aImportar);
+    final aImportar = await _paraConfirmar(DestinoImportacao.transacoes, pularDuplicadas: pularDuplicadas);
+    final resultado = await ref.read(transacaoRepositoryProvider).criarEmLote([
+      for (final t in aImportar)
+        (
+          descricao: t.descricao,
+          valor: t.valor,
+          data: t.data,
+          categoria: t.categoria?.trim() ?? '',
+        ),
+    ]);
+
+    resultado.match(
+      (falha) => state = state.copyWith(carregando: false, erro: falha.message),
+      (_) => state = state.copyWith(carregando: false, etapa: ImportEtapa.concluido, transacoes: aImportar),
+    );
   }
 
   /// Guarda o extrato como linhas separadas (sem criar transações), para
@@ -203,6 +196,7 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
                     'data': t.data.toIso8601String(),
                     'tipo': t.valor < 0 ? 'D' : 'C',
                     'nomeBancoOriginal': state.perfilUsado?.nomeBanco ?? state.instituicao ?? '',
+                    if (t.fitid != null) 'fitid': t.fitid!,
                   })
               .toList(),
         );

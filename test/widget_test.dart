@@ -62,6 +62,9 @@ class FakeAuthRepository implements AuthRepository {
 /// Transações em memória — evita depender do drift/sqlite3 nativo nos
 /// testes de widget.
 class FakeTransacaoRepository implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   FakeTransacaoRepository([List<Transacao>? iniciais]) : _itens = iniciais ?? [];
 
   final List<Transacao> _itens;

@@ -38,6 +38,7 @@ class ReconciliationRepositoryImpl implements ReconciliationRepository {
                 data: drift.Value(DateTime.parse(e.value['data'].toString())),
                 tipo: drift.Value(e.value['tipo'] ?? 'D'),
                 nomeBancoOriginal: drift.Value(e.value['nomeBancoOriginal'] ?? ''),
+                fitid: drift.Value(e.value['fitid']?.toString()),
               ))
           .toList();
 

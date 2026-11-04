@@ -81,6 +81,12 @@ Uint8List _arquivo(List<String> transacoes) =>
     _utf8('OFXHEADER:100\n<OFX><BANKTRANLIST>${transacoes.join('\n')}</BANKTRANLIST></OFX>');
 
 void main() {
+  test('guarda o FITID de cada transação', () {
+    final r = _parser.parsear(_utf8(_sgml));
+    expect(r.transacoes.first.fitid, '2026100501');
+    expect(r.transacoes.every((t) => t.fitid != null), isTrue);
+  });
+
   group('detecção', () {
     test('reconhece OFX 1.x, OFX 2.x e o cabeçalho, mesmo com outra extensão', () {
       expect(_parser.ehOfx(_utf8(_sgml)), isTrue);

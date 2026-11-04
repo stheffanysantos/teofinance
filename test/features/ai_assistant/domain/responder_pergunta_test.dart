@@ -13,6 +13,9 @@ import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
 import 'package:teofinance/features/transacao/domain/repositories/transacao_repository.dart';
 
 class _FakeTransacoes implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   _FakeTransacoes(this.dados);
   final List<Transacao> dados;
 

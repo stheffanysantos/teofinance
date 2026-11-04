@@ -12,6 +12,9 @@ import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
 import 'package:teofinance/features/transacao/domain/repositories/transacao_repository.dart';
 
 class _Transacoes implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   _Transacoes(this.dados);
   final List<Transacao> dados;
 
@@ -186,6 +189,9 @@ void main() {
 }
 
 class _TransacoesQuebrado implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   @override
   Stream<List<Transacao>> observarTodas() => Stream.error(StateError('quebrou'));
 

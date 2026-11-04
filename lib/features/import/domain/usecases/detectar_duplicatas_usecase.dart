@@ -30,12 +30,21 @@ class DetectarDuplicatasUseCase {
     required DestinoImportacao destino,
   }) async {
     try {
-      final existentes = switch (destino) {
-        DestinoImportacao.transacoes => (await _transacoes.observarTodas().first)
-            .map((t) => chaveLancamento(t.data, t.valorCobrado, t.descricao)),
-        DestinoImportacao.reconciliacao => (await _reconciliacao.listarLinhasImportadas())
-            .map((l) => chaveLancamento(l.data, l.valorAsTransacao, l.descricao)),
-      };
+      if (destino == DestinoImportacao.reconciliacao) {
+        final linhas = await _reconciliacao.listarLinhasImportadas();
+        final fitids = {for (final l in linhas) if (l.fitid != null) l.fitid!};
+        // Linhas com FITID já têm identidade exata; só as sem FITID usam a chave.
+        final chaves = linhas
+            .where((l) => l.fitid == null)
+            .map((l) => chaveLancamento(l.data, l.valorAsTransacao, l.descricao));
+        return indicesDuplicados(
+          importadas: importadas,
+          chavesExistentes: chaves.toList(),
+          fitidsExistentes: fitids,
+        );
+      }
+      final existentes = (await _transacoes.observarTodas().first)
+          .map((t) => chaveLancamento(t.data, t.valorCobrado, t.descricao));
       return indicesDuplicados(importadas: importadas, chavesExistentes: existentes.toList());
     } catch (_) {
       return const {};

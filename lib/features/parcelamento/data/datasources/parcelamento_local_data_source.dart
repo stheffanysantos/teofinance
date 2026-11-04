@@ -30,10 +30,9 @@ class ParcelamentoLocalDataSourceImpl implements ParcelamentoLocalDataSource {
 
   @override
   Future<List<ParcelamentoModel>> listarPorUsuario(String userId) async {
-    // Nota: ParcelamentoTable não tem userId diretamente.
-    // Precisamos buscar via FK (transacaoOriginalId) na TransactionsTable.
-    // Por enquanto, retornamos todos os parcelamentos.
-    // TODO: Melhorar query para filtrar por userId quando tivermos relacionamento explícito.
+    // O banco local é de um único usuário por instalação (nenhuma tabela guarda
+    // `userId`; o isolamento entre contas é feito pelo Firestore e a exclusão de
+    // conta apaga o banco). Por isso [userId] não filtra nada aqui.
     final dados = await (database.select(database.parcelamentoTable)
           ..where((tbl) => tbl.syncStatus.equalsValue(SyncStatus.pendingDelete).not()))
         .get();

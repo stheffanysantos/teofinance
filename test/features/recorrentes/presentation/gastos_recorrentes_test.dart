@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:teofinance/core/errors/failure.dart';
 import 'package:teofinance/core/providers/discreet_mode_provider.dart';
 import 'package:teofinance/core/theme/app_colors.dart';
 import 'package:teofinance/features/recorrentes/domain/entities/gasto_recorrente.dart';
@@ -19,6 +21,9 @@ class _ModoFixo extends ModoDiscretoNotifier {
 }
 
 class _Transacoes implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   _Transacoes(this.dados);
   final List<Transacao> dados;
 
@@ -30,6 +35,9 @@ class _Transacoes implements TransacaoRepository {
 }
 
 class _TransacoesQuebrado implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   @override
   Stream<List<Transacao>> observarTodas() => Stream.error(StateError('quebrou'));
 

@@ -6,6 +6,9 @@ import 'package:teofinance/features/transacao/domain/usecases/dividir_transacao_
 import 'package:teofinance/features/transacao/domain/usecases/remover_divisao_usecase.dart';
 
 class _FakeRepository implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   final chamadas = <({String id, double? minhaParte, List<String> pessoas})>[];
 
   @override

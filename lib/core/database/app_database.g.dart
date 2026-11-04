@@ -3503,6 +3503,15 @@ class $ExtratoLinhasTableTable extends ExtratoLinhasTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _fitidMeta = const VerificationMeta('fitid');
+  @override
+  late final GeneratedColumn<String> fitid = GeneratedColumn<String>(
+    'fitid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _importadoEmMeta = const VerificationMeta(
     'importadoEm',
   );
@@ -3524,6 +3533,7 @@ class $ExtratoLinhasTableTable extends ExtratoLinhasTable
     data,
     tipo,
     nomeBancoOriginal,
+    fitid,
     importadoEm,
   ];
   @override
@@ -3594,6 +3604,12 @@ class $ExtratoLinhasTableTable extends ExtratoLinhasTable
     } else if (isInserting) {
       context.missing(_nomeBancoOriginalMeta);
     }
+    if (data.containsKey('fitid')) {
+      context.handle(
+        _fitidMeta,
+        fitid.isAcceptableOrUnknown(data['fitid']!, _fitidMeta),
+      );
+    }
     if (data.containsKey('importado_em')) {
       context.handle(
         _importadoEmMeta,
@@ -3640,6 +3656,10 @@ class $ExtratoLinhasTableTable extends ExtratoLinhasTable
         DriftSqlType.string,
         data['${effectivePrefix}nome_banco_original'],
       )!,
+      fitid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fitid'],
+      ),
       importadoEm: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}importado_em'],
@@ -3662,6 +3682,9 @@ class ExtratoLinhasTableData extends DataClass
   final DateTime data;
   final String tipo;
   final String nomeBancoOriginal;
+
+  /// FITID do OFX (v11): identidade exata do lançamento no banco; nulo no CSV.
+  final String? fitid;
   final DateTime importadoEm;
   const ExtratoLinhasTableData({
     required this.id,
@@ -3671,6 +3694,7 @@ class ExtratoLinhasTableData extends DataClass
     required this.data,
     required this.tipo,
     required this.nomeBancoOriginal,
+    this.fitid,
     required this.importadoEm,
   });
   @override
@@ -3683,6 +3707,9 @@ class ExtratoLinhasTableData extends DataClass
     map['data'] = Variable<DateTime>(data);
     map['tipo'] = Variable<String>(tipo);
     map['nome_banco_original'] = Variable<String>(nomeBancoOriginal);
+    if (!nullToAbsent || fitid != null) {
+      map['fitid'] = Variable<String>(fitid);
+    }
     map['importado_em'] = Variable<DateTime>(importadoEm);
     return map;
   }
@@ -3696,6 +3723,7 @@ class ExtratoLinhasTableData extends DataClass
       data: Value(data),
       tipo: Value(tipo),
       nomeBancoOriginal: Value(nomeBancoOriginal),
+      fitid: fitid == null && nullToAbsent ? const Value.absent() : Value(fitid),
       importadoEm: Value(importadoEm),
     );
   }
@@ -3713,6 +3741,7 @@ class ExtratoLinhasTableData extends DataClass
       data: serializer.fromJson<DateTime>(json['data']),
       tipo: serializer.fromJson<String>(json['tipo']),
       nomeBancoOriginal: serializer.fromJson<String>(json['nomeBancoOriginal']),
+      fitid: serializer.fromJson<String?>(json['fitid']),
       importadoEm: serializer.fromJson<DateTime>(json['importadoEm']),
     );
   }
@@ -3727,6 +3756,7 @@ class ExtratoLinhasTableData extends DataClass
       'data': serializer.toJson<DateTime>(data),
       'tipo': serializer.toJson<String>(tipo),
       'nomeBancoOriginal': serializer.toJson<String>(nomeBancoOriginal),
+      'fitid': serializer.toJson<String?>(fitid),
       'importadoEm': serializer.toJson<DateTime>(importadoEm),
     };
   }
@@ -3739,6 +3769,7 @@ class ExtratoLinhasTableData extends DataClass
     DateTime? data,
     String? tipo,
     String? nomeBancoOriginal,
+    Value<String?> fitid = const Value.absent(),
     DateTime? importadoEm,
   }) => ExtratoLinhasTableData(
     id: id ?? this.id,
@@ -3748,6 +3779,7 @@ class ExtratoLinhasTableData extends DataClass
     data: data ?? this.data,
     tipo: tipo ?? this.tipo,
     nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+    fitid: fitid.present ? fitid.value : this.fitid,
     importadoEm: importadoEm ?? this.importadoEm,
   );
   ExtratoLinhasTableData copyWithCompanion(ExtratoLinhasTableCompanion data) {
@@ -3761,6 +3793,7 @@ class ExtratoLinhasTableData extends DataClass
       nomeBancoOriginal: data.nomeBancoOriginal.present
           ? data.nomeBancoOriginal.value
           : this.nomeBancoOriginal,
+      fitid: data.fitid.present ? data.fitid.value : this.fitid,
       importadoEm: data.importadoEm.present
           ? data.importadoEm.value
           : this.importadoEm,
@@ -3777,6 +3810,7 @@ class ExtratoLinhasTableData extends DataClass
           ..write('data: $data, ')
           ..write('tipo: $tipo, ')
           ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('fitid: $fitid, ')
           ..write('importadoEm: $importadoEm')
           ..write(')'))
         .toString();
@@ -3791,6 +3825,7 @@ class ExtratoLinhasTableData extends DataClass
     data,
     tipo,
     nomeBancoOriginal,
+    fitid,
     importadoEm,
   );
   @override
@@ -3804,6 +3839,7 @@ class ExtratoLinhasTableData extends DataClass
           other.data == this.data &&
           other.tipo == this.tipo &&
           other.nomeBancoOriginal == this.nomeBancoOriginal &&
+          other.fitid == this.fitid &&
           other.importadoEm == this.importadoEm);
 }
 
@@ -3816,6 +3852,7 @@ class ExtratoLinhasTableCompanion
   final Value<DateTime> data;
   final Value<String> tipo;
   final Value<String> nomeBancoOriginal;
+  final Value<String?> fitid;
   final Value<DateTime> importadoEm;
   final Value<int> rowid;
   const ExtratoLinhasTableCompanion({
@@ -3826,6 +3863,7 @@ class ExtratoLinhasTableCompanion
     this.data = const Value.absent(),
     this.tipo = const Value.absent(),
     this.nomeBancoOriginal = const Value.absent(),
+    this.fitid = const Value.absent(),
     this.importadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -3837,6 +3875,7 @@ class ExtratoLinhasTableCompanion
     required DateTime data,
     required String tipo,
     required String nomeBancoOriginal,
+    this.fitid = const Value.absent(),
     this.importadoEm = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -3854,6 +3893,7 @@ class ExtratoLinhasTableCompanion
     Expression<DateTime>? data,
     Expression<String>? tipo,
     Expression<String>? nomeBancoOriginal,
+    Expression<String>? fitid,
     Expression<DateTime>? importadoEm,
     Expression<int>? rowid,
   }) {
@@ -3865,6 +3905,7 @@ class ExtratoLinhasTableCompanion
       if (data != null) 'data': data,
       if (tipo != null) 'tipo': tipo,
       if (nomeBancoOriginal != null) 'nome_banco_original': nomeBancoOriginal,
+      if (fitid != null) 'fitid': fitid,
       if (importadoEm != null) 'importado_em': importadoEm,
       if (rowid != null) 'rowid': rowid,
     });
@@ -3878,6 +3919,7 @@ class ExtratoLinhasTableCompanion
     Value<DateTime>? data,
     Value<String>? tipo,
     Value<String>? nomeBancoOriginal,
+    Value<String?>? fitid,
     Value<DateTime>? importadoEm,
     Value<int>? rowid,
   }) {
@@ -3889,6 +3931,7 @@ class ExtratoLinhasTableCompanion
       data: data ?? this.data,
       tipo: tipo ?? this.tipo,
       nomeBancoOriginal: nomeBancoOriginal ?? this.nomeBancoOriginal,
+      fitid: fitid ?? this.fitid,
       importadoEm: importadoEm ?? this.importadoEm,
       rowid: rowid ?? this.rowid,
     );
@@ -3918,6 +3961,9 @@ class ExtratoLinhasTableCompanion
     if (nomeBancoOriginal.present) {
       map['nome_banco_original'] = Variable<String>(nomeBancoOriginal.value);
     }
+    if (fitid.present) {
+      map['fitid'] = Variable<String>(fitid.value);
+    }
     if (importadoEm.present) {
       map['importado_em'] = Variable<DateTime>(importadoEm.value);
     }
@@ -3937,6 +3983,7 @@ class ExtratoLinhasTableCompanion
           ..write('data: $data, ')
           ..write('tipo: $tipo, ')
           ..write('nomeBancoOriginal: $nomeBancoOriginal, ')
+          ..write('fitid: $fitid, ')
           ..write('importadoEm: $importadoEm, ')
           ..write('rowid: $rowid')
           ..write(')'))

@@ -56,6 +56,7 @@ class OfxParser {
       data: _data(dataTexto, numero: numero),
       descricao: _descricao(_campo(bloco, 'NAME'), _campo(bloco, 'MEMO')),
       valor: _valor(valorTexto, numero: numero),
+      fitid: _campo(bloco, 'FITID'),
     );
   }
 

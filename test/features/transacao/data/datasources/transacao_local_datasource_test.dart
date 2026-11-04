@@ -100,4 +100,18 @@ void main() {
     expect(todas.single.minhaParte, 25);
     expect(todas.single.divididoCom, ['Ana', 'Bruno', 'Carla']);
   });
+
+  test('criarEmLote grava todas, pendentes de sync, e marca as sem categoria', () async {
+    await datasource.criarEmLote([
+      (descricao: 'Mercado', valor: -50.0, data: dia, categoria: 'Mercado'),
+      (descricao: 'Pix recebido', valor: 200.0, data: dia, categoria: ''),
+    ]);
+
+    final todas = await datasource.observarTodas().first;
+    expect(todas, hasLength(2));
+    final pendentes = await datasource.listarPendentes();
+    expect(pendentes, hasLength(2));
+    expect(todas.firstWhere((t) => t.descricao == 'Pix recebido').precisaCategoria, isTrue);
+    expect(todas.firstWhere((t) => t.descricao == 'Mercado').precisaCategoria, isFalse);
+  });
 }

@@ -7,12 +7,16 @@ class TransacaoImportada {
     required this.descricao,
     required this.valor,
     this.categoria,
+    this.fitid,
   });
 
   final DateTime data;
   final String descricao;
   final double valor;
   final String? categoria;
+
+  /// `FITID` do OFX: identificador único do lançamento no banco. Nulo no CSV.
+  final String? fitid;
 
   bool get precisaCategoria => categoria == null || categoria!.trim().isEmpty;
 }

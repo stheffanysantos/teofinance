@@ -7,6 +7,7 @@ import '../../../../core/database/app_database.dart';
 import '../../../../core/sync/sync_status.dart';
 import '../../../parcelamento/domain/services/calculo_parcelas.dart';
 import '../../domain/entities/transacao.dart';
+import '../../domain/repositories/transacao_repository.dart' show NovaTransacao;
 
 /// Única classe da feature que fala com `TransactionsTable` (ver
 /// `.claude/rules/architecture.md`).
@@ -41,6 +42,24 @@ class TransacaoLocalDataSource {
           ),
         );
     return Transacao(id: id, descricao: descricao, categoria: categoria, valor: valor, data: data);
+  }
+
+  Future<void> criarEmLote(List<NovaTransacao> itens) {
+    return _db.batch((batch) {
+      batch.insertAll(
+        _db.transactionsTable,
+        itens.map((t) {
+          return TransactionsTableCompanion.insert(
+            id: _uuid.v4(),
+            name: t.descricao,
+            category: t.categoria,
+            value: t.valor,
+            occurredAt: t.data,
+            needsCategory: Value(t.categoria.trim().isEmpty),
+          );
+        }).toList(),
+      );
+    });
   }
 
   Future<void> categorizar({required String id, required String categoria}) {

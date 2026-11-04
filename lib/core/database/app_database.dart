@@ -143,6 +143,8 @@ class ExtratoLinhasTable extends Table {
   DateTimeColumn get data => dateTime()();
   TextColumn get tipo => text()();               // 'D' (débito) | 'C' (crédito)
   TextColumn get nomeBancoOriginal => text()(); // Como veio do banco
+  /// FITID do OFX (v11): identidade exata do lançamento no banco; nulo no CSV.
+  TextColumn get fitid => text().nullable()();
   DateTimeColumn get importadoEm => dateTime().withDefault(currentDateAndTime)();
 
   @override
@@ -225,7 +227,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -284,6 +286,10 @@ class AppDatabase extends _$AppDatabase {
           }
           if (from < 10) {
             await m.createTable(contaTable);
+          }
+          if (from >= 6 && from < 11) {
+            // Quem vem de antes da v6 já recebeu a tabela com a coluna em createTable.
+            await m.addColumn(extratoLinhasTable, extratoLinhasTable.fitid);
           }
         },
       );

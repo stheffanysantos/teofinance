@@ -95,4 +95,46 @@ void main() {
       expect(dups, isEmpty);
     });
   });
+
+  group('indicesDuplicados com FITID', () {
+    TransacaoImportada comFitid(String fitid, {String descricao = 'padaria', double valor = -10}) =>
+        TransacaoImportada(data: DateTime(2026, 10, 5), descricao: descricao, valor: valor, fitid: fitid);
+
+    test('FITID já existente é duplicata, mesmo com descrição diferente', () {
+      final r = indicesDuplicados(
+        importadas: [comFitid('A1', descricao: 'PADARIA SAO JOAO')],
+        chavesExistentes: const [],
+        fitidsExistentes: {'A1'},
+      );
+      expect(r, {0});
+    });
+
+    test('compras idênticas com FITIDs diferentes não são duplicatas', () {
+      final r = indicesDuplicados(
+        importadas: [comFitid('A1'), comFitid('A2')],
+        chavesExistentes: const [],
+        fitidsExistentes: {'A0'},
+      );
+      expect(r, isEmpty);
+    });
+
+    test('linha com FITID ainda casa por chave com acervo antigo sem FITID', () {
+      final nova = comFitid('A1');
+      final r = indicesDuplicados(
+        importadas: [nova],
+        chavesExistentes: [chaveLancamento(nova.data, nova.valor, nova.descricao)],
+        fitidsExistentes: <String>{},
+      );
+      expect(r, {0});
+    });
+
+    test('linha sem FITID continua usando só a chave', () {
+      final r = indicesDuplicados(
+        importadas: [_t('padaria', -10)],
+        chavesExistentes: [chaveLancamento(DateTime(2026, 10, 5), -10, 'padaria')],
+        fitidsExistentes: {'A1'},
+      );
+      expect(r, {0});
+    });
+  });
 }

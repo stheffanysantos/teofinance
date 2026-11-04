@@ -11,15 +11,22 @@ String chaveLancamento(DateTime data, double valor, String descricao) {
   return '$dia|$centavos|$texto';
 }
 
-/// Índices, em [importadas], das linhas que já existem em [chavesExistentes].
+/// Índices, em [importadas], das linhas que já existem.
 ///
-/// Conta ocorrências em vez de só testar presença: duas compras iguais no mesmo
-/// dia são legítimas. Com 1 igual já existente e 2 no arquivo, só uma é
-/// duplicata; a outra é nova. É o que impede que "importar de novo" descarte
-/// compras repetidas de verdade — e também que as duplique.
+/// Sem FITID (CSV, ou acervo antigo), a identidade é a chave `dia|centavos|
+/// descrição` em [chavesExistentes]. Conta ocorrências em vez de só testar
+/// presença: duas compras iguais no mesmo dia são legítimas. Com 1 igual já
+/// existente e 2 no arquivo, só uma é duplicata; a outra é nova.
+///
+/// Com [fitidsExistentes] informado (acervo vindo de OFX), uma linha que traz
+/// `fitid` é identificada de forma exata: duplicata só se o FITID já existe.
+/// Compras idênticas com FITIDs diferentes nunca se confundem. Para esse caso,
+/// [chavesExistentes] deve conter só as chaves de linhas **sem** FITID, que
+/// ainda podem ser comparadas pela chave.
 Set<int> indicesDuplicados({
   required List<TransacaoImportada> importadas,
   required Iterable<String> chavesExistentes,
+  Set<String>? fitidsExistentes,
 }) {
   final disponiveis = <String, int>{};
   for (final chave in chavesExistentes) {
@@ -29,6 +36,13 @@ Set<int> indicesDuplicados({
   final duplicados = <int>{};
   for (var i = 0; i < importadas.length; i++) {
     final t = importadas[i];
+    final fitid = t.fitid;
+    if (fitid != null && fitidsExistentes != null) {
+      if (fitidsExistentes.contains(fitid)) {
+        duplicados.add(i);
+        continue;
+      }
+    }
     final chave = chaveLancamento(t.data, t.valor, t.descricao);
     final restantes = disponiveis[chave] ?? 0;
     if (restantes > 0) {

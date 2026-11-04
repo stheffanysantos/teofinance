@@ -38,6 +38,7 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
               data: l.data.value,
               tipo: l.tipo.value,
               nomeBancoOriginal: l.nomeBancoOriginal.value,
+              fitid: l.fitid.present ? l.fitid.value : null,
             ))
         .toList();
   }
@@ -77,6 +78,7 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
               data: d.data,
               tipo: d.tipo,
               nomeBancoOriginal: d.nomeBancoOriginal,
+              fitid: d.fitid,
             ))
         .toList();
   }
@@ -94,6 +96,7 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
               data: d.data,
               tipo: d.tipo,
               nomeBancoOriginal: d.nomeBancoOriginal,
+              fitid: d.fitid,
             ))
         .toList();
   }
@@ -143,6 +146,7 @@ class ReconciliationLocalDataSourceImpl implements ReconciliationLocalDataSource
               data: d.data,
               tipo: d.tipo,
               nomeBancoOriginal: d.nomeBancoOriginal,
+              fitid: d.fitid,
             ))
         .toList();
   }

@@ -32,6 +32,17 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> criarEmLote(List<NovaTransacao> itens) async {
+    try {
+      await _local.criarEmLote(itens);
+      return const Right(unit);
+    } catch (e) {
+      debugPrint('TransacaoRepositoryImpl.criarEmLote falhou: ${e.runtimeType}');
+      return const Left(CacheFailure('Não foi possível salvar as transações importadas.'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Unit>> categorizar({required String id, required String categoria}) async {
     try {
       await _local.categorizar(id: id, categoria: categoria);

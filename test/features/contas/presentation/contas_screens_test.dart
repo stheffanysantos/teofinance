@@ -125,6 +125,9 @@ class _FakeContas implements ContaRepository {
 }
 
 class _FakeTransacoes implements TransacaoRepository {
+  @override
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+
   final criadas = <({String descricao, double valor, String categoria})>[];
 
   @override
