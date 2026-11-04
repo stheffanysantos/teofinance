@@ -8,6 +8,7 @@ import 'package:teofinance/features/lgpd/data/repositories/lgpd_repository_impl.
 import 'package:teofinance/features/lgpd/domain/repositories/lgpd_repository.dart';
 import 'package:teofinance/features/lgpd/domain/usecases/excluir_minha_conta_usecase.dart';
 import 'package:teofinance/features/lgpd/domain/usecases/exportar_meus_dados_usecase.dart';
+import 'package:teofinance/features/lgpd/domain/usecases/zerar_dados_financeiros_usecase.dart';
 import 'package:teofinance/features/lgpd/presentation/notifiers/meus_dados_notifier.dart';
 import 'package:teofinance/features/sync/presentation/providers/sync_providers.dart';
 
@@ -34,10 +35,18 @@ final excluirMinhaContaUseCaseProvider = Provider((ref) {
   );
 });
 
+final zerarDadosFinanceirosUseCaseProvider = Provider((ref) {
+  return ZerarDadosFinanceirosUseCase(
+    repository: ref.watch(lgpdRepositoryProvider),
+    auth: ref.watch(authRepositoryProvider),
+  );
+});
+
 final meusDadosNotifierProvider =
     StateNotifierProvider.autoDispose<MeusDadosNotifier, MeusDadosState>((ref) {
   return MeusDadosNotifier(
     exportar: ref.watch(exportarMeusDadosUseCaseProvider),
     excluir: ref.watch(excluirMinhaContaUseCaseProvider),
+    zerar: ref.watch(zerarDadosFinanceirosUseCaseProvider),
   );
 });

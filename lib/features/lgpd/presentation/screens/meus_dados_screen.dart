@@ -35,6 +35,23 @@ class MeusDadosScreen extends ConsumerWidget {
     ));
   }
 
+  Future<void> _zerar(BuildContext context, WidgetRef ref) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmou = await AppConfirmDialog.mostrar(
+      context,
+      titulo: 'Zerar dados financeiros?',
+      mensagem: 'Apaga todas as transações, parcelamentos, rendas, metas, limites de orçamento, '
+          'contas a pagar, extrato e reconciliação, na nuvem e neste aparelho. '
+          'Sua conta e seus Perfis de Banco continuam. Isso não pode ser desfeito.',
+      rotuloConfirmar: 'Zerar tudo',
+      destrutivo: true,
+    );
+    if (!confirmou || !context.mounted) return;
+
+    final zerou = await ref.read(meusDadosNotifierProvider.notifier).zerarDadosFinanceiros();
+    if (zerou) messenger.showSnackBar(const SnackBar(content: Text('Dados financeiros zerados.')));
+  }
+
   Future<void> _excluir(BuildContext context, WidgetRef ref) async {
     final confirmou = await AppConfirmDialog.mostrar(
       context,
@@ -90,6 +107,18 @@ class MeusDadosScreen extends ConsumerWidget {
               ocupado: estado.acao == MeusDadosAcao.exportando,
               desabilitado: estado.ocupado,
               onPressed: () => _exportar(context, ref),
+            ),
+            const SizedBox(height: 12),
+            _Cartao(
+              icone: Icons.restart_alt,
+              titulo: 'Zerar dados financeiros',
+              descricao: 'Apaga transações, rendas, metas, orçamento, contas e extrato para recomeçar '
+                  'do zero. Sua conta continua.',
+              rotuloBotao: 'Zerar dados',
+              destrutivo: true,
+              ocupado: estado.acao == MeusDadosAcao.zerando,
+              desabilitado: estado.ocupado,
+              onPressed: () => _zerar(context, ref),
             ),
             const SizedBox(height: 12),
             _Cartao(

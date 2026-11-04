@@ -9,10 +9,20 @@ import 'package:teofinance/features/lgpd/domain/repositories/lgpd_repository.dar
 import 'package:teofinance/features/lgpd/domain/usecases/excluir_minha_conta_usecase.dart';
 import 'package:teofinance/features/lgpd/domain/usecases/exportar_meus_dados_usecase.dart';
 import 'package:teofinance/features/lgpd/presentation/notifiers/meus_dados_notifier.dart';
+import 'package:teofinance/features/lgpd/domain/usecases/zerar_dados_financeiros_usecase.dart';
 import 'package:teofinance/features/lgpd/presentation/providers/lgpd_providers.dart';
 import 'package:teofinance/features/lgpd/presentation/screens/meus_dados_screen.dart';
 
 class _FakeLgpd implements LgpdRepository {
+  int zeragens = 0;
+  Either<Failure, Unit> respostaZerar = const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> zerarDadosFinanceiros() async {
+    zeragens++;
+    return respostaZerar;
+  }
+
   String? senhaRecebida;
   int exclusoes = 0;
   Either<Failure, Unit> respostaExclusao = const Right(unit);
@@ -47,6 +57,7 @@ Widget _app(_FakeLgpd repo) {
       meusDadosNotifierProvider.overrideWith((ref) => MeusDadosNotifier(
             exportar: ExportarMeusDadosUseCase(repository: repo, auth: auth),
             excluir: ExcluirMinhaContaUseCase(repository: repo, auth: auth),
+            zerar: ZerarDadosFinanceirosUseCase(repository: repo, auth: auth),
           )),
     ],
     child: MaterialApp(theme: AppTheme.light(), home: const MeusDadosScreen()),
@@ -54,6 +65,8 @@ Widget _app(_FakeLgpd repo) {
 }
 
 Future<void> _abrirExclusao(WidgetTester tester) async {
+  await tester.ensureVisible(find.text('Excluir conta'));
+  await tester.pumpAndSettle();
   await tester.tap(find.text('Excluir conta'));
   await tester.pumpAndSettle();
 }
@@ -145,6 +158,7 @@ void main() {
     await tester.tap(find.text('Exportar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Não foi possível reunir seus dados.'), findsOneWidget);
+    // O erro aparece no fim da lista, fora da área visível do teste.
+    expect(find.text('Não foi possível reunir seus dados.', skipOffstage: false), findsOneWidget);
   });
 }

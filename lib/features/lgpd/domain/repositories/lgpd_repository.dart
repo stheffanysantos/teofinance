@@ -11,4 +11,9 @@ abstract class LgpdRepository {
   /// local. A [senha] reautentica o usuário: sem ela o Firebase recusa apagar
   /// a conta de uma sessão antiga.
   Future<Either<Failure, Unit>> excluirTodosOsDados({required String senha});
+
+  /// Zera tudo que tem valor em R$ (transações, parcelamentos, rendas, metas,
+  /// orçamento, contas a pagar, extrato e reconciliação), na nuvem e neste
+  /// aparelho. Mantém a conta, o login, as preferências e os Perfis de Banco.
+  Future<Either<Failure, Unit>> zerarDadosFinanceiros();
 }

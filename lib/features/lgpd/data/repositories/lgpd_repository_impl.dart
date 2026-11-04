@@ -84,6 +84,34 @@ class LgpdRepositoryImpl implements LgpdRepository {
     return const Right(unit);
   }
 
+  /// Nuvem primeiro, aparelho depois: se a nuvem falhar nada local é apagado e
+  /// o sync volta ao normal. O sync fica pausado no meio para não reenviar o
+  /// que acabou de ser apagado.
+  @override
+  Future<Either<Failure, Unit>> zerarDadosFinanceiros() async {
+    final uid = _conta.uid;
+    if (uid == null) return const Left(AuthFailure('Entre na sua conta para continuar.'));
+
+    await _local.pausarSync();
+    try {
+      await _remote.excluirDadosFinanceiros(uid);
+    } on FirebaseException catch (_) {
+      await _local.retomarSync();
+      return const Left(ServerFailure(
+        'Não foi possível apagar seus dados na nuvem. Verifique a conexão e tente de novo.',
+      ));
+    }
+
+    try {
+      await _local.apagarDadosFinanceiros();
+    } catch (_) {
+      await _local.retomarSync();
+      return const Left(CacheFailure('Os dados da nuvem foram apagados, mas não os deste aparelho. Tente de novo.'));
+    }
+    await _local.retomarSync();
+    return const Right(unit);
+  }
+
   String _mensagemReautenticacao(fb.FirebaseAuthException e) {
     switch (e.code) {
       case 'wrong-password':

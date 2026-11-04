@@ -8,6 +8,7 @@ import 'package:teofinance/features/lgpd/domain/repositories/lgpd_repository.dar
 import 'package:teofinance/features/lgpd/domain/usecases/excluir_minha_conta_usecase.dart';
 import 'package:teofinance/features/lgpd/domain/usecases/exportar_meus_dados_usecase.dart';
 import 'package:teofinance/features/lgpd/presentation/notifiers/meus_dados_notifier.dart';
+import 'package:teofinance/features/lgpd/domain/usecases/zerar_dados_financeiros_usecase.dart';
 import 'package:teofinance/features/lgpd/presentation/providers/lgpd_providers.dart';
 import 'package:teofinance/features/profile/presentation/providers/app_info_provider.dart';
 import 'package:teofinance/features/profile/presentation/screens/sobre_screen.dart';
@@ -28,6 +29,7 @@ Widget _app() {
       meusDadosNotifierProvider.overrideWith((ref) => MeusDadosNotifier(
             exportar: ExportarMeusDadosUseCase(repository: _FakeLgpd(), auth: _FakeAuth()),
             excluir: ExcluirMinhaContaUseCase(repository: _FakeLgpd(), auth: _FakeAuth()),
+            zerar: ZerarDadosFinanceirosUseCase(repository: _FakeLgpd(), auth: _FakeAuth()),
           )),
       appInfoProvider.overrideWithValue(const AppInfo(version: '1.2.3', build: '45')),
     ],

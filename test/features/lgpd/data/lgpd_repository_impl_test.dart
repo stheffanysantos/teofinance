@@ -164,6 +164,45 @@ void main() {
     });
   });
 
+  group('zerar dados financeiros', () {
+    test('apaga o que tem valor na nuvem e no aparelho e mantém conta e perfis de banco', () async {
+      await semearLocal();
+      await semearNuvem();
+
+      final r = await criar().zerarDadosFinanceiros();
+
+      expect(r.isRight(), isTrue);
+      for (final nome in LgpdRemoteDataSource.colecoesFinanceiras) {
+        final docs = await nuvem.collection('users').doc('u1').collection(nome).get();
+        expect(docs.docs, isEmpty, reason: nome);
+      }
+      final perfis = await nuvem.collection('users').doc('u1').collection('perfis_banco').get();
+      expect(perfis.docs, hasLength(2));
+      expect(await db.select(db.transactionsTable).get(), isEmpty);
+      expect(await db.select(db.orcamentoTable).get(), isEmpty);
+      expect(await db.select(db.metaTable).get(), isEmpty);
+      expect(conta.contaExcluida, isFalse);
+    });
+
+    test('sem conexão nada local é apagado e o sync não fica pausado', () async {
+      await semearLocal();
+
+      final r = await criar(firestore: _FirestoreOffline()).zerarDadosFinanceiros();
+
+      expect(_falha(r), isA<ServerFailure>());
+      expect(await db.select(db.transactionsTable).get(), hasLength(1));
+      expect(await syncPausado(seguro), isFalse);
+    });
+
+    test('concluído não deixa o sync pausado', () async {
+      await semearLocal();
+
+      await criar().zerarDadosFinanceiros();
+
+      expect(await syncPausado(seguro), isFalse);
+    });
+  });
+
   group('excluir', () {
     test('senha errada não apaga nada em lugar nenhum', () async {
       await semearLocal();

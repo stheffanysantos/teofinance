@@ -42,6 +42,17 @@ class LgpdLocalDataSource {
 
   Future<void> retomarSync() => pausa.retomarSync(_secureStorage);
 
+  /// Esvazia só as tabelas com valores; mantém os Perfis de Banco e o
+  /// armazenamento seguro (login, preferências, biometria).
+  Future<void> apagarDadosFinanceiros() async {
+    await _db.transaction(() async {
+      for (final tabela in _db.allTables) {
+        if (tabela.actualTableName == 'perfil_banco_table') continue;
+        await _db.delete(tabela).go();
+      }
+    });
+  }
+
   /// Esvazia todas as tabelas e o armazenamento seguro (preferências, biometria).
   Future<void> apagarTudo() async {
     await _db.transaction(() async {

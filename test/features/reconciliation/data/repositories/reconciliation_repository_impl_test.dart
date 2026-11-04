@@ -149,7 +149,10 @@ void main() {
       await linha(999, dia);
       await reconciliar();
 
-      final status = (await repository.obterStatusPeriodo(userId: 'u', dataInicio: inicio, dataFim: fim))
+      // O período precisa cobrir também hoje: o vínculo é datado do dia em que a
+      // reconciliação rodou, não do dia do lançamento.
+      final ateHoje = DateTime.now().add(const Duration(days: 1));
+      final status = (await repository.obterStatusPeriodo(userId: 'u', dataInicio: inicio, dataFim: ateHoje))
           .getOrElse((f) => throw StateError(f.message));
 
       expect(status.totalTransacoes, 2);

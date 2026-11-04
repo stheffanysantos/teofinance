@@ -7,6 +7,15 @@ import 'package:teofinance/features/lgpd/domain/usecases/excluir_minha_conta_use
 import 'package:teofinance/features/lgpd/domain/usecases/exportar_meus_dados_usecase.dart';
 
 class _FakeLgpd implements LgpdRepository {
+  int zeragens = 0;
+  Either<Failure, Unit> respostaZerar = const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> zerarDadosFinanceiros() async {
+    zeragens++;
+    return respostaZerar;
+  }
+
   int exportacoes = 0;
   String? senhaRecebida;
   bool falharNaExclusao = false;
