@@ -9,13 +9,37 @@ export '../../../../core/utils/currency_format.dart' show formatCurrencyDelta;
 const kTransactionPeriods = ['Hoje', '7 dias', 'Este mês', 'Personalizado'];
 
 class TransactionsFilterState {
-  const TransactionsFilterState({this.period = 'Este mês', this.category = 'Todas'});
+  const TransactionsFilterState({
+    this.period = 'Este mês',
+    this.category = 'Todas',
+    this.buscando = false,
+    this.query = '',
+  });
 
   final String period;
   final String category;
 
-  TransactionsFilterState copyWith({String? period, String? category}) {
-    return TransactionsFilterState(period: period ?? this.period, category: category ?? this.category);
+  /// Campo de busca aberto.
+  final bool buscando;
+
+  /// Texto procurado na descrição e na categoria. Com texto, a busca olha todos
+  /// os períodos e categorias: quem pesquisa quer achar, não filtrar o mês.
+  final String query;
+
+  bool get temBusca => query.trim().isNotEmpty;
+
+  TransactionsFilterState copyWith({
+    String? period,
+    String? category,
+    bool? buscando,
+    String? query,
+  }) {
+    return TransactionsFilterState(
+      period: period ?? this.period,
+      category: category ?? this.category,
+      buscando: buscando ?? this.buscando,
+      query: query ?? this.query,
+    );
   }
 }
 
@@ -30,10 +54,21 @@ class TransactionsFilterNotifier extends Notifier<TransactionsFilterState> {
 
   void selectPeriod(String period) => state = state.copyWith(period: period);
 
-  void selectCategory(String category) => state = state.copyWith(category: category);
+  void selectCategory(String category) =>
+      state = state.copyWith(category: category);
+
+  /// Abre ou fecha o campo de busca; ao fechar, limpa o texto.
+  void alternarBusca() => state = state.copyWith(
+    buscando: !state.buscando,
+    query: state.buscando ? '' : state.query,
+  );
+
+  void pesquisar(String texto) => state = state.copyWith(query: texto);
 
   Future<void> categorizar(String transacaoId, String categoria) {
-    return ref.read(categorizarTransacaoUseCaseProvider).call(id: transacaoId, categoria: categoria);
+    return ref
+        .read(categorizarTransacaoUseCaseProvider)
+        .call(id: transacaoId, categoria: categoria);
   }
 }
 
@@ -79,9 +114,11 @@ String _listaDeNomes(List<String> nomes) {
 
 bool _dentroDoPeriodo(DateTime data, String periodo) {
   final agora = DateTime.now();
-  final diferenca = DateTime(agora.year, agora.month, agora.day)
-      .difference(DateTime(data.year, data.month, data.day))
-      .inDays;
+  final diferenca = DateTime(
+    agora.year,
+    agora.month,
+    agora.day,
+  ).difference(DateTime(data.year, data.month, data.day)).inDays;
   return switch (periodo) {
     'Hoje' => diferenca == 0,
     '7 dias' => diferenca >= 0 && diferenca < 7,
@@ -90,9 +127,30 @@ bool _dentroDoPeriodo(DateTime data, String periodo) {
   };
 }
 
+/// Sem diferenciar maiúsculas nem acentos ("cafe" acha "Café").
+bool correspondeABusca(String busca, String descricao, String categoria) {
+  final q = _normalizar(busca.trim());
+  if (q.isEmpty) return true;
+  return _normalizar(descricao).contains(q) ||
+      _normalizar(categoria).contains(q);
+}
+
+String _normalizar(String s) {
+  const de = 'áàâãäéèêëíìîïóòôõöúùûüç';
+  const para = 'aaaaaeeeeiiiiooooouuuuc';
+  final b = StringBuffer();
+  for (final c in s.toLowerCase().split('')) {
+    final i = de.indexOf(c);
+    b.write(i >= 0 ? para[i] : c);
+  }
+  return b.toString();
+}
+
 /// Grupos filtrados e já formatados, prontos para a `TransactionsScreen`.
 /// Fonte real: `transacoesStreamProvider` (Drift, cache local).
-final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>>((ref) {
+final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>>((
+  ref,
+) {
   final filter = ref.watch(transactionsFilterProvider);
   final transacoes = ref.watch(transacoesStreamProvider).valueOrNull ?? [];
 
@@ -100,9 +158,19 @@ final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>
   final ordemDatas = <String>[];
 
   for (final transacao in transacoes) {
-    if (!_dentroDoPeriodo(transacao.data, filter.period)) continue;
-    final categoriaExibida = transacao.precisaCategoria ? 'Sem categoria' : transacao.categoria;
-    if (filter.category != 'Todas' && categoriaExibida != filter.category) continue;
+    final categoriaExibida = transacao.precisaCategoria
+        ? 'Sem categoria'
+        : transacao.categoria;
+    if (filter.temBusca) {
+      if (!correspondeABusca(filter.query, transacao.descricao, categoriaExibida)) {
+        continue;
+      }
+    } else {
+      if (!_dentroDoPeriodo(transacao.data, filter.period)) continue;
+      if (filter.category != 'Todas' && categoriaExibida != filter.category) {
+        continue;
+      }
+    }
 
     final resolved = ResolvedTransaction(
       id: transacao.id,
@@ -111,8 +179,8 @@ final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>
       icon: transacao.precisaCategoria
           ? '?'
           : transacao.categoria.isNotEmpty
-              ? transacao.categoria.substring(0, 1).toUpperCase()
-              : '?',
+          ? transacao.categoria.substring(0, 1).toUpperCase()
+          : '?',
       value: transacao.valorContabilizado,
       needsCategory: transacao.precisaCategoria,
       divisaoLabel: transacao.ehDividida
@@ -130,7 +198,9 @@ final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>
       ResolvedTransactionGroup(
         date: rotulo,
         items: porData[rotulo]!,
-        totalLabel: formatCurrencyDelta(porData[rotulo]!.fold(0, (acc, i) => acc + i.value)),
+        totalLabel: formatCurrencyDelta(
+          porData[rotulo]!.fold(0, (acc, i) => acc + i.value),
+        ),
       ),
   ];
 });

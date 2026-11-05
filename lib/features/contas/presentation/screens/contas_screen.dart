@@ -10,14 +10,17 @@ import 'package:teofinance/features/contas/presentation/providers/conta_provider
 import 'package:teofinance/features/contas/presentation/screens/conta_form_screen.dart';
 import 'package:teofinance/features/contas/presentation/screens/pagar_conta_screen.dart';
 
-String _data(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
+String _data(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
 /// Contas a pagar: atrasadas, a vencer e pagas.
 class ContasScreen extends ConsumerWidget {
   const ContasScreen({super.key});
 
   Future<void> _abrirForm(BuildContext context, {ContaAPagar? conta}) {
-    return Navigator.of(context).push(MaterialPageRoute(builder: (_) => ContaFormScreen(existente: conta)));
+    return Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => ContaFormScreen(existente: conta)),
+    );
   }
 
   Future<void> _pagar(BuildContext context, ContaAPagar conta) {
@@ -26,15 +29,23 @@ class ContasScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _excluir(BuildContext context, WidgetRef ref, ContaAPagar conta) async {
+  /// Pede confirmação e exclui. Devolve se a conta foi excluída (o cartão
+  /// arrastado só sai da tela nesse caso).
+  Future<bool> _excluir(
+    BuildContext context,
+    WidgetRef ref,
+    ContaAPagar conta,
+  ) async {
     final ok = await AppConfirmDialog.mostrar(
       context,
       titulo: 'Excluir conta?',
-      mensagem: '"${conta.descricao}" será removida. Despesas já registradas não são afetadas.',
+      mensagem:
+          '"${conta.descricao}" será removida. Despesas já registradas não são afetadas.',
       rotuloConfirmar: 'Excluir',
       destrutivo: true,
     );
     if (ok) await ref.read(excluirContaUseCaseProvider)(conta.id);
+    return ok;
   }
 
   @override
@@ -48,7 +59,10 @@ class ContasScreen extends ConsumerWidget {
         backgroundColor: t.bg,
         elevation: 0,
         iconTheme: IconThemeData(color: t.ink),
-        title: Text('Contas a pagar', style: TextStyle(color: t.ink, fontWeight: FontWeight.w700)),
+        title: Text(
+          'Contas a pagar',
+          style: TextStyle(color: t.ink, fontWeight: FontWeight.w700),
+        ),
         actions: const [
           AppHelpButton(
             titulo: 'Como funcionam as contas a pagar',
@@ -69,7 +83,12 @@ class ContasScreen extends ConsumerWidget {
       body: SafeArea(
         child: contas.when(
           loading: () => Center(child: CircularProgressIndicator(color: t.pos)),
-          error: (_, _) => Center(child: Text('Não foi possível carregar as contas.', style: TextStyle(color: t.sub))),
+          error: (_, _) => Center(
+            child: Text(
+              'Não foi possível carregar as contas.',
+              style: TextStyle(color: t.sub),
+            ),
+          ),
           data: (lista) {
             if (lista.isEmpty) {
               return Center(
@@ -85,9 +104,20 @@ class ContasScreen extends ConsumerWidget {
             }
 
             final hoje = DateTime.now();
-            final atrasadas = lista.where((c) => c.statusEm(hoje) == StatusConta.atrasada).toList();
-            final abertas = lista.where((c) => !c.paga && c.statusEm(hoje) != StatusConta.atrasada).toList();
-            final pagas = lista.where((c) => c.paga).toList().reversed.take(20).toList();
+            final atrasadas = lista
+                .where((c) => c.statusEm(hoje) == StatusConta.atrasada)
+                .toList();
+            final abertas = lista
+                .where(
+                  (c) => !c.paga && c.statusEm(hoje) != StatusConta.atrasada,
+                )
+                .toList();
+            final pagas = lista
+                .where((c) => c.paga)
+                .toList()
+                .reversed
+                .take(20)
+                .toList();
 
             Widget secao(String titulo, List<ContaAPagar> itens) {
               if (itens.isEmpty) return const SizedBox.shrink();
@@ -99,24 +129,51 @@ class ContasScreen extends ConsumerWidget {
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
                       '$titulo (${itens.length})',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.ink),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: t.ink,
+                      ),
                     ),
                   ),
-                  for (final c in itens)
-                    _ContaCard(
-                      conta: c,
-                      hoje: hoje,
-                      onPagar: c.paga ? null : () => _pagar(context, c),
-                      onEditar: c.paga ? null : () => _abrirForm(context, conta: c),
-                      onExcluir: () => _excluir(context, ref, c),
+                  if (itens.any((c) => c.paga))
+                    Text(
+                      'Arraste uma conta paga para o lado para excluir.',
+                      style: TextStyle(fontSize: 12, color: t.sub),
                     ),
+                  for (final c in itens)
+                    if (c.paga)
+                      // Conta paga: sem botões; arraste para o lado para excluir.
+                      Dismissible(
+                        key: ValueKey('conta-paga-${c.id}'),
+                        confirmDismiss: (_) => _excluir(context, ref, c),
+                        background: const _FundoExcluir(
+                          alinhamento: Alignment.centerLeft,
+                        ),
+                        secondaryBackground: const _FundoExcluir(
+                          alinhamento: Alignment.centerRight,
+                        ),
+                        child: _ContaCard(conta: c, hoje: hoje),
+                      )
+                    else
+                      _ContaCard(
+                        conta: c,
+                        hoje: hoje,
+                        onPagar: () => _pagar(context, c),
+                        onEditar: () => _abrirForm(context, conta: c),
+                        onExcluir: () => _excluir(context, ref, c),
+                      ),
                 ],
               );
             }
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 90),
-              children: [secao('Atrasadas', atrasadas), secao('A vencer', abertas), secao('Pagas', pagas)],
+              children: [
+                secao('Atrasadas', atrasadas),
+                secao('A vencer', abertas),
+                secao('Pagas', pagas),
+              ],
             );
           },
         ),
@@ -129,7 +186,7 @@ class _ContaCard extends StatelessWidget {
   const _ContaCard({
     required this.conta,
     required this.hoje,
-    required this.onExcluir,
+    this.onExcluir,
     this.onPagar,
     this.onEditar,
   });
@@ -138,7 +195,7 @@ class _ContaCard extends StatelessWidget {
   final DateTime hoje;
   final VoidCallback? onPagar;
   final VoidCallback? onEditar;
-  final VoidCallback onExcluir;
+  final Future<bool> Function()? onExcluir;
 
   @override
   Widget build(BuildContext context) {
@@ -147,11 +204,80 @@ class _ContaCard extends StatelessWidget {
     final dias = conta.diasParaVencer(hoje);
 
     final (texto, cor) = switch (status) {
-      StatusConta.paga => ('Paga em ${_data(conta.dataPagamento ?? conta.vencimento)}', t.pos),
-      StatusConta.atrasada => ('Atrasada há ${-dias} ${dias == -1 ? 'dia' : 'dias'}', t.neg),
+      StatusConta.paga => (
+        'Paga em ${_data(conta.dataPagamento ?? conta.vencimento)}',
+        t.pos,
+      ),
+      StatusConta.atrasada => (
+        'Atrasada há ${-dias} ${dias == -1 ? 'dia' : 'dias'}',
+        t.neg,
+      ),
       StatusConta.venceHoje => ('Vence hoje', t.neg),
-      StatusConta.aVencer => ('Vence ${_data(conta.vencimento)} · em $dias ${dias == 1 ? 'dia' : 'dias'}', t.sub),
+      StatusConta.aVencer => (
+        'Vence ${_data(conta.vencimento)} · em $dias ${dias == 1 ? 'dia' : 'dias'}',
+        t.sub,
+      ),
     };
+
+    final complemento = conta.recorrencia == RecorrenciaConta.nenhuma
+        ? texto
+        : '$texto · ${conta.recorrencia.rotulo.toLowerCase()}';
+
+    if (conta.paga) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: t.card,
+          border: Border.all(color: t.line),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          spacing: 12,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(color: t.posBg, shape: BoxShape.circle),
+              child: Icon(Icons.check_rounded, size: 20, color: t.pos),
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 2,
+                children: [
+                  Text(
+                    conta.descricao,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: t.ink,
+                    ),
+                  ),
+                  Text(
+                    complemento,
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                      color: cor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            AppAmountText(
+              formatCurrency(conta.valorPago ?? conta.valor),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: t.ink,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -171,30 +297,79 @@ class _ContaCard extends StatelessWidget {
                   conta.descricao,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: t.ink),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: t.ink,
+                  ),
                 ),
               ),
               AppAmountText(
-                formatCurrency(conta.paga ? (conta.valorPago ?? conta.valor) : conta.valor),
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: t.ink),
+                formatCurrency(
+                  conta.paga ? (conta.valorPago ?? conta.valor) : conta.valor,
+                ),
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: t.ink,
+                ),
               ),
             ],
           ),
           Text(
-            conta.recorrencia == RecorrenciaConta.nenhuma ? texto : '$texto · ${conta.recorrencia.rotulo.toLowerCase()}',
-            style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600, color: cor),
+            complemento,
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+              color: cor,
+            ),
           ),
           Row(
             spacing: 8,
             children: [
-              if (onPagar != null) Expanded(child: FilledButton(onPressed: onPagar, child: const Text('Pagar'))),
+              if (onPagar != null)
+                Expanded(
+                  child: FilledButton(
+                    onPressed: onPagar,
+                    child: const Text('Pagar'),
+                  ),
+                ),
               if (onEditar != null)
-                IconButton(onPressed: onEditar, icon: Icon(Icons.edit_outlined, color: t.ink), tooltip: 'Editar'),
-              IconButton(onPressed: onExcluir, icon: Icon(Icons.delete_outline, color: t.neg), tooltip: 'Excluir'),
+                IconButton(
+                  onPressed: onEditar,
+                  icon: Icon(Icons.edit_outlined, color: t.ink),
+                  tooltip: 'Editar',
+                ),
+              IconButton(
+                onPressed: onExcluir == null ? null : () => onExcluir!(),
+                icon: Icon(Icons.delete_outline, color: t.neg),
+                tooltip: 'Excluir',
+              ),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Fundo vermelho que aparece atrás do cartão pago ao arrastá-lo para o lado.
+class _FundoExcluir extends StatelessWidget {
+  const _FundoExcluir({required this.alinhamento});
+
+  final Alignment alinhamento;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Container(
+      alignment: alinhamento,
+      padding: const EdgeInsets.symmetric(horizontal: 22),
+      decoration: BoxDecoration(
+        color: t.negBg,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(Icons.delete_outline, color: t.neg),
     );
   }
 }

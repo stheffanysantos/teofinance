@@ -36,168 +36,220 @@ class TransactionsScreen extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: 14,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 14,
                   children: [
-                    Text(
-                      'Transações',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -.5, color: t.ink),
-                    ),
                     Row(
-                      spacing: 8,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ConnectScreen()),
-                          ),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: t.card,
-                              border: Border.all(color: t.line),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(Icons.add, size: 20, color: t.ink),
+                        Text(
+                          'Transações',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -.5,
+                            color: t.ink,
                           ),
                         ),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const ReconciliationScreen()),
-                          ),
-                          child: Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: t.card,
-                              border: Border.all(color: t.line),
-                              borderRadius: BorderRadius.circular(12),
+                        Row(
+                          spacing: 8,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ConnectScreen(),
+                                ),
+                              ),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: t.card,
+                                  border: Border.all(color: t.line),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(Icons.add, size: 20, color: t.ink),
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: Icon(Icons.fact_check_outlined, size: 18, color: t.ink),
-                          ),
-                        ),
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: t.card,
-                            border: Border.all(color: t.line),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          alignment: Alignment.center,
-                          child: Icon(Icons.search, size: 18, color: t.ink),
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const ReconciliationScreen(),
+                                ),
+                              ),
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: t.card,
+                                  border: Border.all(color: t.line),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  Icons.fact_check_outlined,
+                                  size: 18,
+                                  color: t.ink,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: filterNotifier.alternarBusca,
+                              child: Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: filter.buscando ? t.hero : t.card,
+                                  border: Border.all(color: t.line),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                alignment: Alignment.center,
+                                child: Icon(
+                                  filter.buscando ? Icons.close : Icons.search,
+                                  size: 18,
+                                  color: filter.buscando ? t.accent : t.ink,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    if (filter.buscando)
+                      TextField(
+                        autofocus: true,
+                        onChanged: filterNotifier.pesquisar,
+                        textInputAction: TextInputAction.search,
+                        decoration: InputDecoration(
+                          hintText: 'Buscar por descrição ou categoria',
+                          helperText: filter.temBusca
+                              ? 'Buscando em todos os períodos'
+                              : null,
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: t.card.withValues(alpha: 0.35),
+                        ),
+                      ),
+                    SizedBox(
+                      height: 36,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: kTransactionPeriods.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 8),
+                        itemBuilder: (context, i) {
+                          final period = kTransactionPeriods[i];
+                          return AppFilterChip(
+                            label: period,
+                            selected: filter.period == period,
+                            outlinedWhenUnselected: true,
+                            onTap: () => filterNotifier.selectPeriod(period),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: t.line)),
+                      ),
+                      child: SizedBox(
+                        height: 34,
+                        child: ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: categoriasFiltro.length,
+                          separatorBuilder: (_, _) => const SizedBox(width: 8),
+                          itemBuilder: (context, i) {
+                            final category = categoriasFiltro[i];
+                            return AppFilterChip(
+                              label: category,
+                              selected: filter.category == category,
+                              onTap: () =>
+                                  filterNotifier.selectCategory(category),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                SizedBox(
-                  height: 36,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: kTransactionPeriods.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 8),
-                    itemBuilder: (context, i) {
-                      final period = kTransactionPeriods[i];
-                      return AppFilterChip(
-                        label: period,
-                        selected: filter.period == period,
-                        outlinedWhenUnselected: true,
-                        onTap: () => filterNotifier.selectPeriod(period),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(border: Border(bottom: BorderSide(color: t.line))),
-                  child: SizedBox(
-                    height: 34,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categoriasFiltro.length,
-                      separatorBuilder: (_, _) => const SizedBox(width: 8),
-                      itemBuilder: (context, i) {
-                        final category = categoriasFiltro[i];
-                        return AppFilterChip(
-                          label: category,
-                          selected: filter.category == category,
-                          onTap: () => filterNotifier.selectCategory(category),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: groups.isEmpty
-                ? Center(
-                    child: Text(
-                      'Nenhuma transação nesta categoria.',
-                      style: TextStyle(color: t.sub, fontSize: 14),
-                    ),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                    itemCount: groups.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 18),
-                    itemBuilder: (context, index) {
-                      final group = groups[index];
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        spacing: 8,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              Expanded(
+                child: groups.isEmpty
+                    ? Center(
+                        child: Text(
+                          'Nenhuma transação nesta categoria.',
+                          style: TextStyle(color: t.sub, fontSize: 14),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                        itemCount: groups.length,
+                        separatorBuilder: (_, _) => const SizedBox(height: 18),
+                        itemBuilder: (context, index) {
+                          final group = groups[index];
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            spacing: 8,
                             children: [
-                              Text(
-                                group.date,
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: t.sub),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    group.date,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: t.sub,
+                                    ),
+                                  ),
+                                  AppAmountText(
+                                    group.totalLabel,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w700,
+                                      color: t.sub,
+                                      fontFeatures: const [
+                                        FontFeature.tabularFigures(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              AppAmountText(
-                                group.totalLabel,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: t.sub,
-                                  fontFeatures: const [FontFeature.tabularFigures()],
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: t.card,
+                                  border: Border.all(color: t.line),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: Column(
+                                  children: [
+                                    for (var i = 0; i < group.items.length; i++)
+                                      TransactionRow(
+                                        transaction: group.items[i],
+                                        showTopBorder: i > 0,
+                                        onCategorize: (id) =>
+                                            _escolherCategoria(
+                                              context,
+                                              filterNotifier,
+                                              id,
+                                              categoriasFiltro.skip(1).toList(),
+                                            ),
+                                        onLongPress: (id) =>
+                                            _abrirAcoes(context, ref, id),
+                                      ),
+                                  ],
                                 ),
                               ),
                             ],
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: t.card,
-                              border: Border.all(color: t.line),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Column(
-                              children: [
-                                for (var i = 0; i < group.items.length; i++)
-                                  TransactionRow(
-                                    transaction: group.items[i],
-                                    showTopBorder: i > 0,
-                                    onCategorize: (id) => _escolherCategoria(context, filterNotifier, id, categoriasFiltro.skip(1).toList()),
-                                    onLongPress: (id) => _abrirAcoes(context, ref, id),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
               ),
             ],
           ),
@@ -218,13 +270,18 @@ class TransactionsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _abrirAcoes(BuildContext context, WidgetRef ref, String transacaoId) async {
+  Future<void> _abrirAcoes(
+    BuildContext context,
+    WidgetRef ref,
+    String transacaoId,
+  ) async {
     final transacoes = ref.read(transacoesStreamProvider).valueOrNull ?? [];
     final transacao = transacoes.where((x) => x.id == transacaoId).firstOrNull;
     if (transacao == null) return;
 
     final ehDespesa = transacao.valor < 0;
-    final podeParcelar = !transacao.ehParcela && !transacao.ehDividida && ehDespesa;
+    final podeParcelar =
+        !transacao.ehParcela && !transacao.ehDividida && ehDespesa;
     // Parcela e compra dividida têm valores derivados; editar o valor ali
     // deixaria o parcelamento/divisão inconsistente.
     final podeEditar = !transacao.ehParcela && !transacao.ehDividida;
@@ -250,7 +307,11 @@ class TransactionsScreen extends ConsumerWidget {
             if (ehDespesa)
               ListTile(
                 leading: const Icon(Icons.group_outlined),
-                title: Text(transacao.ehDividida ? 'Editar divisão' : 'Dividir com amigos'),
+                title: Text(
+                  transacao.ehDividida
+                      ? 'Editar divisão'
+                      : 'Dividir com amigos',
+                ),
                 onTap: () => Navigator.of(context).pop('dividir'),
               ),
             if (transacao.ehDividida)
@@ -273,24 +334,33 @@ class TransactionsScreen extends ConsumerWidget {
     switch (acao) {
       case 'editar':
         await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => NovaTransacaoScreen(transacao: transacao)),
+          MaterialPageRoute(
+            builder: (_) => NovaTransacaoScreen(transacao: transacao),
+          ),
         );
       case 'excluir':
         final confirmou = await AppConfirmDialog.mostrar(
           context,
           titulo: 'Excluir transação?',
-          mensagem: '"${transacao.descricao}" será removida. Essa ação não pode ser desfeita.',
+          mensagem:
+              '"${transacao.descricao}" será removida. Essa ação não pode ser desfeita.',
           rotuloConfirmar: 'Excluir',
           destrutivo: true,
         );
-        if (confirmou) await ref.read(excluirTransacaoUseCaseProvider).call(transacao.id);
+        if (confirmou) {
+          await ref.read(excluirTransacaoUseCaseProvider).call(transacao.id);
+        }
       case 'parcelar':
         await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ParcelarTransacaoScreen(transacao: transacao)),
+          MaterialPageRoute(
+            builder: (_) => ParcelarTransacaoScreen(transacao: transacao),
+          ),
         );
       case 'dividir':
         await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => DividirTransacaoScreen(transacao: transacao)),
+          MaterialPageRoute(
+            builder: (_) => DividirTransacaoScreen(transacao: transacao),
+          ),
         );
       case 'remover':
         await ref.read(removerDivisaoUseCaseProvider).call(transacao.id);
@@ -310,7 +380,9 @@ class TransactionsScreen extends ConsumerWidget {
         final t = context.tokens;
         return SafeArea(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -318,7 +390,11 @@ class TransactionsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     'Categorizar como',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: t.ink),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: t.ink,
+                    ),
                   ),
                 ),
                 Flexible(

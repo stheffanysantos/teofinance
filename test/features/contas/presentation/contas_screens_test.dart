@@ -204,7 +204,7 @@ void main() {
       expect(find.textContaining('em 5 dias'), findsOneWidget);
     });
 
-    testWidgets('conta paga não oferece Pagar nem Editar', (tester) async {
+    testWidgets('conta paga não tem botões; arrastar pede confirmação e exclui', (tester) async {
       final c = contas.semear('Água', hoje);
       await contas.marcarComoPaga(id: c.id, valorPago: 80, dataPagamento: hoje);
 
@@ -213,7 +213,15 @@ void main() {
 
       expect(find.text('Pagar'), findsNothing);
       expect(find.byTooltip('Editar'), findsNothing);
-      expect(find.byTooltip('Excluir'), findsOneWidget);
+      expect(find.byTooltip('Excluir'), findsNothing);
+
+      await tester.drag(find.text('Água'), const Offset(-500, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Excluir conta?'), findsOneWidget);
+
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+      expect(find.text('Água'), findsNothing);
     });
 
     testWidgets('pagar cria a despesa com o valor digitado e marca a conta como paga', (tester) async {

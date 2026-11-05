@@ -18,19 +18,23 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final tab = ref.watch(currentTabProvider);
+    // Com o teclado aberto o menu inferior some em vez de subir junto com ele.
+    final tecladoAberto = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
       backgroundColor: t.bg,
       body: Column(
         children: [
           Expanded(child: _contentFor(tab)),
-          SafeArea(
-            top: false,
-            child: AppBottomNav(
-              current: tab,
-              onTap: (next) => ref.read(currentTabProvider.notifier).state = next,
+          if (!tecladoAberto)
+            SafeArea(
+              top: false,
+              child: AppBottomNav(
+                current: tab,
+                onTap: (next) =>
+                    ref.read(currentTabProvider.notifier).state = next,
+              ),
             ),
-          ),
         ],
       ),
     );

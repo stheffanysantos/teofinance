@@ -32,7 +32,9 @@ class AppFilterChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? selectedBg : (outlinedWhenUnselected ? t.card : t.track),
+          color: selected
+              ? selectedBg
+              : (outlinedWhenUnselected ? t.card : t.track),
           borderRadius: BorderRadius.circular(999),
           border: outlinedWhenUnselected
               ? Border.all(color: selected ? selectedBg : t.line)
