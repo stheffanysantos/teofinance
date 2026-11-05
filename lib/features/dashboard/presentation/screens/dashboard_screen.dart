@@ -1,3 +1,4 @@
+import '../../../cartao/presentation/providers/cartao_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,7 +42,11 @@ class DashboardScreen extends ConsumerWidget {
     final metas = ref.watch(metasStreamProvider).valueOrNull ?? [];
     final reconciliacao = ref.watch(statusReconciliacaoMesProvider).valueOrNull;
     final contasResumo = ref.watch(resumoContasProvider);
-    final saldoFormatado = formatCurrency(summary.saldoTotal).split(',');
+    final faturasEmAberto = ref.watch(faturasEmAbertoTotalProvider);
+    // Com cartão, o valor grande é o saldo da conta (o crédito só sai quando a
+    // fatura é paga); o saldo depois das faturas fica numa linha abaixo.
+    final saldoNaConta = summary.saldoTotal + (faturasEmAberto ?? 0);
+    final saldoFormatado = formatCurrency(saldoNaConta).split(',');
 
     return SafeArea(
       bottom: false,
@@ -56,6 +61,9 @@ class DashboardScreen extends ConsumerWidget {
               integerPart: saldoFormatado.first,
               centsPart: saldoFormatado.length > 1 ? saldoFormatado[1] : '00',
               deltaLabel: formatCurrency(summary.deltaSaldoMes, comSinal: true),
+              titulo: faturasEmAberto == null ? 'Saldo total' : 'Saldo na conta',
+              faturasEmAberto: faturasEmAberto == null ? null : formatCurrency(faturasEmAberto),
+              saldoAposFaturas: faturasEmAberto == null ? null : formatCurrency(summary.saldoTotal),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AjustarSaldoScreen()),
               ),

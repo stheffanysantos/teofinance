@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../cartao/presentation/providers/cartao_providers.dart';
 import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../domain/entities/campo_coluna.dart';
@@ -206,7 +207,9 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
     // em receitas e despesas).
     final saldoBanco = state.saldoFinal;
     if (erro == null && state.ajustarSaldo && !state.ehCartao && saldoBanco != null) {
-      final ajuste = await ref.read(ajustarSaldoUseCaseProvider).call(saldoBanco);
+      // O saldo do banco ainda não desconta o crédito; o do app já desconta.
+      final emAberto = ref.read(faturasEmAbertoTotalProvider) ?? 0;
+      final ajuste = await ref.read(ajustarSaldoUseCaseProvider).call(saldoBanco - emAberto);
       erro = ajuste.match((falha) => falha.message, (_) => null);
     }
 

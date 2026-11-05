@@ -1,3 +1,4 @@
+import 'package:teofinance/features/cartao/presentation/providers/cartao_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +45,9 @@ class _AjustarSaldoScreenState extends ConsumerState<AjustarSaldoScreen> {
       _salvando = true;
       _erro = null;
     });
-    final r = await ref.read(ajustarSaldoUseCaseProvider).call(saldo);
+    // O usuário informa o saldo do banco; o do app já desconta as faturas em aberto.
+    final emAberto = ref.read(faturasEmAbertoTotalProvider) ?? 0;
+    final r = await ref.read(ajustarSaldoUseCaseProvider).call(saldo - emAberto);
     if (!mounted) return;
     r.match(
       (f) => setState(() {
@@ -59,7 +62,9 @@ class _AjustarSaldoScreenState extends ConsumerState<AjustarSaldoScreen> {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final transacoes = ref.watch(transacoesStreamProvider).valueOrNull ?? const [];
-    final atual = transacoes.fold<double>(0, (a, x) => a + x.valorNoSaldo);
+    final emAberto = ref.watch(faturasEmAbertoTotalProvider) ?? 0;
+    // Saldo na conta: o que o banco mostra (sem descontar o crédito ainda não pago).
+    final atual = transacoes.fold<double>(0, (a, x) => a + x.valorNoSaldo) + emAberto;
     final desejado = _lerValor();
 
     return AppFormPage(
@@ -71,7 +76,7 @@ class _AjustarSaldoScreenState extends ConsumerState<AjustarSaldoScreen> {
           'Esse ajuste não conta como receita nem como despesa.',
           style: TextStyle(color: t.sub, fontSize: 13.5, height: 1.4),
         ),
-        Text('Saldo atual no app: ${formatCurrency(atual)}', style: TextStyle(color: t.ink, fontWeight: FontWeight.w700)),
+        Text('Saldo na conta no app: ${formatCurrency(atual)}', style: TextStyle(color: t.ink, fontWeight: FontWeight.w700)),
         TextField(
           controller: _valor,
           autofocus: true,

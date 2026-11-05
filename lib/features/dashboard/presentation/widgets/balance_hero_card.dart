@@ -14,11 +14,23 @@ class BalanceHeroCard extends ConsumerWidget {
     required this.centsPart,
     required this.deltaLabel,
     this.onTap,
+    this.titulo = 'Saldo total',
+    this.faturasEmAberto,
+    this.saldoAposFaturas,
   });
 
   final String integerPart;
   final String centsPart;
   final String deltaLabel;
+
+  /// Rótulo do valor grande: "Saldo na conta" quando há cartão cadastrado.
+  final String titulo;
+
+  /// Total das faturas de cartão em aberto (só com cartão cadastrado).
+  final String? faturasEmAberto;
+
+  /// Saldo depois de pagar as faturas em aberto.
+  final String? saldoAposFaturas;
 
   /// Toque no cartão (abre o ajuste de saldo).
   final VoidCallback? onTap;
@@ -42,7 +54,7 @@ class BalanceHeroCard extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Saldo total',
+                  titulo,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: .75),
                     fontWeight: FontWeight.w500,
@@ -103,6 +115,12 @@ class BalanceHeroCard extends ConsumerWidget {
                   ),
               ],
             ),
+            if (faturasEmAberto != null && saldoAposFaturas != null) ...[
+              const SizedBox(height: 12),
+              _LinhaSaldo(rotulo: 'Faturas em aberto', valor: faturasEmAberto!),
+              const SizedBox(height: 4),
+              _LinhaSaldo(rotulo: 'Saldo após faturas', valor: saldoAposFaturas!),
+            ],
             const SizedBox(height: 14),
             Row(
               children: [
@@ -138,6 +156,31 @@ class BalanceHeroCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _LinhaSaldo extends StatelessWidget {
+  const _LinhaSaldo({required this.rotulo, required this.valor});
+
+  final String rotulo;
+  final String valor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            rotulo,
+            style: TextStyle(color: Colors.white.withValues(alpha: .75), fontWeight: FontWeight.w600, fontSize: 13),
+          ),
+        ),
+        AppAmountText(
+          valor,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
+        ),
+      ],
     );
   }
 }

@@ -213,5 +213,23 @@ void main() {
       expect((await lembretes.listar()).getOrElse((_) => []), isEmpty);
     });
   });
-}
 
+  test('total em aberto soma só as faturas não pagas de todos os cartões', () {
+    const a = Cartao(id: 'a', nome: 'A', diaFechamento: 25, diaVencimento: 5);
+    const b = Cartao(id: 'b', nome: 'B', diaFechamento: 25, diaVencimento: 5);
+    Transacao compra(String id, String cartao, DateTime d, double v) =>
+        Transacao(id: id, descricao: id, categoria: '', valor: v, data: d, cartaoId: cartao);
+
+    final total = totalEmAbertoNosCartoes(
+      cartoes: [a, b],
+      transacoes: [
+        compra('1', 'a', DateTime(2026, 10, 10), -100), // fatura de nov, paga abaixo
+        compra('2', 'a', DateTime(2026, 10, 30), -70), // fatura de dez, em aberto
+        compra('3', 'b', DateTime(2026, 10, 10), -50), // em aberto
+      ],
+      pagamentos: [FaturaPaga(cartaoId: 'a', ano: 2026, mes: 11, valor: 100, dataPagamento: DateTime(2026, 11, 5))],
+    );
+
+    expect(total, 120);
+  });
+}

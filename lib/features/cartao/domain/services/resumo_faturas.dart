@@ -53,3 +53,19 @@ List<ResumoFatura> resumirFaturas({
   ]..sort((a, b) => a.periodo.vencimento.compareTo(b.periodo.vencimento));
   return lista;
 }
+
+/// Soma das faturas ainda não pagas de todos os [cartoes]: o que já foi gasto no
+/// crédito mas o banco ainda não descontou da conta.
+double totalEmAbertoNosCartoes({
+  required List<Cartao> cartoes,
+  required List<Transacao> transacoes,
+  required List<FaturaPaga> pagamentos,
+}) {
+  var total = 0.0;
+  for (final c in cartoes) {
+    for (final f in resumirFaturas(cartao: c, transacoes: transacoes, pagamentos: pagamentos)) {
+      if (f.emAberto) total += f.total;
+    }
+  }
+  return total;
+}
