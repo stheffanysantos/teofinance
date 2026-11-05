@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
+import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
-import 'package:teofinance/features/budget/presentation/widgets/definir_limite_sheet.dart';
+import 'package:teofinance/features/budget/presentation/screens/definir_limite_screen.dart';
 
 const _meses = [
   'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -21,10 +22,8 @@ class BudgetScreen extends ConsumerWidget {
     required List<String> categoriasLivres,
     Orcamento? existente,
   }) {
-    return showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => DefinirLimiteSheet(categoriasLivres: categoriasLivres, existente: existente),
+    return Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => DefinirLimiteScreen(categoriasLivres: categoriasLivres, existente: existente)),
     );
   }
 
@@ -43,7 +42,7 @@ class BudgetScreen extends ConsumerWidget {
           ),
           data: (r) {
             final usadas = r.envelopes.map((e) => e.categoria).toSet();
-            final livres = DefinirLimiteSheet.categoriasOrcaveis().where((c) => !usadas.contains(c)).toList();
+            final livres = DefinirLimiteScreen.categoriasOrcaveis(ref.watch(categoriasProvider)).where((c) => !usadas.contains(c)).toList();
             return _Conteudo(
               resumo: r,
               onNovo: () => _abrirSheet(context, categoriasLivres: livres),

@@ -4,6 +4,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../providers/meta_providers.dart';
 
+/// Sugestões do campo Banco; o usuário pode digitar qualquer outro nome.
+const _kBancos = [
+  'Nubank',
+  'Itaú',
+  'Bradesco',
+  'Banco do Brasil',
+  'Caixa',
+  'Santander',
+  'Inter',
+  'C6 Bank',
+  'BTG Pactual',
+  'XP Investimentos',
+  'PicPay',
+  'Mercado Pago',
+  'Sicoob',
+  'Sicredi',
+];
+
 /// Cadastro de meta de investimento — item 7 do MVP (`.claude/plans/MVP.md`).
 class NovaMetaScreen extends ConsumerStatefulWidget {
   const NovaMetaScreen({super.key});
@@ -16,6 +34,8 @@ class _NovaMetaScreenState extends ConsumerState<NovaMetaScreen> {
   final _nomeController = TextEditingController();
   final _valorAlvoController = TextEditingController();
   final _valorAtualController = TextEditingController(text: '0');
+  final _bancoController = TextEditingController();
+  final _bancoFocus = FocusNode();
   DateTime _prazo = DateTime.now().add(const Duration(days: 365));
   bool _salvando = false;
   String? _erro;
@@ -25,6 +45,8 @@ class _NovaMetaScreenState extends ConsumerState<NovaMetaScreen> {
     _nomeController.dispose();
     _valorAlvoController.dispose();
     _valorAtualController.dispose();
+    _bancoController.dispose();
+    _bancoFocus.dispose();
     super.dispose();
   }
 
@@ -56,6 +78,7 @@ class _NovaMetaScreenState extends ConsumerState<NovaMetaScreen> {
           valorAlvo: valorAlvo,
           prazo: _prazo,
           valorAtual: valorAtual,
+          banco: _bancoController.text,
         );
 
     if (!mounted) return;
@@ -105,6 +128,41 @@ class _NovaMetaScreenState extends ConsumerState<NovaMetaScreen> {
                 decoration: const InputDecoration(
                   labelText: 'Já guardado (opcional)',
                   prefixText: 'R\$ ',
+                ),
+              ),
+              RawAutocomplete<String>(
+                textEditingController: _bancoController,
+                focusNode: _bancoFocus,
+                optionsBuilder: (valor) {
+                  final q = valor.text.trim().toLowerCase();
+                  return _kBancos.where((b) => q.isEmpty || b.toLowerCase().contains(q));
+                },
+                fieldViewBuilder: (context, controller, focusNode, onSubmitted) => TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'Banco (opcional)',
+                    hintText: 'Onde esse dinheiro está guardado',
+                    suffixIcon: Icon(Icons.account_balance_outlined),
+                  ),
+                ),
+                optionsViewBuilder: (context, onSelected, options) => Align(
+                  alignment: Alignment.topLeft,
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(12),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 220, maxWidth: 360),
+                      child: ListView(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        children: [
+                          for (final b in options) ListTile(dense: true, title: Text(b), onTap: () => onSelected(b)),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ),
               InkWell(

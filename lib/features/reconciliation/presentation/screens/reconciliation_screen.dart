@@ -1,3 +1,4 @@
+import 'package:teofinance/core/widgets/app_help_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -89,6 +90,18 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
         elevation: 0,
         title: Text('Reconciliação', style: TextStyle(color: t.ink, fontWeight: FontWeight.w700)),
         iconTheme: IconThemeData(color: t.ink),
+        actions: const [
+          AppHelpButton(
+            titulo: 'Como funciona a reconciliação',
+            paragrafos: [
+              'Reconciliar é conferir o seu extrato ou fatura com o que você lançou no app, para achar o que ficou de fora ou está diferente.',
+              'Você importa o arquivo do banco (OFX ou CSV) escolhendo "Reconciliar com minhas transações". As linhas do extrato ficam só no seu aparelho e não viram gastos.',
+              'O app procura, para cada linha do extrato, uma transação sua com o mesmo valor e data próxima. As que batem ficam como conciliadas.',
+              'Sobras de um lado ou do outro mostram o que falta lançar ou o que foi lançado errado. Você pode vincular manualmente uma linha a uma transação.',
+              'Fatura de cartão: use as compras com a data em que foram feitas (ex.: outubro), mesmo que o vencimento seja em novembro.',
+            ],
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(

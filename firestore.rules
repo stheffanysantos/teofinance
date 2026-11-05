@@ -56,6 +56,26 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      match /categorias/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /investimentos/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /lembretes/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /cartoes/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /faturas_pagas/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
       match /parcelamentos/{id} {
         allow read, delete: if isOwner(uid);
         allow create, update: if isOwner(uid) && validParcelamento(request.resource.data);

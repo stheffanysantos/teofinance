@@ -1,3 +1,7 @@
+import 'package:teofinance/features/cartao/presentation/providers/cartao_providers.dart';
+import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
+import 'package:teofinance/features/investimento/presentation/providers/investimento_providers.dart';
+import 'package:teofinance/features/lembrete/presentation/providers/lembrete_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -27,6 +31,10 @@ final syncEngineProvider = Provider<SyncEngine?>((ref) {
     parcelamentoRepository: ref.watch(parcelamentoRepositoryProvider),
     orcamentoRepository: ref.watch(orcamentoRepositoryProvider),
     contaRepository: ref.watch(contaRepositoryProvider),
+    categoriaRepository: ref.watch(categoriaRepositoryProvider),
+    investimentoRepository: ref.watch(investimentoRepositoryProvider),
+    lembreteRepository: ref.watch(lembreteRepositoryProvider),
+    cartaoRepository: ref.watch(cartaoRepositoryProvider),
     pausado: () => syncPausado(ref.read(secureStorageProvider)),
   );
 });

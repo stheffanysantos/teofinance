@@ -8,16 +8,21 @@ import '../../../auth/presentation/providers/auth_session_providers.dart';
 import '../../../contas/presentation/providers/lembretes_providers.dart';
 import '../../../contas/presentation/screens/contas_screen.dart';
 import '../../../contas/presentation/screens/notificacoes_screen.dart';
+import '../../../cartao/presentation/screens/cartoes_screen.dart';
+import '../../../categoria/presentation/screens/categorias_screen.dart';
+import '../../../investimento/presentation/screens/investimentos_screen.dart';
+import '../../../lembrete/presentation/screens/lembretes_screen.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../relatorio/presentation/screens/relatorios_screen.dart';
+import '../../../transacao/presentation/screens/reembolsos_screen.dart';
 import '../../../recorrentes/presentation/screens/gastos_recorrentes_screen.dart';
 import '../../../renda/presentation/screens/renda_screen.dart';
-import '../../../score/presentation/providers/score_providers.dart';
-import '../../../score/presentation/widgets/como_calculamos_score_sheet.dart';
+import '../../../relatorio/domain/services/fluxo_mensal.dart';
+import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../../sync/presentation/providers/sync_providers.dart';
 import '../../../../core/providers/discreet_mode_provider.dart';
 import '../providers/app_info_provider.dart';
-import '../widgets/financial_score_gauge.dart';
+import '../widgets/fluxo_mensal_card.dart';
 import '../widgets/settings_toggle_tile.dart';
 import 'sobre_screen.dart';
 
@@ -40,7 +45,7 @@ class ProfileScreen extends ConsumerWidget {
     final biometriaHabilitada = ref.watch(biometriaHabilitadaProvider).valueOrNull ?? false;
     final syncState = ref.watch(syncUiStateProvider);
     final appInfo = ref.watch(appInfoProvider);
-    final score = ref.watch(scoreFinanceiroProvider);
+    final transacoes = ref.watch(transacoesStreamProvider).valueOrNull ?? const [];
 
     return SafeArea(
       bottom: false,
@@ -51,15 +56,11 @@ class ProfileScreen extends ConsumerWidget {
           children: [
                     _ProfileHeader(
                       initials: iniciais,
-                      name: email.isNotEmpty ? email : 'Conta',
+                      name: email.isNotEmpty ? email.split('@').first : 'Conta',
                       memberSince: 'TeoFinance',
                     ),
                     const SizedBox(height: 18),
-                    FinancialScoreGauge(
-                      score: score.valueOrNull,
-                      carregando: score.isLoading,
-                      onTap: () => ComoCalculamosScoreSheet.mostrar(context, score.valueOrNull),
-                    ),
+                    FluxoMensalCard(meses: calcularFluxoMensal(transacoes, DateTime.now())),
                     const SizedBox(height: 18),
                     Text(
                       'CONFIGURAÇÕES',
@@ -123,6 +124,41 @@ class ProfileScreen extends ConsumerWidget {
                             title: 'Contas a pagar',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const ContasScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.trending_up, size: 18, color: t.ink),
+                            title: 'Investimentos',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const InvestimentosScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.credit_card, size: 18, color: t.ink),
+                            title: 'Cartões e faturas',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const CartoesScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.group_outlined, size: 18, color: t.ink),
+                            title: 'Reembolsos a receber',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ReembolsosScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.label_outline, size: 18, color: t.ink),
+                            title: 'Categorias',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const CategoriasScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.alarm, size: 18, color: t.ink),
+                            title: 'Meus lembretes',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const LembretesScreen()),
                             ),
                           ),
                           SettingsNavTile(

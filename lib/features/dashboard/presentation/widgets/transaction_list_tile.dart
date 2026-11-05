@@ -55,7 +55,14 @@ class TransactionListTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: t.ink)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: t.ink,
+                  ),
+                ),
                 Text(subtitle, style: TextStyle(fontSize: 12, color: t.sub)),
               ],
             ),

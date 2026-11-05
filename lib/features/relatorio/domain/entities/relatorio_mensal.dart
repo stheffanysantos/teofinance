@@ -1,3 +1,4 @@
+import 'package:teofinance/core/constants/categorias.dart';
 import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
 
 /// Resumo de um mês de transações, pronto para virar PDF ou CSV.
@@ -18,7 +19,14 @@ class RelatorioMensal {
     required int mes,
   }) {
     final doMes =
-        todas.where((t) => t.data.year == ano && t.data.month == mes).toList()
+        todas
+            .where(
+              (t) =>
+                  t.data.year == ano &&
+                  t.data.month == mes &&
+                  t.categoria != kCategoriaAjusteSaldo,
+            )
+            .toList()
           ..sort((a, b) => a.data.compareTo(b.data));
 
     var receitas = 0.0;

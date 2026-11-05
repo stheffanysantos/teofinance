@@ -16,6 +16,18 @@ class _FakeTransacoes implements TransacaoRepository {
   @override
   Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
 
+  @override
+  Future<Either<Failure, Unit>> editar({required String id, required String descricao, required double valor, required DateTime data, required String categoria}) async => const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> definirCartao({required String id, String? cartaoId}) async => const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> vincularCartao({required List<String> ids, required String cartaoId}) async => const Right(unit);
+
+  @override
+  Future<void> aplicarCartaoRemoto({required String remoteId, String? cartaoId}) async {}
+
   _FakeTransacoes(this.dados);
   final List<Transacao> dados;
 

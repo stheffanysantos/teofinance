@@ -56,10 +56,56 @@ class TransacaoLocalDataSource {
             value: t.valor,
             occurredAt: t.data,
             needsCategory: Value(t.categoria.trim().isEmpty),
+            cartaoId: Value(t.cartaoId),
           );
         }).toList(),
       );
     });
+  }
+
+  Future<void> editar({
+    required String id,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String categoria,
+  }) {
+    return (_db.update(_db.transactionsTable)..where((t) => t.id.equals(id))).write(
+      TransactionsTableCompanion(
+        name: Value(descricao),
+        value: Value(valor),
+        occurredAt: Value(data),
+        category: Value(categoria),
+        needsCategory: Value(categoria.trim().isEmpty),
+        syncStatus: const Value(SyncStatus.pendingUpdate),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> definirCartao({required String id, String? cartaoId}) {
+    return (_db.update(_db.transactionsTable)..where((t) => t.id.equals(id))).write(
+      TransactionsTableCompanion(
+        cartaoId: Value(cartaoId),
+        syncStatus: const Value(SyncStatus.pendingUpdate),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+  }
+
+  Future<void> vincularCartao({required List<String> ids, required String cartaoId}) {
+    return _db.transaction(() async {
+      for (final id in ids) {
+        await definirCartao(id: id, cartaoId: cartaoId);
+      }
+    });
+  }
+
+  /// Aplica o cartão vindo do Firestore, sem sobrescrever edição local pendente.
+  Future<void> aplicarCartaoRemoto({required String remoteId, String? cartaoId}) {
+    return (_db.update(_db.transactionsTable)
+          ..where((t) => t.remoteId.equals(remoteId) & t.syncStatus.equalsValue(SyncStatus.synced)))
+        .write(TransactionsTableCompanion(cartaoId: Value(cartaoId)));
   }
 
   Future<void> categorizar({required String id, required String categoria}) {
@@ -291,6 +337,7 @@ class TransacaoLocalDataSource {
       divididoCom: linha.divididoCom == null
           ? const []
           : (jsonDecode(linha.divididoCom!) as List).cast<String>(),
+      cartaoId: linha.cartaoId,
     );
   }
 }

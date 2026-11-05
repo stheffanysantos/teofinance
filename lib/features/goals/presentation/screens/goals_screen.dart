@@ -1,4 +1,6 @@
+import 'package:teofinance/features/meta/presentation/screens/aporte_meta_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:teofinance/core/widgets/app_help_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
@@ -30,6 +32,19 @@ class GoalsScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned(
+              top: 0,
+              right: 8,
+              child: AppHelpButton(
+                titulo: 'Como funcionam as metas',
+                paragrafos: [
+                  'Meta é um objetivo com valor e prazo: reserva de emergência, viagem, entrada de um carro.',
+                  'Meta ativa é a que ainda não foi concluída. O anel mostra quanto já foi guardado em relação ao valor-alvo.',
+                  'Quando você registra um aporte, o valor atual da meta sobe e o percentual avança.',
+                  'O "aporte mensal sugerido" é quanto guardar por mês para chegar no valor até o prazo; o total das metas aparece somado no topo da tela.',
+                ],
+              ),
+            ),
             metas.isEmpty
                 ? Center(
                     child: Text(
@@ -139,35 +154,10 @@ class _MetaCard extends ConsumerWidget {
 
   final Meta meta;
 
-  Future<void> _aportar(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController();
-    final valor = await showDialog<double>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Registrar aporte'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Valor', prefixText: 'R\$ '),
-          ),
-          actions: [
-            TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancelar')),
-            FilledButton(
-              onPressed: () {
-                final v = double.tryParse(controller.text.replaceAll(',', '.'));
-                Navigator.of(context).pop(v);
-              },
-              child: const Text('Confirmar'),
-            ),
-          ],
-        );
-      },
+  Future<void> _aportar(BuildContext context, WidgetRef ref) {
+    return Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => AporteMetaScreen(meta: meta)),
     );
-    if (valor != null && valor > 0) {
-      await ref.read(aportarMetaUseCaseProvider).call(id: meta.id, valor: valor);
-    }
   }
 
   @override
@@ -208,6 +198,8 @@ class _MetaCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(meta.nome, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: t.ink)),
+                      if (meta.banco != null)
+                        Text(meta.banco!, style: TextStyle(fontSize: 12, color: t.sub)),
                       Text(
                         'Prazo estimado · $eta',
                         style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: t.sub),

@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:teofinance/features/ai_assistant/data/services/gerenciador_modelo_indisponivel.dart';
+import 'package:teofinance/features/ai_assistant/data/services/inferencia_local_indisponivel.dart';
+import 'package:teofinance/features/ai_assistant/presentation/providers/ai_assistant_providers.dart';
 import 'package:fpdart/fpdart.dart';
 
-import 'package:teofinance/features/score/domain/entities/score_financeiro.dart';
-import 'package:teofinance/features/score/presentation/providers/score_providers.dart';
 import 'package:teofinance/features/meta/domain/entities/meta.dart';
 import 'package:teofinance/features/meta/domain/repositories/meta_repository.dart';
 import 'package:teofinance/features/meta/presentation/providers/meta_providers.dart';
@@ -27,7 +28,10 @@ import 'package:teofinance/main.dart';
 /// Usuário logado fixo, sem biometria habilitada — evita qualquer chamada
 /// real ao Firebase/local_auth nos testes de widget.
 class FakeAuthRepository implements AuthRepository {
-  static const _usuario = Usuario(uid: 'test-uid', email: 'marina@teofinance.app');
+  static const _usuario = Usuario(
+    uid: 'test-uid',
+    email: 'marina@teofinance.app',
+  );
 
   @override
   Usuario? get usuarioAtual => _usuario;
@@ -36,12 +40,16 @@ class FakeAuthRepository implements AuthRepository {
   Stream<Usuario?> watchUsuarioAtual() => Stream.value(_usuario);
 
   @override
-  Future<Either<Failure, Usuario>> login({required String email, required String senha}) async =>
-      const Right(_usuario);
+  Future<Either<Failure, Usuario>> login({
+    required String email,
+    required String senha,
+  }) async => const Right(_usuario);
 
   @override
-  Future<Either<Failure, Usuario>> cadastrar({required String email, required String senha}) async =>
-      const Right(_usuario);
+  Future<Either<Failure, Usuario>> cadastrar({
+    required String email,
+    required String senha,
+  }) async => const Right(_usuario);
 
   @override
   Future<Either<Failure, Unit>> logout() async => const Right(unit);
@@ -53,19 +61,51 @@ class FakeAuthRepository implements AuthRepository {
   Future<bool> biometriaHabilitada() async => false;
 
   @override
-  Future<Either<Failure, Unit>> definirBiometriaHabilitada(bool habilitada) async => const Right(unit);
+  Future<Either<Failure, Unit>> definirBiometriaHabilitada(
+    bool habilitada,
+  ) async => const Right(unit);
 
   @override
-  Future<Either<Failure, Unit>> autenticarComBiometria() async => const Right(unit);
+  Future<Either<Failure, Unit>> autenticarComBiometria() async =>
+      const Right(unit);
 }
 
 /// Transações em memória — evita depender do drift/sqlite3 nativo nos
 /// testes de widget.
 class FakeTransacaoRepository implements TransacaoRepository {
   @override
-  Future<Either<Failure, Unit>> criarEmLote(List itens) async => const Right(unit);
+  Future<Either<Failure, Unit>> criarEmLote(List itens) async =>
+      const Right(unit);
 
-  FakeTransacaoRepository([List<Transacao>? iniciais]) : _itens = iniciais ?? [];
+  @override
+  Future<Either<Failure, Unit>> editar({
+    required String id,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String categoria,
+  }) async => const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> definirCartao({
+    required String id,
+    String? cartaoId,
+  }) async => const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> vincularCartao({
+    required List<String> ids,
+    required String cartaoId,
+  }) async => const Right(unit);
+
+  @override
+  Future<void> aplicarCartaoRemoto({
+    required String remoteId,
+    String? cartaoId,
+  }) async {}
+
+  FakeTransacaoRepository([List<Transacao>? iniciais])
+    : _itens = iniciais ?? [];
 
   final List<Transacao> _itens;
   final _controller = StreamController<List<Transacao>>.broadcast();
@@ -101,7 +141,10 @@ class FakeTransacaoRepository implements TransacaoRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> categorizar({required String id, required String categoria}) async {
+  Future<Either<Failure, Unit>> categorizar({
+    required String id,
+    required String categoria,
+  }) async {
     final indice = _itens.indexWhere((t) => t.id == id);
     if (indice != -1) {
       final anterior = _itens[indice];
@@ -134,7 +177,10 @@ class FakeTransacaoRepository implements TransacaoRepository {
   Future<void> confirmarExclusao(String id) async {}
 
   @override
-  Future<void> confirmarSincronizacao({required String id, required String remoteId}) async {}
+  Future<void> confirmarSincronizacao({
+    required String id,
+    required String remoteId,
+  }) async {}
 
   @override
   Future<void> aplicarRemoto({
@@ -168,8 +214,9 @@ class _ModoLigado extends ModoDiscretoNotifier {
 
 class _FakeOrcamentoRepository implements OrcamentoRepository {
   @override
-  Stream<List<Orcamento>> observarTodos() =>
-      Stream.value(const [Orcamento(id: 'o1', categoria: 'Mercado', limite: 500)]);
+  Stream<List<Orcamento>> observarTodos() => Stream.value(const [
+    Orcamento(id: 'o1', categoria: 'Mercado', limite: 500),
+  ]);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -183,17 +230,21 @@ class _FakeMetaRepository implements MetaRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto = false}) {
+ProviderScope _pumpApp({
+  TransacaoRepository? transacaoRepository,
+  bool discreto = false,
+}) {
   return ProviderScope(
     overrides: [
       authRepositoryProvider.overrideWithValue(FakeAuthRepository()),
       syncEngineProvider.overrideWithValue(null),
       orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
       metaRepositoryProvider.overrideWithValue(_FakeMetaRepository()),
-      scoreFinanceiroProvider.overrideWith(
-        (ref) async => const ScoreFinanceiro([
-          ComponenteScore(nome: 'Poupança do mês', peso: 30, fracao: 0.5, detalhe: 'Você guardou 10% da renda.'),
-        ]),
+      inferenciaLocalProvider.overrideWithValue(
+        const InferenciaLocalIndisponivel(),
+      ),
+      gerenciadorModeloProvider.overrideWithValue(
+        const GerenciadorModeloIndisponivel(),
       ),
       if (discreto) modoDiscretoProvider.overrideWith(() => _ModoLigado()),
       transacaoRepositoryProvider.overrideWithValue(
@@ -205,7 +256,9 @@ ProviderScope _pumpApp({TransacaoRepository? transacaoRepository, bool discreto 
 }
 
 void main() {
-  testWidgets('Dashboard no Modo Discreto esconde o saldo e as despesas', (WidgetTester tester) async {
+  testWidgets('Dashboard no Modo Discreto esconde o saldo e as despesas', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(_pumpApp(discreto: true));
     await tester.pumpAndSettle();
 
@@ -226,14 +279,13 @@ void main() {
     await tester.tap(find.text('Perfil'));
     await tester.pumpAndSettle();
 
-    expect(find.text('marina@teofinance.app'), findsOneWidget);
-    expect(find.text('500'), findsOneWidget);
-    expect(find.text('Regular'), findsOneWidget);
+    expect(find.text('marina'), findsOneWidget);
+    expect(find.text('Receitas x despesas'), findsOneWidget);
 
     await tester.tap(find.text('Escuro'), warnIfMissed: false);
     await tester.pumpAndSettle();
 
-    expect(find.text('marina@teofinance.app'), findsOneWidget);
+    expect(find.text('marina'), findsOneWidget);
   });
 
   testWidgets('Transações mostra os grupos por data e permite categorizar', (
@@ -266,7 +318,9 @@ void main() {
     expect(find.text('Sem categoria'), findsNothing);
   });
 
-  testWidgets('Chat IA responde a um chip de sugestão', (WidgetTester tester) async {
+  testWidgets('Chat IA responde a um chip de sugestão', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(_pumpApp());
     await tester.pumpAndSettle();
 
@@ -281,29 +335,30 @@ void main() {
     expect(find.textContaining('Não há lançamentos'), findsOneWidget);
   });
 
-  testWidgets('Traga seus dados abre a partir de Transações e leva à importação, sem Open Finance', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Traga seus dados abre a partir de Transações e leva à importação, sem Open Finance',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(_pumpApp());
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Contas'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Contas'));
+      await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.add).first);
-    await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.add).first);
+      await tester.pumpAndSettle();
 
-    expect(find.text('Traga seus dados'), findsOneWidget);
-    expect(find.text('Importar arquivo OFX ou CSV'), findsOneWidget);
-    expect(find.textContaining('Open Finance'), findsNothing);
-    expect(find.text('Escolher meu banco'), findsNothing);
+      expect(find.text('Traga seus dados'), findsOneWidget);
+      expect(find.text('Importar arquivo OFX ou CSV'), findsOneWidget);
+      expect(find.textContaining('Open Finance'), findsNothing);
+      expect(find.text('Escolher meu banco'), findsNothing);
 
-    await tester.tap(find.text('Selecionar arquivo'));
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Selecionar arquivo'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('Importar extrato'), findsOneWidget);
-    expect(find.textContaining('OFX ou CSV'), findsOneWidget);
-  });
+      expect(find.text('Importar extrato'), findsOneWidget);
+      expect(find.textContaining('OFX ou CSV'), findsOneWidget);
+    },
+  );
 
   testWidgets('Orçamento abre a partir do Dashboard e mostra os envelopes', (
     WidgetTester tester,
@@ -319,16 +374,20 @@ void main() {
     expect(find.text('Mercado'), findsOneWidget);
   });
 
-  testWidgets('Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(_pumpApp());
-    await tester.pumpAndSettle();
+  testWidgets(
+    'Metas abre a partir do Dashboard e mostra o estado vazio sem metas cadastradas',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(_pumpApp());
+      await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Metas ativas'));
-    await tester.tap(find.text('Metas ativas'));
-    await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Metas ativas'));
+      await tester.tap(find.text('Metas ativas'));
+      await tester.pumpAndSettle();
 
-    expect(find.textContaining('Nenhuma meta cadastrada ainda.'), findsOneWidget);
-  });
+      expect(
+        find.textContaining('Nenhuma meta cadastrada ainda.'),
+        findsOneWidget,
+      );
+    },
+  );
 }

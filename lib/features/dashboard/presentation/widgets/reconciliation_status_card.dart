@@ -41,12 +41,20 @@ class ReconciliationStatusCard extends StatelessWidget {
               children: [
                 Text(
                   'Reconciliação do mês',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: t.ink),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: t.ink,
+                  ),
                 ),
                 if (temExtrato)
                   Text(
                     '$reconciliadas de $totalLinhas',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: t.sub),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: t.sub,
+                    ),
                   ),
               ],
             ),

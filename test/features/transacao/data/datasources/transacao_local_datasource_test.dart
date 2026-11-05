@@ -103,8 +103,8 @@ void main() {
 
   test('criarEmLote grava todas, pendentes de sync, e marca as sem categoria', () async {
     await datasource.criarEmLote([
-      (descricao: 'Mercado', valor: -50.0, data: dia, categoria: 'Mercado'),
-      (descricao: 'Pix recebido', valor: 200.0, data: dia, categoria: ''),
+      (descricao: 'Mercado', valor: -50.0, data: dia, categoria: 'Mercado', cartaoId: null),
+      (descricao: 'Pix recebido', valor: 200.0, data: dia, categoria: '', cartaoId: null),
     ]);
 
     final todas = await datasource.observarTodas().first;
@@ -113,5 +113,25 @@ void main() {
     expect(pendentes, hasLength(2));
     expect(todas.firstWhere((t) => t.descricao == 'Pix recebido').precisaCategoria, isTrue);
     expect(todas.firstWhere((t) => t.descricao == 'Mercado').precisaCategoria, isFalse);
+  });
+
+  test('editar altera os dados, recategoriza e marca para sincronizar', () async {
+    final t = await datasource.criar(descricao: 'Mercdo', valor: -80, data: dia, categoria: '');
+    await datasource.confirmarSincronizacao(id: t.id, remoteId: 'remoto-1');
+
+    await datasource.editar(
+      id: t.id,
+      descricao: 'Mercado',
+      valor: -85.5,
+      data: dia.add(const Duration(days: 1)),
+      categoria: 'Mercado',
+    );
+
+    final editada = (await datasource.observarTodas().first).single;
+    expect(editada.descricao, 'Mercado');
+    expect(editada.valor, -85.5);
+    expect(editada.data, dia.add(const Duration(days: 1)));
+    expect(editada.precisaCategoria, isFalse);
+    expect(await datasource.listarPendentes(), hasLength(1));
   });
 }

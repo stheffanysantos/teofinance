@@ -6,6 +6,7 @@ import '../../domain/entities/renda.dart';
 import '../providers/renda_providers.dart';
 import 'nova_renda_screen.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
+import 'package:teofinance/core/widgets/app_help_button.dart';
 
 /// Lista de rendas fixas e variáveis cadastradas — acessada a partir do
 /// Perfil ("Minhas rendas").
@@ -30,6 +31,17 @@ class RendaScreen extends ConsumerWidget {
         elevation: 0,
         title: Text('Minhas rendas', style: TextStyle(color: t.ink)),
         iconTheme: IconThemeData(color: t.ink),
+        actions: const [
+          AppHelpButton(
+            titulo: 'Como funcionam as rendas',
+            paragrafos: [
+              'Aqui você cadastra o dinheiro que entra: salário, aluguel recebido, freelas, rendimentos.',
+              'Renda fixa é a que se repete com valor previsível (ex.: salário todo mês). O total das fixas aparece como "Renda fixa mensal" e serve de base para planejar o mês.',
+              'Renda variável muda de valor ou de data (ex.: freelas, comissões). Cadastre quando souber que vai receber.',
+              'A recorrência (semanal, mensal, anual) diz quando a renda volta a acontecer. Para registrar o que realmente caiu na conta, lance uma transação do tipo Receita.',
+            ],
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: t.accent,

@@ -18,7 +18,7 @@ class DividirTransacaoScreen extends ConsumerStatefulWidget {
 
 class _DividirTransacaoScreenState extends ConsumerState<DividirTransacaoScreen> {
   late final TextEditingController _pessoasController = TextEditingController(
-    text: widget.transacao.divididoCom.join(', '),
+    text: widget.transacao.pessoasDaDivisao.join(', '),
   );
   late final TextEditingController _parteController = TextEditingController(
     text: widget.transacao.minhaParte?.toStringAsFixed(2) ?? '',
@@ -66,7 +66,7 @@ class _DividirTransacaoScreenState extends ConsumerState<DividirTransacaoScreen>
           id: widget.transacao.id,
           valorTotal: widget.transacao.valorCobrado,
           minhaParte: parte,
-          pessoas: _pessoas,
+          pessoas: widget.transacao.preservandoReembolsos(_pessoas),
         );
 
     if (!mounted) return;

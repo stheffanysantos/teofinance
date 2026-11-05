@@ -8,6 +8,7 @@ import 'package:teofinance/core/theme/app_colors.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/contas/presentation/providers/conta_providers.dart';
 import 'package:teofinance/features/contas/presentation/providers/lembretes_providers.dart';
+import 'package:teofinance/features/lembrete/presentation/providers/lembrete_providers.dart';
 import 'package:teofinance/features/contas/presentation/screens/notificacoes_screen.dart';
 
 class _Armazenamento implements FlutterSecureStorage {
@@ -66,6 +67,7 @@ void main() {
       notificacaoServiceProvider.overrideWithValue(servico),
       secureStorageProvider.overrideWithValue(armazenamento),
       contasStreamProvider.overrideWith((ref) => Stream.value(contas)),
+      lembretesPersonalizadosProvider.overrideWith((ref) async => const []),
     ]);
     addTearDown(c.dispose);
     return c;
@@ -146,6 +148,7 @@ void main() {
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       await c.read(configLembretesProvider.notifier).definirAtivo(false);
+      await c.read(configLembretesProvider.notifier).definirExtratoAtivo(false);
       await Future<void>.delayed(const Duration(milliseconds: 50));
 
       expect(servico.cancelamentos, greaterThan(0));
@@ -165,7 +168,7 @@ void main() {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isFalse);
+      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile).first).value, isFalse);
       expect(find.text('Permissão do sistema pendente'), findsOneWidget);
     });
 
@@ -173,11 +176,11 @@ void main() {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
       expect(servico.pedidos, 1);
-      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isTrue);
+      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile).first).value, isTrue);
     });
 
     testWidgets('permissão negada mantém desligado e explica onde liberar', (tester) async {
@@ -185,10 +188,10 @@ void main() {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byType(Switch));
+      await tester.tap(find.byType(Switch).first);
       await tester.pumpAndSettle();
 
-      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile)).value, isFalse);
+      expect(tester.widget<SwitchListTile>(find.byType(SwitchListTile).first).value, isFalse);
       expect(find.textContaining('Configurações > Apps'), findsOneWidget);
     });
 

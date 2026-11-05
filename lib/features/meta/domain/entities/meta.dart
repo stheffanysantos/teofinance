@@ -10,6 +10,7 @@ class Meta {
     required this.valorAtual,
     required this.valorAlvo,
     required this.prazo,
+    this.banco,
     this.remoteId,
     this.syncStatus = SyncStatus.pendingCreate,
   });
@@ -19,6 +20,9 @@ class Meta {
   final double valorAtual;
   final double valorAlvo;
   final DateTime prazo;
+
+  /// Banco ou instituição onde a meta está guardada (opcional).
+  final String? banco;
   final String? remoteId;
   final SyncStatus syncStatus;
 

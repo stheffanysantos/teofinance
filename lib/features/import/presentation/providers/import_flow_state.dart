@@ -25,6 +25,11 @@ class ImportFlowState {
     this.paraReconciliacao = false,
     this.formato = FormatoExtrato.csv,
     this.instituicao,
+    this.saldoFinal,
+    this.ehCartao = false,
+    this.cartaoId,
+    this.ignoradas = const {},
+    this.ajustarSaldo = false,
   });
 
   final ImportEtapa etapa;
@@ -48,7 +53,32 @@ class ImportFlowState {
   /// Banco informado pelo próprio arquivo (OFX); no CSV vem do Perfil de Banco.
   final String? instituicao;
 
-  int get quantidadeSemCategoria => transacoes.where((t) => t.precisaCategoria).length;
+  /// Saldo final informado pelo banco no OFX de conta corrente.
+  final double? saldoFinal;
+
+  /// O arquivo é uma fatura de cartão.
+  final bool ehCartao;
+
+  /// Cartão ao qual as compras importadas serão vinculadas; nulo = nenhum.
+  final String? cartaoId;
+
+  /// Posições (em [transacoes]) que o usuário tirou da importação — começa com
+  /// os pagamentos de fatura, que já estão contados nas compras do cartão.
+  final Set<int> ignoradas;
+
+  /// Ajustar o "Saldo total" do app ao [saldoFinal] depois de importar.
+  final bool ajustarSaldo;
+
+  /// O que de fato será importado.
+  List<TransacaoImportada> get efetivas => [
+    for (var i = 0; i < transacoes.length; i++)
+      if (!ignoradas.contains(i)) transacoes[i],
+  ];
+
+  double get entradas => efetivas.where((t) => t.valor > 0).fold(0.0, (a, t) => a + t.valor);
+  double get saidas => efetivas.where((t) => t.valor < 0).fold(0.0, (a, t) => a + t.valor.abs());
+
+  int get quantidadeSemCategoria => efetivas.where((t) => t.precisaCategoria).length;
 
   ImportFlowState copyWith({
     ImportEtapa? etapa,
@@ -67,6 +97,12 @@ class ImportFlowState {
     bool? paraReconciliacao,
     FormatoExtrato? formato,
     String? instituicao,
+    double? saldoFinal,
+    bool? ehCartao,
+    String? cartaoId,
+    bool limparCartao = false,
+    Set<int>? ignoradas,
+    bool? ajustarSaldo,
   }) {
     return ImportFlowState(
       etapa: etapa ?? this.etapa,
@@ -84,6 +120,11 @@ class ImportFlowState {
       paraReconciliacao: paraReconciliacao ?? this.paraReconciliacao,
       formato: formato ?? this.formato,
       instituicao: instituicao ?? this.instituicao,
+      saldoFinal: saldoFinal ?? this.saldoFinal,
+      ehCartao: ehCartao ?? this.ehCartao,
+      cartaoId: limparCartao ? null : (cartaoId ?? this.cartaoId),
+      ignoradas: ignoradas ?? this.ignoradas,
+      ajustarSaldo: ajustarSaldo ?? this.ajustarSaldo,
     );
   }
 }

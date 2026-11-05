@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
+import 'package:teofinance/core/widgets/app_help_button.dart';
 import 'package:teofinance/core/utils/currency_format.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 import 'package:teofinance/core/widgets/app_confirm_dialog.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/contas/presentation/providers/conta_providers.dart';
 import 'package:teofinance/features/contas/presentation/screens/conta_form_screen.dart';
-import 'package:teofinance/features/contas/presentation/widgets/pagar_conta_sheet.dart';
+import 'package:teofinance/features/contas/presentation/screens/pagar_conta_screen.dart';
 
 String _data(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
@@ -20,10 +21,8 @@ class ContasScreen extends ConsumerWidget {
   }
 
   Future<void> _pagar(BuildContext context, ContaAPagar conta) {
-    return showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (_) => PagarContaSheet(conta: conta),
+    return Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => PagarContaScreen(conta: conta)),
     );
   }
 
@@ -50,6 +49,17 @@ class ContasScreen extends ConsumerWidget {
         elevation: 0,
         iconTheme: IconThemeData(color: t.ink),
         title: Text('Contas a pagar', style: TextStyle(color: t.ink, fontWeight: FontWeight.w700)),
+        actions: const [
+          AppHelpButton(
+            titulo: 'Como funcionam as contas a pagar',
+            paragrafos: [
+              'Cadastre boletos, mensalidades e impostos com a data de vencimento. O app mostra o que está atrasado, o que vence hoje e o que ainda vai vencer.',
+              'Contas que se repetem (todo mês ou todo ano) geram o próximo vencimento sozinhas depois que você marca como paga.',
+              'Ao tocar em Pagar, o app cria a despesa correspondente nas suas transações, com o valor real pago (útil em contas variáveis como luz e água).',
+              'O lembrete avisa alguns dias antes e no dia do vencimento. Você liga, desliga e escolhe o horário em Avisos > Configurar lembretes.',
+            ],
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: t.accent,

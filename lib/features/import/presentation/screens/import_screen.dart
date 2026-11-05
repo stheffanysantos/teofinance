@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../cartao/presentation/providers/cartao_providers.dart';
 import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
 import '../../domain/entities/campo_coluna.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
+import '../../domain/services/pagamento_fatura.dart';
 import '../../domain/usecases/detectar_duplicatas_usecase.dart';
 import '../providers/import_flow_notifier.dart';
 import '../providers/import_flow_state.dart';
+import 'package:teofinance/core/utils/currency_format.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 /// Tela de importação de extrato — cobre os passos 1-7 de
@@ -49,10 +52,10 @@ class _SelecaoArquivo extends ConsumerWidget {
   final ImportFlowState state;
 
   Future<void> _escolherArquivo(WidgetRef ref) async {
-    final arquivo = await FilePicker.pickFile(
-      type: FileType.custom,
-      allowedExtensions: ['csv', 'ofx', 'qfx', 'txt'],
-    );
+    // Sem filtro por extensão: o seletor do Android filtra por tipo MIME, e
+    // `.ofx` não tem um — o arquivo aparecia desabilitado. O formato (OFX ou
+    // CSV) é detectado pelo conteúdo em `ImportarExtratoUseCase.detectarFormato`.
+    final arquivo = await FilePicker.pickFile();
     if (arquivo == null) return;
 
     final bytes = await arquivo.readAsBytes();
@@ -313,6 +316,11 @@ class _Revisao extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
+    final notifier = ref.read(importFlowProvider.notifier);
+    final cartoes = ref.watch(cartoesProvider).valueOrNull ?? const [];
+    final saldoFinal = state.saldoFinal;
+    final saldoArquivo = state.entradas - state.saidas;
+    final ignoradas = state.ignoradas.length;
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -320,9 +328,56 @@ class _Revisao extends ConsumerWidget {
         spacing: 14,
         children: [
           Text(
-            '${state.transacoes.length} transações encontradas',
+            '${state.efetivas.length} transações para importar',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: t.ink),
           ),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: t.card,
+              border: Border.all(color: t.line),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              spacing: 6,
+              children: [
+                _LinhaTotal(rotulo: 'Entradas', valor: formatCurrency(state.entradas), cor: t.pos),
+                _LinhaTotal(rotulo: 'Saídas', valor: formatCurrency(state.saidas), cor: t.neg),
+                Divider(color: t.line, height: 8),
+                _LinhaTotal(rotulo: 'Saldo do arquivo', valor: formatCurrency(saldoArquivo, comSinal: true), cor: t.ink, forte: true),
+                if (saldoFinal != null && !state.ehCartao)
+                  _LinhaTotal(rotulo: 'Saldo final no banco', valor: formatCurrency(saldoFinal), cor: t.ink),
+              ],
+            ),
+          ),
+          if (ignoradas > 0)
+            Text(
+              '$ignoradas ${ignoradas == 1 ? 'linha fora' : 'linhas fora'} da importação: pagamento de fatura de cartão. '
+              'As compras do cartão já contam como despesa, então não entram de novo. Marque a linha para incluir.',
+              style: TextStyle(color: t.sub, fontSize: 12.5),
+            ),
+          if (saldoFinal != null && !state.ehCartao)
+            CheckboxListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              controlAffinity: ListTileControlAffinity.leading,
+              value: state.ajustarSaldo,
+              onChanged: (v) => notifier.definirAjustarSaldo(v ?? false),
+              title: Text('Ajustar meu saldo para ${formatCurrency(saldoFinal)}', style: TextStyle(color: t.ink, fontSize: 14)),
+              subtitle: Text('Use se este for o extrato mais recente da conta.', style: TextStyle(color: t.sub, fontSize: 12)),
+            ),
+          if (state.ehCartao || cartoes.isNotEmpty)
+            DropdownButtonFormField<String?>(
+              initialValue: cartoes.any((c) => c.id == state.cartaoId) ? state.cartaoId : null,
+              decoration: InputDecoration(
+                labelText: state.ehCartao ? 'Esta é uma fatura de cartão: qual cartão?' : 'Vincular a um cartão (opcional)',
+              ),
+              items: [
+                const DropdownMenuItem<String?>(value: null, child: Text('Nenhum')),
+                for (final c in cartoes) DropdownMenuItem<String?>(value: c.id, child: Text(c.nome)),
+              ],
+              onChanged: notifier.definirCartao,
+            ),
           if (state.quantidadeSemCategoria > 0)
             Text(
               '${state.quantidadeSemCategoria} ficarão marcadas como "sem categoria" — você categoriza '
@@ -335,20 +390,26 @@ class _Revisao extends ConsumerWidget {
               separatorBuilder: (_, _) => Divider(color: t.line, height: 1),
               itemBuilder: (context, i) {
                 final transacao = state.transacoes[i];
-                return ListTile(
+                final fora = state.ignoradas.contains(i);
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  value: !fora,
+                  onChanged: (_) => notifier.alternarIgnorada(i),
+                  secondary: AppAmountText(
+                    transacao.valor.toStringAsFixed(2),
+                    style: TextStyle(
+                      color: fora ? t.sub : (transacao.valor < 0 ? t.neg : t.pos),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   title: Text(transacao.descricao, style: TextStyle(color: t.ink)),
                   subtitle: Text(
                     '${transacao.data.day.toString().padLeft(2, '0')}/'
                     '${transacao.data.month.toString().padLeft(2, '0')}/${transacao.data.year}'
-                    '${transacao.precisaCategoria ? '' : ' · ${transacao.categoria}'}',
+                    '${transacao.precisaCategoria ? '' : ' · ${transacao.categoria}'}'
+                    '${pareceTransferenciaDeFatura(transacao.descricao) ? ' · pagamento de fatura' : ''}',
                     style: TextStyle(color: t.sub),
-                  ),
-                  trailing: AppAmountText(
-                    transacao.valor.toStringAsFixed(2),
-                    style: TextStyle(
-                      color: transacao.valor < 0 ? t.neg : t.pos,
-                      fontWeight: FontWeight.w700,
-                    ),
                   ),
                 );
               },
@@ -373,6 +434,26 @@ class _Revisao extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _LinhaTotal extends StatelessWidget {
+  const _LinhaTotal({required this.rotulo, required this.valor, required this.cor, this.forte = false});
+
+  final String rotulo;
+  final String valor;
+  final Color cor;
+  final bool forte;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.tokens;
+    return Row(
+      children: [
+        Expanded(child: Text(rotulo, style: TextStyle(color: t.sub, fontSize: 13.5))),
+        AppAmountText(valor, style: TextStyle(color: cor, fontWeight: forte ? FontWeight.w800 : FontWeight.w700, fontSize: 14)),
+      ],
     );
   }
 }

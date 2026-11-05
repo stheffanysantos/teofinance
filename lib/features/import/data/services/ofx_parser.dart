@@ -38,7 +38,18 @@ class OfxParser {
       transacoes.add(_transacao(blocos[i], numero: i + 1));
     }
 
-    return ExtratoImportado(transacoes: transacoes, instituicao: _campo(texto, 'ORG'));
+    final ehCartao = RegExp('<CCSTMTRS', caseSensitive: false).hasMatch(texto);
+    final saldoBloco = RegExp(r'<LEDGERBAL>([\s\S]*?)(?=</LEDGERBAL>|<AVAILBAL>|</STMTRS>|</CCSTMTRS>|$)', caseSensitive: false)
+        .firstMatch(texto)
+        ?.group(1);
+    final saldoTexto = saldoBloco == null ? null : _campo(saldoBloco, 'BALAMT');
+
+    return ExtratoImportado(
+      transacoes: transacoes,
+      instituicao: _campo(texto, 'ORG'),
+      saldoFinal: saldoTexto == null ? null : _valorOuNulo(saldoTexto),
+      ehCartao: ehCartao,
+    );
   }
 
   TransacaoImportada _transacao(String bloco, {required int numero}) {
@@ -58,6 +69,15 @@ class OfxParser {
       valor: _valor(valorTexto, numero: numero),
       fitid: _campo(bloco, 'FITID'),
     );
+  }
+
+  /// Saldo é informativo: se vier ilegível, ignora em vez de barrar a importação.
+  double? _valorOuNulo(String texto) {
+    try {
+      return _valor(texto, numero: 0);
+    } on FormatException {
+      return null;
+    }
   }
 
   /// `AAAAMMDD` seguido, opcionalmente, de hora e fuso (`20261005120000[-3:BRT]`).

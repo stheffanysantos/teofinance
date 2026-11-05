@@ -50,7 +50,11 @@ class GoalRingCard extends StatelessWidget {
                 ),
                 Text(
                   progressLabel,
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: t.ink),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                    color: t.ink,
+                  ),
                 ),
               ],
             ),
@@ -61,7 +65,12 @@ class GoalRingCard extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, height: 1.15, color: t.ink),
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              height: 1.15,
+              color: t.ink,
+            ),
           ),
           const SizedBox(height: 3),
           AppAmountText(
@@ -82,7 +91,11 @@ class GoalRingCard extends StatelessWidget {
 }
 
 class _RingPainter extends CustomPainter {
-  _RingPainter({required this.progress, required this.track, required this.color});
+  _RingPainter({
+    required this.progress,
+    required this.track,
+    required this.color,
+  });
 
   final double progress;
   final Color track;

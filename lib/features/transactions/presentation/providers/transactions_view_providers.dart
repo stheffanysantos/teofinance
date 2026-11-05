@@ -116,7 +116,7 @@ final visibleTransactionGroupsProvider = Provider<List<ResolvedTransactionGroup>
       value: transacao.valorContabilizado,
       needsCategory: transacao.precisaCategoria,
       divisaoLabel: transacao.ehDividida
-          ? 'Dividida com ${_listaDeNomes(transacao.divididoCom)} · total ${transacao.valorCobrado.abs().toStringAsFixed(2)}'
+          ? 'Dividida com ${_listaDeNomes(transacao.pessoasDaDivisao)} · total ${transacao.valorCobrado.abs().toStringAsFixed(2)}'
           : null,
     );
 

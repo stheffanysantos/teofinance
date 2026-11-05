@@ -1,9 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../budget/domain/repositories/orcamento_repository.dart';
+import '../../cartao/domain/entities/cartao.dart';
+import '../../cartao/domain/repositories/cartao_repository.dart';
+import '../../categoria/domain/repositories/categoria_repository.dart';
 import '../../contas/domain/entities/conta_a_pagar.dart';
 import '../../contas/domain/repositories/conta_repository.dart';
 import '../../import/domain/entities/campo_coluna.dart';
+import '../../investimento/domain/entities/investimento.dart';
+import '../../investimento/domain/repositories/investimento_repository.dart';
+import '../../lembrete/domain/entities/lembrete_personalizado.dart';
+import '../../lembrete/domain/repositories/lembrete_repository.dart';
 import '../../import/domain/entities/perfil_banco.dart';
 import '../../import/domain/repositories/perfil_banco_repository.dart';
 import '../../meta/domain/entities/meta.dart';
@@ -33,6 +40,10 @@ class SyncEngine {
     required ParcelamentoRepository parcelamentoRepository,
     required OrcamentoRepository orcamentoRepository,
     required ContaRepository contaRepository,
+    required CategoriaRepository categoriaRepository,
+    required InvestimentoRepository investimentoRepository,
+    required LembreteRepository lembreteRepository,
+    required CartaoRepository cartaoRepository,
     Future<bool> Function()? pausado,
   }) : _firestore = firestore,
        _uid = uid,
@@ -43,6 +54,10 @@ class SyncEngine {
        _parcelamentoRepository = parcelamentoRepository,
        _orcamentoRepository = orcamentoRepository,
        _contaRepository = contaRepository,
+       _categoriaRepository = categoriaRepository,
+       _investimentoRepository = investimentoRepository,
+       _lembreteRepository = lembreteRepository,
+       _cartaoRepository = cartaoRepository,
        _pausado = pausado;
 
   final FirebaseFirestore _firestore;
@@ -54,6 +69,10 @@ class SyncEngine {
   final ParcelamentoRepository _parcelamentoRepository;
   final OrcamentoRepository _orcamentoRepository;
   final ContaRepository _contaRepository;
+  final CategoriaRepository _categoriaRepository;
+  final InvestimentoRepository _investimentoRepository;
+  final LembreteRepository _lembreteRepository;
+  final CartaoRepository _cartaoRepository;
 
   /// Quando devolve `true` o sync não roda (exclusão de conta interrompida).
   final Future<bool> Function()? _pausado;
@@ -74,11 +93,20 @@ class SyncEngine {
     await _tentar(_sincronizarMetas);
     await _tentar(_sincronizarOrcamentos);
     await _tentar(_sincronizarContas);
+    await _tentar(_sincronizarCategorias);
+    await _tentar(_sincronizarInvestimentos);
+    await _tentar(_sincronizarLembretes);
+    await _tentar(_sincronizarCartoes);
+    await _tentar(_sincronizarFaturasPagas);
   }
+
+  static const _tempoMaximoPorEntidade = Duration(seconds: 40);
 
   Future<void> _tentar(Future<void> Function() sincronizar) async {
     try {
-      await sincronizar();
+      // Sem teto, uma chamada ao Firestore que nunca responde (aparelho sem
+      // conexão, regra negando a escrita) deixaria "Sincronizar" girando para sempre.
+      await sincronizar().timeout(_tempoMaximoPorEntidade);
     } catch (_) {
       // Erro de uma entidade não deve quebrar a sincronização das demais;
       // a próxima rodada (próxima abertura do app) tenta de novo.
@@ -118,6 +146,7 @@ class SyncEngine {
           'valorParcela': transacao.valorParcela,
           'ehParcela': transacao.ehParcela,
           'statusParcela': transacao.statusParcela,
+          'cartaoId': transacao.cartaoId,
         });
         await _transacaoRepository.confirmarSincronizacao(id: transacao.id, remoteId: doc.id);
       } catch (_) {
@@ -144,6 +173,7 @@ class SyncEngine {
           ehParcela: dados['ehParcela'] as bool? ?? false,
           statusParcela: dados['statusParcela'] as String?,
         );
+        await _transacaoRepository.aplicarCartaoRemoto(remoteId: doc.id, cartaoId: dados['cartaoId'] as String?);
       } catch (_) {}
     }
   }
@@ -268,6 +298,7 @@ class SyncEngine {
           'valorAtual': meta.valorAtual,
           'valorAlvo': meta.valorAlvo,
           'prazo': Timestamp.fromDate(meta.prazo),
+          'banco': meta.banco,
         });
         await _metaRepository.confirmarSincronizacao(id: meta.id, remoteId: doc.id);
       } catch (_) {}
@@ -285,6 +316,7 @@ class SyncEngine {
             valorAtual: (dados['valorAtual'] as num?)?.toDouble() ?? 0,
             valorAlvo: (dados['valorAlvo'] as num?)?.toDouble() ?? 0,
             prazo: (dados['prazo'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            banco: dados['banco'] as String?,
           ),
         );
       } catch (_) {}
@@ -449,5 +481,233 @@ class SyncEngine {
         );
       } catch (_) {}
     }
+  }
+
+  // ---------------------------------------------------------------------
+  // Categorias personalizadas (documento com id = nome codificado)
+  // ---------------------------------------------------------------------
+
+  /// O nome da categoria vira o id do documento (sem `/`, que o Firestore não aceita).
+  static String idDocCategoria(String nome) => Uri.encodeComponent(nome);
+
+  Future<void> _sincronizarCategorias() async {
+    final colecao = _colecao('categorias');
+
+    for (final nome in await _categoriaRepository.listarPendentesDeExclusao()) {
+      try {
+        await colecao.doc(idDocCategoria(nome)).delete();
+        await _categoriaRepository.confirmarExclusao(nome);
+      } catch (_) {
+        // mantém a marca de exclusão — a próxima rodada tenta de novo.
+      }
+    }
+
+    for (final nome in await _categoriaRepository.listarPendentesDeSincronizacao()) {
+      try {
+        await colecao.doc(idDocCategoria(nome)).set({'nome': nome});
+        await _categoriaRepository.confirmarSincronizacao(nome);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    final nomes = <String>{};
+    for (final doc in remotos.docs) {
+      try {
+        final nome = doc.data()['nome'] as String;
+        nomes.add(nome);
+        await _categoriaRepository.aplicarRemoto(nome);
+      } catch (_) {}
+    }
+    await _categoriaRepository.removerAusentesNoRemoto(nomes);
+  }
+
+  // ---------------------------------------------------------------------
+  // Investimentos manuais
+  // ---------------------------------------------------------------------
+
+  Future<void> _sincronizarInvestimentos() async {
+    final colecao = _colecao('investimentos');
+
+    for (final id in await _investimentoRepository.listarPendentesDeExclusao()) {
+      try {
+        await colecao.doc(id).delete();
+        await _investimentoRepository.confirmarExclusao(id);
+      } catch (_) {}
+    }
+
+    for (final i in await _investimentoRepository.listarPendentesDeSincronizacao()) {
+      try {
+        await colecao.doc(i.id).set({
+          'nome': i.nome,
+          'tipo': i.tipo.name,
+          'valorInvestido': i.valorInvestido,
+          'valorAtual': i.valorAtual,
+          'dataAplicacao': Timestamp.fromDate(i.dataAplicacao),
+          'observacao': i.observacao,
+        });
+        await _investimentoRepository.confirmarSincronizacao(i.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    final ids = <String>{};
+    for (final doc in remotos.docs) {
+      try {
+        final d = doc.data();
+        ids.add(doc.id);
+        await _investimentoRepository.aplicarRemoto(
+          Investimento(
+            id: doc.id,
+            nome: d['nome'] as String,
+            tipo: TipoInvestimento.deNome(d['tipo'] as String? ?? ''),
+            valorInvestido: (d['valorInvestido'] as num).toDouble(),
+            valorAtual: (d['valorAtual'] as num).toDouble(),
+            dataAplicacao: (d['dataAplicacao'] as Timestamp).toDate(),
+            observacao: d['observacao'] as String? ?? '',
+          ),
+        );
+      } catch (_) {}
+    }
+    await _investimentoRepository.removerAusentesNoRemoto(ids);
+  }
+
+  // ---------------------------------------------------------------------
+  // Lembretes personalizados
+  // ---------------------------------------------------------------------
+
+  Future<void> _sincronizarLembretes() async {
+    final colecao = _colecao('lembretes');
+
+    for (final id in await _lembreteRepository.listarPendentesDeExclusao()) {
+      try {
+        await colecao.doc(id).delete();
+        await _lembreteRepository.confirmarExclusao(id);
+      } catch (_) {}
+    }
+
+    for (final l in await _lembreteRepository.listarPendentesDeSincronizacao()) {
+      try {
+        await colecao.doc(l.id).set({
+          'titulo': l.titulo,
+          'tipo': l.tipo.name,
+          'dia': l.dia,
+          'ativo': l.ativo,
+        });
+        await _lembreteRepository.confirmarSincronizacao(l.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    final ids = <String>{};
+    for (final doc in remotos.docs) {
+      try {
+        final d = doc.data();
+        ids.add(doc.id);
+        await _lembreteRepository.aplicarRemoto(
+          LembretePersonalizado(
+            id: doc.id,
+            titulo: d['titulo'] as String,
+            tipo: TipoLembrete.deNome(d['tipo'] as String? ?? ''),
+            dia: (d['dia'] as num).toInt(),
+            ativo: d['ativo'] as bool? ?? true,
+          ),
+        );
+      } catch (_) {}
+    }
+    await _lembreteRepository.removerAusentesNoRemoto(ids);
+  }
+
+  // ---------------------------------------------------------------------
+  // Cartões de crédito
+  // ---------------------------------------------------------------------
+
+  Future<void> _sincronizarCartoes() async {
+    final colecao = _colecao('cartoes');
+
+    for (final id in await _cartaoRepository.cartoesPendentesDeExclusao()) {
+      try {
+        await colecao.doc(id).delete();
+        await _cartaoRepository.confirmarExclusaoCartao(id);
+      } catch (_) {}
+    }
+
+    for (final c in await _cartaoRepository.cartoesPendentesDeSincronizacao()) {
+      try {
+        await colecao.doc(c.id).set({
+          'nome': c.nome,
+          'diaFechamento': c.diaFechamento,
+          'diaVencimento': c.diaVencimento,
+          'limite': c.limite,
+        });
+        await _cartaoRepository.confirmarCartao(c.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    final ids = <String>{};
+    for (final doc in remotos.docs) {
+      try {
+        final d = doc.data();
+        ids.add(doc.id);
+        await _cartaoRepository.aplicarCartaoRemoto(
+          Cartao(
+            id: doc.id,
+            nome: d['nome'] as String,
+            diaFechamento: (d['diaFechamento'] as num).toInt(),
+            diaVencimento: (d['diaVencimento'] as num).toInt(),
+            limite: (d['limite'] as num?)?.toDouble(),
+          ),
+        );
+      } catch (_) {}
+    }
+    await _cartaoRepository.removerCartoesAusentes(ids);
+  }
+
+  // ---------------------------------------------------------------------
+  // Faturas pagas
+  // ---------------------------------------------------------------------
+
+  /// O id do documento é o da fatura ("cartao|ano-mes"): `|` é aceito pelo Firestore.
+  Future<void> _sincronizarFaturasPagas() async {
+    final colecao = _colecao('faturas_pagas');
+
+    for (final id in await _cartaoRepository.pagamentosPendentesDeExclusao()) {
+      try {
+        await colecao.doc(id).delete();
+        await _cartaoRepository.confirmarExclusaoPagamento(id);
+      } catch (_) {}
+    }
+
+    for (final p in await _cartaoRepository.pagamentosPendentesDeSincronizacao()) {
+      try {
+        await colecao.doc(p.id).set({
+          'cartaoId': p.cartaoId,
+          'ano': p.ano,
+          'mes': p.mes,
+          'valor': p.valor,
+          'dataPagamento': Timestamp.fromDate(p.dataPagamento),
+        });
+        await _cartaoRepository.confirmarPagamento(p.id);
+      } catch (_) {}
+    }
+
+    final remotos = await colecao.get();
+    final ids = <String>{};
+    for (final doc in remotos.docs) {
+      try {
+        final d = doc.data();
+        ids.add(doc.id);
+        await _cartaoRepository.aplicarPagamentoRemoto(
+          FaturaPaga(
+            cartaoId: d['cartaoId'] as String,
+            ano: (d['ano'] as num).toInt(),
+            mes: (d['mes'] as num).toInt(),
+            valor: (d['valor'] as num).toDouble(),
+            dataPagamento: (d['dataPagamento'] as Timestamp).toDate(),
+          ),
+        );
+      } catch (_) {}
+    }
+    await _cartaoRepository.removerPagamentosAusentes(ids);
   }
 }

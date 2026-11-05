@@ -17,6 +17,11 @@ class LgpdRemoteDataSource {
     'parcelamentos',
     'orcamentos',
     'contas',
+    'categorias',
+    'investimentos',
+    'lembretes',
+    'cartoes',
+    'faturas_pagas',
   ];
 
   /// Coleções com valores em R$; os Perfis de Banco ficam de fora.
@@ -27,6 +32,8 @@ class LgpdRemoteDataSource {
     'parcelamentos',
     'orcamentos',
     'contas',
+    'investimentos',
+    'faturas_pagas',
   ];
 
   static const _tamanhoDoLote = 400;

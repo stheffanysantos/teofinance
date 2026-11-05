@@ -11,6 +11,7 @@ abstract class MetaRepository {
     required double valorAlvo,
     required DateTime prazo,
     double valorAtual = 0,
+    String? banco,
   });
 
   /// Soma [valor] ao valor atual guardado (aporte) — nunca substitui.

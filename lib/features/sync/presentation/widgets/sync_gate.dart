@@ -1,3 +1,4 @@
+import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -30,6 +31,8 @@ class _SyncGateState extends ConsumerState<SyncGate> {
   Widget build(BuildContext context) {
     // Mantém os lembretes de contas a pagar agendados enquanto o app está aberto.
     ref.watch(lembretesAutomaticosProvider);
+    // E avisa quando uma categoria chega perto do limite do orçamento.
+    ref.watch(alertasOrcamentoProvider);
     return widget.child;
   }
 }

@@ -5,9 +5,12 @@ import '../../data/datasources/transacao_local_datasource.dart';
 import '../../data/repositories/transacao_repository_impl.dart';
 import '../../domain/entities/transacao.dart';
 import '../../domain/repositories/transacao_repository.dart';
+import '../../domain/usecases/ajustar_saldo_usecase.dart';
 import '../../domain/usecases/categorizar_transacao_usecase.dart';
+import '../../domain/usecases/editar_transacao_usecase.dart';
 import '../../domain/usecases/criar_transacao_usecase.dart';
 import '../../domain/usecases/dividir_transacao_usecase.dart';
+import '../../domain/usecases/registrar_reembolso_usecase.dart';
 import '../../domain/usecases/excluir_transacao_usecase.dart';
 import '../../domain/usecases/remover_divisao_usecase.dart';
 
@@ -27,8 +30,20 @@ final categorizarTransacaoUseCaseProvider = Provider((ref) {
   return CategorizarTransacaoUseCase(ref.watch(transacaoRepositoryProvider));
 });
 
+final ajustarSaldoUseCaseProvider = Provider((ref) {
+  return AjustarSaldoUseCase(ref.watch(transacaoRepositoryProvider));
+});
+
+final editarTransacaoUseCaseProvider = Provider((ref) {
+  return EditarTransacaoUseCase(ref.watch(transacaoRepositoryProvider));
+});
+
 final excluirTransacaoUseCaseProvider = Provider((ref) {
   return ExcluirTransacaoUseCase(ref.watch(transacaoRepositoryProvider));
+});
+
+final registrarReembolsoUseCaseProvider = Provider((ref) {
+  return RegistrarReembolsoUseCase(ref.watch(transacaoRepositoryProvider));
 });
 
 final dividirTransacaoUseCaseProvider = Provider((ref) {

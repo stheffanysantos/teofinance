@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/categorias.dart';
+import '../../../categoria/presentation/providers/categoria_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../connect/presentation/screens/connect_screen.dart';
 import '../../../parcelamento/presentation/screens/parcelar_transacao_screen.dart';
@@ -13,6 +13,7 @@ import '../providers/transactions_view_providers.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
+import 'package:teofinance/core/widgets/app_confirm_dialog.dart';
 
 /// Tela de Transações — implementação fiel a Transactions.dc.html: filtros
 /// de período/categoria em pílula, grupos por data, categorização manual
@@ -26,6 +27,7 @@ class TransactionsScreen extends ConsumerWidget {
     final filter = ref.watch(transactionsFilterProvider);
     final filterNotifier = ref.read(transactionsFilterProvider.notifier);
     final groups = ref.watch(visibleTransactionGroupsProvider);
+    final categoriasFiltro = ref.watch(categoriasFiltroProvider);
 
     return SafeArea(
       bottom: false,
@@ -121,10 +123,10 @@ class TransactionsScreen extends ConsumerWidget {
                     height: 34,
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
-                      itemCount: kCategoriasBase.length,
+                      itemCount: categoriasFiltro.length,
                       separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (context, i) {
-                        final category = kCategoriasBase[i];
+                        final category = categoriasFiltro[i];
                         return AppFilterChip(
                           label: category,
                           selected: filter.category == category,
@@ -186,10 +188,8 @@ class TransactionsScreen extends ConsumerWidget {
                                   TransactionRow(
                                     transaction: group.items[i],
                                     showTopBorder: i > 0,
-                                    onCategorize: (id) => _escolherCategoria(context, filterNotifier, id),
-                                    onLongPress: group.items[i].value < 0
-                                        ? (id) => _abrirAcoes(context, ref, id)
-                                        : null,
+                                    onCategorize: (id) => _escolherCategoria(context, filterNotifier, id, categoriasFiltro.skip(1).toList()),
+                                    onLongPress: (id) => _abrirAcoes(context, ref, id),
                                   ),
                               ],
                             ),
@@ -223,7 +223,11 @@ class TransactionsScreen extends ConsumerWidget {
     final transacao = transacoes.where((x) => x.id == transacaoId).firstOrNull;
     if (transacao == null) return;
 
-    final podeParcelar = !transacao.ehParcela && !transacao.ehDividida;
+    final ehDespesa = transacao.valor < 0;
+    final podeParcelar = !transacao.ehParcela && !transacao.ehDividida && ehDespesa;
+    // Parcela e compra dividida têm valores derivados; editar o valor ali
+    // deixaria o parcelamento/divisão inconsistente.
+    final podeEditar = !transacao.ehParcela && !transacao.ehDividida;
 
     final acao = await showModalBottomSheet<String>(
       context: context,
@@ -231,23 +235,35 @@ class TransactionsScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (podeEditar)
+              ListTile(
+                leading: const Icon(Icons.edit_outlined),
+                title: const Text('Editar'),
+                onTap: () => Navigator.of(context).pop('editar'),
+              ),
             if (podeParcelar)
               ListTile(
                 leading: const Icon(Icons.credit_card),
                 title: const Text('Parcelar compra'),
                 onTap: () => Navigator.of(context).pop('parcelar'),
               ),
-            ListTile(
-              leading: const Icon(Icons.group_outlined),
-              title: Text(transacao.ehDividida ? 'Editar divisão' : 'Dividir com amigos'),
-              onTap: () => Navigator.of(context).pop('dividir'),
-            ),
+            if (ehDespesa)
+              ListTile(
+                leading: const Icon(Icons.group_outlined),
+                title: Text(transacao.ehDividida ? 'Editar divisão' : 'Dividir com amigos'),
+                onTap: () => Navigator.of(context).pop('dividir'),
+              ),
             if (transacao.ehDividida)
               ListTile(
                 leading: const Icon(Icons.group_off_outlined),
                 title: const Text('Remover divisão'),
                 onTap: () => Navigator.of(context).pop('remover'),
               ),
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('Excluir'),
+              onTap: () => Navigator.of(context).pop('excluir'),
+            ),
           ],
         ),
       ),
@@ -255,6 +271,19 @@ class TransactionsScreen extends ConsumerWidget {
     if (acao == null || !context.mounted) return;
 
     switch (acao) {
+      case 'editar':
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => NovaTransacaoScreen(transacao: transacao)),
+        );
+      case 'excluir':
+        final confirmou = await AppConfirmDialog.mostrar(
+          context,
+          titulo: 'Excluir transação?',
+          mensagem: '"${transacao.descricao}" será removida. Essa ação não pode ser desfeita.',
+          rotuloConfirmar: 'Excluir',
+          destrutivo: true,
+        );
+        if (confirmou) await ref.read(excluirTransacaoUseCaseProvider).call(transacao.id);
       case 'parcelar':
         await Navigator.of(context).push(
           MaterialPageRoute(builder: (_) => ParcelarTransacaoScreen(transacao: transacao)),
@@ -272,29 +301,40 @@ class TransactionsScreen extends ConsumerWidget {
     BuildContext context,
     TransactionsFilterNotifier notifier,
     String transacaoId,
+    List<String> categorias,
   ) async {
-    final categorias = kCategorias;
     final escolhida = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
         final t = context.tokens;
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Categorizar como',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: t.ink),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Categorizar como',
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: t.ink),
+                  ),
                 ),
-              ),
-              for (final categoria in categorias)
-                ListTile(
-                  title: Text(categoria),
-                  onTap: () => Navigator.of(context).pop(categoria),
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final categoria in categorias)
+                        ListTile(
+                          title: Text(categoria),
+                          onTap: () => Navigator.of(context).pop(categoria),
+                        ),
+                    ],
+                  ),
                 ),
-            ],
+              ],
+            ),
           ),
         );
       },

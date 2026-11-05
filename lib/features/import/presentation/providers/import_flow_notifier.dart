@@ -9,6 +9,7 @@ import '../../domain/entities/formato_extrato.dart';
 import '../../domain/entities/modelo_partida_banco.dart';
 import '../../domain/entities/perfil_banco.dart';
 import '../../domain/entities/transacao_importada.dart';
+import '../../domain/services/pagamento_fatura.dart';
 import '../../domain/usecases/detectar_duplicatas_usecase.dart';
 import 'import_flow_state.dart';
 import 'import_providers.dart';
@@ -44,6 +45,11 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
           etapa: ImportEtapa.revisando,
           transacoes: extrato.transacoes,
           instituicao: extrato.instituicao,
+          saldoFinal: extrato.saldoFinal,
+          ehCartao: extrato.ehCartao,
+          ignoradas: _pagamentosDeFatura(extrato.transacoes),
+          ajustarSaldo: !extrato.ehCartao && extrato.saldoFinal != null,
+          limparCartao: true,
         ),
       );
       return;
@@ -131,15 +137,31 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
         etapa: ImportEtapa.revisando,
         transacoes: transacoes,
         perfilUsado: perfilFinal,
+        ignoradas: _pagamentosDeFatura(transacoes),
       ),
     );
   }
+
+  static Set<int> _pagamentosDeFatura(List<TransacaoImportada> lista) => {
+    for (var i = 0; i < lista.length; i++)
+      if (pareceTransferenciaDeFatura(lista[i].descricao)) i,
+  };
+
+  void alternarIgnorada(int indice) {
+    final novas = {...state.ignoradas};
+    if (!novas.remove(indice)) novas.add(indice);
+    state = state.copyWith(ignoradas: novas);
+  }
+
+  void definirCartao(String? id) => state = state.copyWith(cartaoId: id, limparCartao: id == null);
+
+  void definirAjustarSaldo(bool valor) => state = state.copyWith(ajustarSaldo: valor);
 
   /// Quantas linhas do arquivo já foram importadas antes para o [destino].
   /// A tela usa isto para perguntar antes de duplicar.
   Future<int> contarDuplicadas(DestinoImportacao destino) async {
     final duplicadas = await ref.read(detectarDuplicatasUseCaseProvider)(
-      importadas: state.transacoes,
+      importadas: state.efetivas,
       destino: destino,
     );
     return duplicadas.length;
@@ -147,15 +169,16 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
 
   /// Linhas que seguem para o [destino]: todas, ou só as novas.
   Future<List<TransacaoImportada>> _paraConfirmar(DestinoImportacao destino, {required bool pularDuplicadas}) async {
-    if (!pularDuplicadas) return state.transacoes;
+    final efetivas = state.efetivas;
+    if (!pularDuplicadas) return efetivas;
 
     final duplicadas = await ref.read(detectarDuplicatasUseCaseProvider)(
-      importadas: state.transacoes,
+      importadas: efetivas,
       destino: destino,
     );
     return [
-      for (var i = 0; i < state.transacoes.length; i++)
-        if (!duplicadas.contains(i)) state.transacoes[i],
+      for (var i = 0; i < efetivas.length; i++)
+        if (!duplicadas.contains(i)) efetivas[i],
     ];
   }
 
@@ -172,13 +195,24 @@ class ImportFlowNotifier extends Notifier<ImportFlowState> {
           valor: t.valor,
           data: t.data,
           categoria: t.categoria?.trim() ?? '',
+          cartaoId: state.cartaoId,
         ),
     ]);
 
-    resultado.match(
-      (falha) => state = state.copyWith(carregando: false, erro: falha.message),
-      (_) => state = state.copyWith(carregando: false, etapa: ImportEtapa.concluido, transacoes: aImportar),
-    );
+    var erro = resultado.match((falha) => falha.message, (_) => null);
+
+    // Com o extrato da conta importado, o banco diz quanto há de verdade: o
+    // saldo do app passa a bater com ele (um lançamento de ajuste, sem mexer
+    // em receitas e despesas).
+    final saldoBanco = state.saldoFinal;
+    if (erro == null && state.ajustarSaldo && !state.ehCartao && saldoBanco != null) {
+      final ajuste = await ref.read(ajustarSaldoUseCaseProvider).call(saldoBanco);
+      erro = ajuste.match((falha) => falha.message, (_) => null);
+    }
+
+    state = erro != null
+        ? state.copyWith(carregando: false, erro: erro)
+        : state.copyWith(carregando: false, etapa: ImportEtapa.concluido, transacoes: aImportar);
   }
 
   /// Guarda o extrato como linhas separadas (sem criar transações), para

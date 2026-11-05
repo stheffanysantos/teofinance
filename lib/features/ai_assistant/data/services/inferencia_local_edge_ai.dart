@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_edge_ai/flutter_edge_ai.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:teofinance/core/errors/failure.dart';
+import 'package:teofinance/core/services/edge_ai_motor.dart';
 import 'package:teofinance/features/ai_assistant/domain/services/inferencia_local.dart';
 
 /// Inferência no aparelho com o plugin de IA local. Só gera texto com o modelo
@@ -17,7 +18,10 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
   /// Usa o plugin real; [modeloId] é o arquivo instalado pelo gerenciador.
   factory InferenciaLocalEdgeAi.plugin({required String modeloId}) {
     return InferenciaLocalEdgeAi(
-      verificarInstalacao: () => FlutterEdgeAi.isModelInstalled(modeloId),
+      verificarInstalacao: () async {
+        await garantirMotorEdgeAi();
+        return FlutterEdgeAi.isModelInstalled(modeloId);
+      },
       executar: _gerarComPlugin,
     );
   }
@@ -56,6 +60,7 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
 /// Contexto de 2048 tokens (prompt + resposta) e resposta limitada a 512: o
 /// suficiente para o resumo financeiro sem estourar a memória do aparelho.
 Future<String> _gerarComPlugin(String instrucoes, String mensagem) async {
+  await garantirMotorEdgeAi();
   final modelo = await FlutterEdgeAi.getActiveModel(maxTokens: 2048);
   final chat = await modelo.createChat(
     systemInstruction: instrucoes,

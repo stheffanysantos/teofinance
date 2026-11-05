@@ -7,7 +7,11 @@ import 'package:teofinance/features/contas/domain/services/resumo_contas.dart';
 /// Resumo do que há para pagar. Só aparece quando existe algo atrasado ou
 /// vencendo nos próximos 7 dias.
 class ContasAVencerCard extends StatelessWidget {
-  const ContasAVencerCard({required this.resumo, required this.onTap, super.key});
+  const ContasAVencerCard({
+    required this.resumo,
+    required this.onTap,
+    super.key,
+  });
 
   final ResumoContas resumo;
   final VoidCallback onTap;
@@ -30,19 +34,34 @@ class ContasAVencerCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 6,
           children: [
-            Text('Contas a pagar', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: t.ink)),
+            Text(
+              'Contas a pagar',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 15,
+                color: t.ink,
+              ),
+            ),
             if (resumo.atrasadas > 0)
               Row(
                 children: [
                   Expanded(
                     child: Text(
                       '${resumo.atrasadas} ${resumo.atrasadas == 1 ? 'atrasada' : 'atrasadas'}',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: t.neg),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: t.neg,
+                      ),
                     ),
                   ),
                   AppAmountText(
                     formatCurrency(resumo.valorAtrasadas),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: t.neg),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: t.neg,
+                    ),
                   ),
                 ],
               ),
@@ -57,7 +76,11 @@ class ContasAVencerCard extends StatelessWidget {
                   ),
                   AppAmountText(
                     formatCurrency(resumo.valorAVencerEm7Dias),
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: t.ink),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: t.ink,
+                    ),
                   ),
                 ],
               ),

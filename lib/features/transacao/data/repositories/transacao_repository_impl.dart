@@ -43,6 +43,48 @@ class TransacaoRepositoryImpl implements TransacaoRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> editar({
+    required String id,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String categoria,
+  }) async {
+    try {
+      await _local.editar(id: id, descricao: descricao, valor: valor, data: data, categoria: categoria);
+      return const Right(unit);
+    } catch (e) {
+      debugPrint('TransacaoRepositoryImpl.editar falhou: ${e.runtimeType}');
+      return const Left(CacheFailure('Não foi possível salvar a edição.'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> definirCartao({required String id, String? cartaoId}) async {
+    try {
+      await _local.definirCartao(id: id, cartaoId: cartaoId);
+      return const Right(unit);
+    } catch (_) {
+      return const Left(CacheFailure('Não foi possível associar o cartão.'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> vincularCartao({required List<String> ids, required String cartaoId}) async {
+    try {
+      await _local.vincularCartao(ids: ids, cartaoId: cartaoId);
+      return const Right(unit);
+    } catch (_) {
+      return const Left(CacheFailure('Não foi possível associar as compras ao cartão.'));
+    }
+  }
+
+  @override
+  Future<void> aplicarCartaoRemoto({required String remoteId, String? cartaoId}) {
+    return _local.aplicarCartaoRemoto(remoteId: remoteId, cartaoId: cartaoId);
+  }
+
+  @override
   Future<Either<Failure, Unit>> categorizar({required String id, required String categoria}) async {
     try {
       await _local.categorizar(id: id, categoria: categoria);

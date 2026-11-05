@@ -14,6 +14,7 @@ class CriarMetaUseCase {
     required double valorAlvo,
     required DateTime prazo,
     double valorAtual = 0,
+    String? banco,
   }) {
     if (nome.trim().isEmpty) {
       return Future.value(const Left(ValidationFailure('Dê um nome à meta.')));
@@ -29,6 +30,7 @@ class CriarMetaUseCase {
       valorAlvo: valorAlvo,
       prazo: prazo,
       valorAtual: valorAtual,
+      banco: (banco == null || banco.trim().isEmpty) ? null : banco.trim(),
     );
   }
 }

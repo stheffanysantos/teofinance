@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:teofinance/core/constants/categorias.dart';
+import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/contas/presentation/providers/conta_providers.dart';
@@ -109,7 +109,7 @@ class _ContaFormScreenState extends ConsumerState<ContaFormScreen> {
   Widget build(BuildContext context) {
     final t = context.tokens;
     final editando = widget.existente != null;
-    final categorias = kCategorias.where((c) => c != 'Renda').toList();
+    final categorias = ref.watch(categoriasProvider).where((c) => c != 'Renda').toList();
 
     return Scaffold(
       backgroundColor: t.bg,

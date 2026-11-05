@@ -1,11 +1,17 @@
 import 'package:teofinance/core/services/notificacao_service.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
+import 'package:teofinance/features/contas/domain/services/planejar_lembrete_extrato.dart';
 import 'package:teofinance/features/contas/domain/services/planejar_lembretes.dart';
+import 'package:teofinance/features/lembrete/domain/entities/lembrete_personalizado.dart';
+import 'package:teofinance/features/lembrete/domain/services/planejar_lembretes_personalizados.dart';
 
 /// Mantém os lembretes do aparelho iguais às contas em aberto. É idempotente:
 /// chamar de novo com os mesmos dados deixa tudo como está.
 class ReagendarLembretesUseCase {
-  ReagendarLembretesUseCase(this._notificacoes, {DateTime Function() agora = DateTime.now}) : _agora = agora;
+  ReagendarLembretesUseCase(
+    this._notificacoes, {
+    DateTime Function() agora = DateTime.now,
+  }) : _agora = agora;
 
   final NotificacaoService _notificacoes;
   final DateTime Function() _agora;
@@ -16,13 +22,32 @@ class ReagendarLembretesUseCase {
     required List<ContaAPagar> contas,
     required bool ativo,
     required int hora,
+    bool extratoAtivo = false,
+    int extratoDia = kDiaPadraoLembreteExtrato,
+    List<LembretePersonalizado> personalizados = const [],
   }) async {
     try {
-      if (!ativo || !await _notificacoes.permissaoConcedida()) {
+      final temPersonalizado = personalizados.any((l) => l.ativo);
+      if ((!ativo && !extratoAtivo && !temPersonalizado) ||
+          !await _notificacoes.permissaoConcedida()) {
         await _notificacoes.cancelarTudo();
         return 0;
       }
-      final lembretes = planejarLembretes(contas, agora: _agora(), hora: hora);
+      final agora = _agora();
+      final lembretes = [
+        if (ativo) ...planejarLembretes(contas, agora: agora, hora: hora),
+        if (extratoAtivo)
+          ...planejarLembretesExtrato(
+            agora: agora,
+            dia: extratoDia,
+            hora: hora,
+          ),
+        ...planejarLembretesPersonalizados(
+          personalizados,
+          agora: agora,
+          hora: hora,
+        ),
+      ];
       await _notificacoes.reagendarTudo(lembretes);
       return lembretes.length;
     } catch (_) {

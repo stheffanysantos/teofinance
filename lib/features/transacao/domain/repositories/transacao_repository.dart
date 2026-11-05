@@ -4,7 +4,7 @@ import '../../../../core/errors/failure.dart';
 import '../entities/transacao.dart';
 
 /// Dados de uma transação a criar; o id é gerado na camada de dados.
-typedef NovaTransacao = ({String descricao, double valor, DateTime data, String categoria});
+typedef NovaTransacao = ({String descricao, double valor, DateTime data, String categoria, String? cartaoId});
 
 abstract class TransacaoRepository {
   /// Todas as transações, mais recentes primeiro — atualiza automaticamente
@@ -21,6 +21,24 @@ abstract class TransacaoRepository {
   /// Cria várias transações de uma vez, atomicamente (tudo ou nada) — usado pela
   /// confirmação de uma importação. Categoria vazia marca `precisaCategoria`.
   Future<Either<Failure, Unit>> criarEmLote(List<NovaTransacao> itens);
+
+  /// Corrige descricao, valor, data e categoria de uma transacao. Marca para sincronizar.
+  Future<Either<Failure, Unit>> editar({
+    required String id,
+    required String descricao,
+    required double valor,
+    required DateTime data,
+    required String categoria,
+  });
+
+  /// Associa (ou, com [cartaoId] nulo, desassocia) a compra a um cartão.
+  Future<Either<Failure, Unit>> definirCartao({required String id, String? cartaoId});
+
+  /// Associa várias transações ao mesmo cartão, de uma vez.
+  Future<Either<Failure, Unit>> vincularCartao({required List<String> ids, required String cartaoId});
+
+  /// Usado só por `features/sync/`.
+  Future<void> aplicarCartaoRemoto({required String remoteId, String? cartaoId});
 
   Future<Either<Failure, Unit>> categorizar({required String id, required String categoria});
 

@@ -1,7 +1,6 @@
+import 'package:teofinance/core/constants/categorias.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/utils/currency_format.dart';
-import '../../../../core/utils/date_label.dart';
 import '../../../transacao/domain/entities/transacao.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
 
@@ -16,10 +15,6 @@ class DashboardSummary {
     required this.deltaReceitasPercent,
     required this.despesasMes,
     required this.despesasFootnote,
-    required this.netWorthMonths,
-    required this.netWorthValuesNormalizados,
-    required this.netWorthRangeLabel,
-    required this.netWorthDeltaLabel,
     required this.ultimasTransacoes,
   });
 
@@ -32,11 +27,6 @@ class DashboardSummary {
   final double despesasMes;
   final String despesasFootnote;
 
-  final List<String> netWorthMonths;
-  final List<double> netWorthValuesNormalizados;
-  final String netWorthRangeLabel;
-  final String netWorthDeltaLabel;
-
   final List<Transacao> ultimasTransacoes;
 }
 
@@ -44,22 +34,26 @@ final dashboardSummaryProvider = Provider<DashboardSummary>((ref) {
   final transacoes = ref.watch(transacoesStreamProvider).valueOrNull ?? [];
   final agora = DateTime.now();
 
-  double saldoAte(DateTime limite) {
-    return transacoes
-        .where((t) => !t.data.isAfter(limite))
-        .fold<double>(0, (acc, t) => acc + t.valor);
-  }
+  bool noMes(DateTime data, int ano, int mes) =>
+      data.year == ano && data.month == mes;
 
-  bool noMes(DateTime data, int ano, int mes) => data.year == ano && data.month == mes;
-
-  final transacoesEsteMes = transacoes.where((t) => noMes(t.data, agora.year, agora.month));
+  // O ajuste de saldo entra no saldo, mas não é receita nem despesa.
+  final reais = transacoes
+      .where((t) => t.categoria != kCategoriaAjusteSaldo)
+      .toList();
+  final transacoesEsteMes = reais.where(
+    (t) => noMes(t.data, agora.year, agora.month),
+  );
   final mesPassado = DateTime(agora.year, agora.month - 1);
-  final transacoesMesPassado = transacoes.where((t) => noMes(t.data, mesPassado.year, mesPassado.month));
+  final transacoesMesPassado = reais.where(
+    (t) => noMes(t.data, mesPassado.year, mesPassado.month),
+  );
 
   // Receitas/despesas usam a parte do usuário (compras divididas); o saldo
   // total continua sendo o caixa real, com o valor cobrado.
-  final receitasMes =
-      transacoesEsteMes.where((t) => t.valorContabilizado > 0).fold<double>(0, (a, t) => a + t.valorContabilizado);
+  final receitasMes = transacoesEsteMes
+      .where((t) => t.valorContabilizado > 0)
+      .fold<double>(0, (a, t) => a + t.valorContabilizado);
   final despesasMes = transacoesEsteMes
       .where((t) => t.valorContabilizado < 0)
       .fold<double>(0, (a, t) => a + t.valorContabilizado.abs());
@@ -67,35 +61,17 @@ final dashboardSummaryProvider = Provider<DashboardSummary>((ref) {
       .where((t) => t.valorContabilizado > 0)
       .fold<double>(0, (a, t) => a + t.valorContabilizado);
 
-  final saldoTotal = transacoes.fold<double>(0, (acc, t) => acc + t.valor);
+  final saldoTotal = transacoes.fold<double>(
+    0,
+    (acc, t) => acc + t.valorNoSaldo,
+  );
   final deltaSaldoMes = receitasMes - despesasMes;
 
   double? deltaReceitasPercent;
   if (receitasMesPassado > 0) {
-    deltaReceitasPercent = (receitasMes - receitasMesPassado) / receitasMesPassado * 100;
+    deltaReceitasPercent =
+        (receitasMes - receitasMesPassado) / receitasMesPassado * 100;
   }
-
-  // Patrimônio líquido: saldo acumulado ao fim de cada um dos últimos 6 meses.
-  final pontos = <double>[];
-  final rotulosMeses = <String>[];
-  for (var i = 5; i >= 0; i--) {
-    final mesRef = DateTime(agora.year, agora.month - i + 1, 0); // último dia do mês
-    pontos.add(saldoAte(mesRef));
-    rotulosMeses.add(kMesesAbreviados[mesRef.month - 1]);
-  }
-  final minimo = pontos.reduce((a, b) => a < b ? a : b);
-  final maximo = pontos.reduce((a, b) => a > b ? a : b);
-  final amplitude = (maximo - minimo).abs();
-  final normalizados = pontos
-      .map((v) => amplitude == 0 ? 0.5 : (v - minimo) / amplitude)
-      .toList();
-
-  final primeiro = pontos.first;
-  final ultimo = pontos.last;
-  final deltaNetWorth = primeiro.abs() > 0.01 ? (ultimo - primeiro) / primeiro.abs() * 100 : null;
-  final netWorthDeltaLabel = deltaNetWorth == null
-      ? 'em 6 meses'
-      : '${deltaNetWorth >= 0 ? '+' : ''}${deltaNetWorth.toStringAsFixed(1).replaceAll('.', ',')}% em 6 meses';
 
   final ultimasTransacoes = [...transacoes]
     ..sort((a, b) => b.data.compareTo(a.data));
@@ -106,11 +82,9 @@ final dashboardSummaryProvider = Provider<DashboardSummary>((ref) {
     receitasMes: receitasMes,
     deltaReceitasPercent: deltaReceitasPercent,
     despesasMes: despesasMes,
-    despesasFootnote: despesasMes == 0 ? 'Nenhuma despesa este mês' : 'Até agora este mês',
-    netWorthMonths: rotulosMeses,
-    netWorthValuesNormalizados: normalizados,
-    netWorthRangeLabel: '${formatCurrency(primeiro)} → ${formatCurrency(ultimo)}',
-    netWorthDeltaLabel: netWorthDeltaLabel,
+    despesasFootnote: despesasMes == 0
+        ? 'Nenhuma despesa este mês'
+        : 'Até agora este mês',
     ultimasTransacoes: ultimasTransacoes.take(5).toList(),
   );
 });

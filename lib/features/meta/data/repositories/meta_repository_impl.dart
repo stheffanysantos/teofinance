@@ -19,10 +19,11 @@ class MetaRepositoryImpl implements MetaRepository {
     required double valorAlvo,
     required DateTime prazo,
     double valorAtual = 0,
+    String? banco,
   }) async {
     try {
       return Right(
-        await _local.criar(nome: nome, valorAlvo: valorAlvo, prazo: prazo, valorAtual: valorAtual),
+        await _local.criar(nome: nome, valorAlvo: valorAlvo, prazo: prazo, valorAtual: valorAtual, banco: banco),
       );
     } catch (_) {
       return const Left(CacheFailure('Não foi possível salvar a meta.'));

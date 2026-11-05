@@ -187,6 +187,17 @@ class $TransactionsTableTable extends TransactionsTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _cartaoIdMeta = const VerificationMeta(
+    'cartaoId',
+  );
+  @override
+  late final GeneratedColumn<String> cartaoId = GeneratedColumn<String>(
+    'cartao_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -205,6 +216,7 @@ class $TransactionsTableTable extends TransactionsTable
     statusParcela,
     minhaParte,
     divididoCom,
+    cartaoId,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -333,6 +345,12 @@ class $TransactionsTableTable extends TransactionsTable
         ),
       );
     }
+    if (data.containsKey('cartao_id')) {
+      context.handle(
+        _cartaoIdMeta,
+        cartaoId.isAcceptableOrUnknown(data['cartao_id']!, _cartaoIdMeta),
+      );
+    }
     return context;
   }
 
@@ -408,6 +426,10 @@ class $TransactionsTableTable extends TransactionsTable
         DriftSqlType.string,
         data['${effectivePrefix}dividido_com'],
       ),
+      cartaoId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cartao_id'],
+      ),
     );
   }
 
@@ -454,6 +476,7 @@ class TransactionsTableData extends DataClass
 
   /// Nomes das outras pessoas, em JSON (`["Ana","Bruno"]`).
   final String? divididoCom;
+  final String? cartaoId;
   const TransactionsTableData({
     required this.id,
     this.remoteId,
@@ -471,6 +494,7 @@ class TransactionsTableData extends DataClass
     this.statusParcela,
     this.minhaParte,
     this.divididoCom,
+    this.cartaoId,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -509,6 +533,9 @@ class TransactionsTableData extends DataClass
     if (!nullToAbsent || divididoCom != null) {
       map['dividido_com'] = Variable<String>(divididoCom);
     }
+    if (!nullToAbsent || cartaoId != null) {
+      map['cartao_id'] = Variable<String>(cartaoId);
+    }
     return map;
   }
 
@@ -544,6 +571,9 @@ class TransactionsTableData extends DataClass
       divididoCom: divididoCom == null && nullToAbsent
           ? const Value.absent()
           : Value(divididoCom),
+      cartaoId: cartaoId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cartaoId),
     );
   }
 
@@ -571,6 +601,7 @@ class TransactionsTableData extends DataClass
       statusParcela: serializer.fromJson<String?>(json['statusParcela']),
       minhaParte: serializer.fromJson<double?>(json['minhaParte']),
       divididoCom: serializer.fromJson<String?>(json['divididoCom']),
+      cartaoId: serializer.fromJson<String?>(json['cartaoId']),
     );
   }
   @override
@@ -595,6 +626,7 @@ class TransactionsTableData extends DataClass
       'statusParcela': serializer.toJson<String?>(statusParcela),
       'minhaParte': serializer.toJson<double?>(minhaParte),
       'divididoCom': serializer.toJson<String?>(divididoCom),
+      'cartaoId': serializer.toJson<String?>(cartaoId),
     };
   }
 
@@ -615,6 +647,7 @@ class TransactionsTableData extends DataClass
     Value<String?> statusParcela = const Value.absent(),
     Value<double?> minhaParte = const Value.absent(),
     Value<String?> divididoCom = const Value.absent(),
+    Value<String?> cartaoId = const Value.absent(),
   }) => TransactionsTableData(
     id: id ?? this.id,
     remoteId: remoteId.present ? remoteId.value : this.remoteId,
@@ -638,6 +671,7 @@ class TransactionsTableData extends DataClass
         : this.statusParcela,
     minhaParte: minhaParte.present ? minhaParte.value : this.minhaParte,
     divididoCom: divididoCom.present ? divididoCom.value : this.divididoCom,
+    cartaoId: cartaoId.present ? cartaoId.value : this.cartaoId,
   );
   TransactionsTableData copyWithCompanion(TransactionsTableCompanion data) {
     return TransactionsTableData(
@@ -675,6 +709,7 @@ class TransactionsTableData extends DataClass
       divididoCom: data.divididoCom.present
           ? data.divididoCom.value
           : this.divididoCom,
+      cartaoId: data.cartaoId.present ? data.cartaoId.value : this.cartaoId,
     );
   }
 
@@ -696,7 +731,8 @@ class TransactionsTableData extends DataClass
           ..write('ehParcela: $ehParcela, ')
           ..write('statusParcela: $statusParcela, ')
           ..write('minhaParte: $minhaParte, ')
-          ..write('divididoCom: $divididoCom')
+          ..write('divididoCom: $divididoCom, ')
+          ..write('cartaoId: $cartaoId')
           ..write(')'))
         .toString();
   }
@@ -719,6 +755,7 @@ class TransactionsTableData extends DataClass
     statusParcela,
     minhaParte,
     divididoCom,
+    cartaoId,
   );
   @override
   bool operator ==(Object other) =>
@@ -739,7 +776,8 @@ class TransactionsTableData extends DataClass
           other.ehParcela == this.ehParcela &&
           other.statusParcela == this.statusParcela &&
           other.minhaParte == this.minhaParte &&
-          other.divididoCom == this.divididoCom);
+          other.divididoCom == this.divididoCom &&
+          other.cartaoId == this.cartaoId);
 }
 
 class TransactionsTableCompanion
@@ -760,6 +798,7 @@ class TransactionsTableCompanion
   final Value<String?> statusParcela;
   final Value<double?> minhaParte;
   final Value<String?> divididoCom;
+  final Value<String?> cartaoId;
   final Value<int> rowid;
   const TransactionsTableCompanion({
     this.id = const Value.absent(),
@@ -778,6 +817,7 @@ class TransactionsTableCompanion
     this.statusParcela = const Value.absent(),
     this.minhaParte = const Value.absent(),
     this.divididoCom = const Value.absent(),
+    this.cartaoId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   TransactionsTableCompanion.insert({
@@ -797,6 +837,7 @@ class TransactionsTableCompanion
     this.statusParcela = const Value.absent(),
     this.minhaParte = const Value.absent(),
     this.divididoCom = const Value.absent(),
+    this.cartaoId = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        name = Value(name),
@@ -820,6 +861,7 @@ class TransactionsTableCompanion
     Expression<String>? statusParcela,
     Expression<double>? minhaParte,
     Expression<String>? divididoCom,
+    Expression<String>? cartaoId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -839,6 +881,7 @@ class TransactionsTableCompanion
       if (statusParcela != null) 'status_parcela': statusParcela,
       if (minhaParte != null) 'minha_parte': minhaParte,
       if (divididoCom != null) 'dividido_com': divididoCom,
+      if (cartaoId != null) 'cartao_id': cartaoId,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -860,6 +903,7 @@ class TransactionsTableCompanion
     Value<String?>? statusParcela,
     Value<double?>? minhaParte,
     Value<String?>? divididoCom,
+    Value<String?>? cartaoId,
     Value<int>? rowid,
   }) {
     return TransactionsTableCompanion(
@@ -879,6 +923,7 @@ class TransactionsTableCompanion
       statusParcela: statusParcela ?? this.statusParcela,
       minhaParte: minhaParte ?? this.minhaParte,
       divididoCom: divididoCom ?? this.divididoCom,
+      cartaoId: cartaoId ?? this.cartaoId,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -936,6 +981,9 @@ class TransactionsTableCompanion
     if (divididoCom.present) {
       map['dividido_com'] = Variable<String>(divididoCom.value);
     }
+    if (cartaoId.present) {
+      map['cartao_id'] = Variable<String>(cartaoId.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -961,6 +1009,7 @@ class TransactionsTableCompanion
           ..write('statusParcela: $statusParcela, ')
           ..write('minhaParte: $minhaParte, ')
           ..write('divididoCom: $divididoCom, ')
+          ..write('cartaoId: $cartaoId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2434,6 +2483,15 @@ class $MetaTableTable extends MetaTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _bancoMeta = const VerificationMeta('banco');
+  @override
+  late final GeneratedColumn<String> banco = GeneratedColumn<String>(
+    'banco',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   late final GeneratedColumnWithTypeConverter<SyncStatus, int> syncStatus =
       GeneratedColumn<int>(
@@ -2464,6 +2522,7 @@ class $MetaTableTable extends MetaTable
     valorAtual,
     valorAlvo,
     prazo,
+    banco,
     syncStatus,
     updatedAt,
   ];
@@ -2520,6 +2579,12 @@ class $MetaTableTable extends MetaTable
     } else if (isInserting) {
       context.missing(_prazoMeta);
     }
+    if (data.containsKey('banco')) {
+      context.handle(
+        _bancoMeta,
+        banco.isAcceptableOrUnknown(data['banco']!, _bancoMeta),
+      );
+    }
     if (data.containsKey('updated_at')) {
       context.handle(
         _updatedAtMeta,
@@ -2559,6 +2624,10 @@ class $MetaTableTable extends MetaTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}prazo'],
       )!,
+      banco: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}banco'],
+      ),
       syncStatus: $MetaTableTable.$convertersyncStatus.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.int,
@@ -2588,6 +2657,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
   final double valorAtual;
   final double valorAlvo;
   final DateTime prazo;
+  final String? banco;
   final SyncStatus syncStatus;
   final DateTime updatedAt;
   const MetaTableData({
@@ -2597,6 +2667,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
     required this.valorAtual,
     required this.valorAlvo,
     required this.prazo,
+    this.banco,
     required this.syncStatus,
     required this.updatedAt,
   });
@@ -2611,6 +2682,9 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
     map['valor_atual'] = Variable<double>(valorAtual);
     map['valor_alvo'] = Variable<double>(valorAlvo);
     map['prazo'] = Variable<DateTime>(prazo);
+    if (!nullToAbsent || banco != null) {
+      map['banco'] = Variable<String>(banco);
+    }
     {
       map['sync_status'] = Variable<int>(
         $MetaTableTable.$convertersyncStatus.toSql(syncStatus),
@@ -2630,6 +2704,9 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
       valorAtual: Value(valorAtual),
       valorAlvo: Value(valorAlvo),
       prazo: Value(prazo),
+      banco: banco == null && nullToAbsent
+          ? const Value.absent()
+          : Value(banco),
       syncStatus: Value(syncStatus),
       updatedAt: Value(updatedAt),
     );
@@ -2647,6 +2724,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
       valorAtual: serializer.fromJson<double>(json['valorAtual']),
       valorAlvo: serializer.fromJson<double>(json['valorAlvo']),
       prazo: serializer.fromJson<DateTime>(json['prazo']),
+      banco: serializer.fromJson<String?>(json['banco']),
       syncStatus: $MetaTableTable.$convertersyncStatus.fromJson(
         serializer.fromJson<int>(json['syncStatus']),
       ),
@@ -2663,6 +2741,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
       'valorAtual': serializer.toJson<double>(valorAtual),
       'valorAlvo': serializer.toJson<double>(valorAlvo),
       'prazo': serializer.toJson<DateTime>(prazo),
+      'banco': serializer.toJson<String?>(banco),
       'syncStatus': serializer.toJson<int>(
         $MetaTableTable.$convertersyncStatus.toJson(syncStatus),
       ),
@@ -2677,6 +2756,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
     double? valorAtual,
     double? valorAlvo,
     DateTime? prazo,
+    Value<String?> banco = const Value.absent(),
     SyncStatus? syncStatus,
     DateTime? updatedAt,
   }) => MetaTableData(
@@ -2686,6 +2766,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
     valorAtual: valorAtual ?? this.valorAtual,
     valorAlvo: valorAlvo ?? this.valorAlvo,
     prazo: prazo ?? this.prazo,
+    banco: banco.present ? banco.value : this.banco,
     syncStatus: syncStatus ?? this.syncStatus,
     updatedAt: updatedAt ?? this.updatedAt,
   );
@@ -2699,6 +2780,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
           : this.valorAtual,
       valorAlvo: data.valorAlvo.present ? data.valorAlvo.value : this.valorAlvo,
       prazo: data.prazo.present ? data.prazo.value : this.prazo,
+      banco: data.banco.present ? data.banco.value : this.banco,
       syncStatus: data.syncStatus.present
           ? data.syncStatus.value
           : this.syncStatus,
@@ -2715,6 +2797,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
           ..write('valorAtual: $valorAtual, ')
           ..write('valorAlvo: $valorAlvo, ')
           ..write('prazo: $prazo, ')
+          ..write('banco: $banco, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt')
           ..write(')'))
@@ -2729,6 +2812,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
     valorAtual,
     valorAlvo,
     prazo,
+    banco,
     syncStatus,
     updatedAt,
   );
@@ -2742,6 +2826,7 @@ class MetaTableData extends DataClass implements Insertable<MetaTableData> {
           other.valorAtual == this.valorAtual &&
           other.valorAlvo == this.valorAlvo &&
           other.prazo == this.prazo &&
+          other.banco == this.banco &&
           other.syncStatus == this.syncStatus &&
           other.updatedAt == this.updatedAt);
 }
@@ -2753,6 +2838,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
   final Value<double> valorAtual;
   final Value<double> valorAlvo;
   final Value<DateTime> prazo;
+  final Value<String?> banco;
   final Value<SyncStatus> syncStatus;
   final Value<DateTime> updatedAt;
   final Value<int> rowid;
@@ -2763,6 +2849,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
     this.valorAtual = const Value.absent(),
     this.valorAlvo = const Value.absent(),
     this.prazo = const Value.absent(),
+    this.banco = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2774,6 +2861,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
     this.valorAtual = const Value.absent(),
     required double valorAlvo,
     required DateTime prazo,
+    this.banco = const Value.absent(),
     this.syncStatus = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -2788,6 +2876,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
     Expression<double>? valorAtual,
     Expression<double>? valorAlvo,
     Expression<DateTime>? prazo,
+    Expression<String>? banco,
     Expression<int>? syncStatus,
     Expression<DateTime>? updatedAt,
     Expression<int>? rowid,
@@ -2799,6 +2888,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
       if (valorAtual != null) 'valor_atual': valorAtual,
       if (valorAlvo != null) 'valor_alvo': valorAlvo,
       if (prazo != null) 'prazo': prazo,
+      if (banco != null) 'banco': banco,
       if (syncStatus != null) 'sync_status': syncStatus,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (rowid != null) 'rowid': rowid,
@@ -2812,6 +2902,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
     Value<double>? valorAtual,
     Value<double>? valorAlvo,
     Value<DateTime>? prazo,
+    Value<String?>? banco,
     Value<SyncStatus>? syncStatus,
     Value<DateTime>? updatedAt,
     Value<int>? rowid,
@@ -2823,6 +2914,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
       valorAtual: valorAtual ?? this.valorAtual,
       valorAlvo: valorAlvo ?? this.valorAlvo,
       prazo: prazo ?? this.prazo,
+      banco: banco ?? this.banco,
       syncStatus: syncStatus ?? this.syncStatus,
       updatedAt: updatedAt ?? this.updatedAt,
       rowid: rowid ?? this.rowid,
@@ -2850,6 +2942,9 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
     if (prazo.present) {
       map['prazo'] = Variable<DateTime>(prazo.value);
     }
+    if (banco.present) {
+      map['banco'] = Variable<String>(banco.value);
+    }
     if (syncStatus.present) {
       map['sync_status'] = Variable<int>(
         $MetaTableTable.$convertersyncStatus.toSql(syncStatus.value),
@@ -2873,6 +2968,7 @@ class MetaTableCompanion extends UpdateCompanion<MetaTableData> {
           ..write('valorAtual: $valorAtual, ')
           ..write('valorAlvo: $valorAlvo, ')
           ..write('prazo: $prazo, ')
+          ..write('banco: $banco, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('rowid: $rowid')

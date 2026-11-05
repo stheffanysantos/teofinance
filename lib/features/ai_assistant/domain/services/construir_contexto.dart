@@ -1,3 +1,4 @@
+import 'package:teofinance/core/constants/categorias.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/contexto_financeiro.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/domain/services/calcular_envelopes.dart';
@@ -17,6 +18,7 @@ ContextoFinanceiro construirContexto({
 
   for (final t in transacoes) {
     if (t.data.year != mes.year || t.data.month != mes.month) continue;
+    if (t.categoria == kCategoriaAjusteSaldo) continue;
     final valor = t.valorContabilizado;
     if (valor > 0) {
       receitas += valor;

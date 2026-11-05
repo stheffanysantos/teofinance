@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:teofinance/core/database/app_database.dart';
+import 'package:teofinance/core/database/tabelas_locais.dart';
 import 'package:teofinance/core/sync/sync_pausa.dart' as pausa;
 
 /// Nome de cada tabela interna no arquivo exportado, em português e estável.
@@ -35,6 +36,10 @@ class LgpdLocalDataSource {
       tudo[_nomesExportados[tabela.actualTableName] ?? tabela.actualTableName] =
           linhas.map((l) => (l as DataClass).toJson(serializer: serializador)).toList();
     }
+    for (final nome in kTodasTabelasLocais) {
+      final linhas = await _db.customSelect('SELECT * FROM $nome').get();
+      tudo[nome] = linhas.map((l) => Map<String, dynamic>.from(l.data)).toList();
+    }
     return tudo;
   }
 
@@ -50,6 +55,9 @@ class LgpdLocalDataSource {
         if (tabela.actualTableName == 'perfil_banco_table') continue;
         await _db.delete(tabela).go();
       }
+      for (final nome in kTabelasLocaisFinanceiras) {
+        await _db.customStatement('DELETE FROM $nome');
+      }
     });
   }
 
@@ -58,6 +66,9 @@ class LgpdLocalDataSource {
     await _db.transaction(() async {
       for (final tabela in _db.allTables) {
         await _db.delete(tabela).go();
+      }
+      for (final nome in kTodasTabelasLocais) {
+        await _db.customStatement('DELETE FROM $nome');
       }
     });
     await _secureStorage.deleteAll();

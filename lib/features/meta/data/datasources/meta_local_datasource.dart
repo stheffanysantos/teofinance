@@ -25,6 +25,7 @@ class MetaLocalDataSource {
     required double valorAlvo,
     required DateTime prazo,
     required double valorAtual,
+    String? banco,
   }) async {
     final id = _uuid.v4();
     await _db.into(_db.metaTable).insert(
@@ -34,9 +35,10 @@ class MetaLocalDataSource {
             valorAlvo: valorAlvo,
             prazo: prazo,
             valorAtual: Value(valorAtual),
+            banco: Value(banco),
           ),
         );
-    return Meta(id: id, nome: nome, valorAtual: valorAtual, valorAlvo: valorAlvo, prazo: prazo);
+    return Meta(id: id, nome: nome, valorAtual: valorAtual, valorAlvo: valorAlvo, prazo: prazo, banco: banco);
   }
 
   Future<void> aportar({required String id, required double valor}) async {
@@ -116,6 +118,7 @@ class MetaLocalDataSource {
             valorAlvo: meta.valorAlvo,
             prazo: meta.prazo,
             valorAtual: Value(meta.valorAtual),
+            banco: Value(meta.banco),
             syncStatus: const Value(SyncStatus.synced),
           ),
         );
@@ -128,6 +131,7 @@ class MetaLocalDataSource {
       valorAtual: linha.valorAtual,
       valorAlvo: linha.valorAlvo,
       prazo: linha.prazo,
+      banco: linha.banco,
       remoteId: linha.remoteId,
       syncStatus: linha.syncStatus,
     );

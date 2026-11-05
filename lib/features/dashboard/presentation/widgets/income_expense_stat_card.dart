@@ -29,51 +29,69 @@ class IncomeExpenseStatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: t.card,
-        border: Border.all(color: t.line),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 22,
-                height: 22,
-                decoration: BoxDecoration(color: tintBg, borderRadius: BorderRadius.circular(7)),
-                alignment: Alignment.center,
-                child: Text(
-                  isIncome ? '↓' : '↑',
-                  style: TextStyle(color: tint, fontWeight: FontWeight.w800, fontSize: 13),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: t.card,
+          border: Border.all(color: t.line),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: tintBg,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    isIncome ? '↓' : '↑',
+                    style: TextStyle(
+                      color: tint,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(color: t.sub, fontWeight: FontWeight.w600, fontSize: 13),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: t.sub,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          AppAmountText(
-            amount,
-            style: TextStyle(
-              fontSize: 21,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -.5,
-              color: t.ink,
-              fontFeatures: const [FontFeature.tabularFigures()],
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(footnote, style: TextStyle(color: tint, fontWeight: FontWeight.w700, fontSize: 12)),
-        ],
-      ),
+            const SizedBox(height: 8),
+            AppAmountText(
+              amount,
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -.5,
+                color: t.ink,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              footnote,
+              style: TextStyle(
+                color: tint,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../sync/sync_status.dart';
+import 'package:teofinance/core/database/tabelas_locais.dart';
 
 part 'app_database.g.dart';
 
@@ -43,6 +44,10 @@ class TransactionsTable extends Table {
   RealColumn get minhaParte => real().nullable()();
   /// Nomes das outras pessoas, em JSON (`["Ana","Bruno"]`).
   TextColumn get divididoCom => text().nullable()();
+
+  /// Cartão de crédito (v14) em que a compra foi feita; nulo = sem cartão.
+  /// Referencia `cartoes` (tabela criada por SQL em `tabelas_locais.dart`).
+  TextColumn get cartaoId => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -105,6 +110,9 @@ class MetaTable extends Table {
   RealColumn get valorAtual => real().withDefault(const Constant(0))();
   RealColumn get valorAlvo => real()();
   DateTimeColumn get prazo => dateTime()();
+
+  /// Banco/instituição onde a meta está guardada (opcional).
+  TextColumn get banco => text().nullable()();
   IntColumn get syncStatus => intEnum<SyncStatus>().withDefault(
         Constant(SyncStatus.pendingCreate.index),
       )();
@@ -227,11 +235,14 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) => m.createAll(),
+        onCreate: (m) async {
+          await m.createAll();
+          await _criarTabelasLocais();
+        },
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await m.createTable(rendaTable);
@@ -291,8 +302,25 @@ class AppDatabase extends _$AppDatabase {
             // Quem vem de antes da v6 já recebeu a tabela com a coluna em createTable.
             await m.addColumn(extratoLinhasTable, extratoLinhasTable.fitid);
           }
+          if (from < 14) {
+            // Idempotente: cria só as tabelas locais que ainda não existem.
+            await _criarTabelasLocais();
+          }
+          if (from < 14) {
+            await m.addColumn(transactionsTable, transactionsTable.cartaoId);
+          }
+          if (from >= 3 && from < 13) {
+            // Quem vem de antes da v3 já recebeu a tabela com a coluna em createTable.
+            await m.addColumn(metaTable, metaTable.banco);
+          }
         },
       );
+
+  Future<void> _criarTabelasLocais() async {
+    for (final comando in kCriarTabelasLocais) {
+      await customStatement(comando);
+    }
+  }
 }
 
 LazyDatabase _openConnection() {

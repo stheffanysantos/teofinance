@@ -4,3 +4,8 @@
 const kCategoriasBase = ['Todas', 'Mercado', 'Moradia', 'Transporte', 'Lazer', 'Renda'];
 
 List<String> get kCategorias => kCategoriasBase.skip(1).toList();
+
+/// Categoria da transação que acerta o saldo do app com o saldo real da conta
+/// (ver `AjustarSaldoUseCase`). Entra no saldo total, mas nunca em receitas,
+/// despesas, relatórios ou score: não é dinheiro que entrou ou saiu no mês.
+const kCategoriaAjusteSaldo = 'Ajuste de saldo';

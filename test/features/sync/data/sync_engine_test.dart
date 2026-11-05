@@ -4,6 +4,14 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:teofinance/core/database/app_database.dart';
 import 'package:teofinance/core/sync/sync_status.dart';
+import 'package:teofinance/features/cartao/data/datasources/cartao_local_data_source.dart';
+import 'package:teofinance/features/cartao/data/repositories/cartao_repository_impl.dart';
+import 'package:teofinance/features/categoria/data/datasources/categoria_local_data_source.dart';
+import 'package:teofinance/features/categoria/data/repositories/categoria_repository_impl.dart';
+import 'package:teofinance/features/investimento/data/datasources/investimento_local_data_source.dart';
+import 'package:teofinance/features/investimento/data/repositories/investimento_repository_impl.dart';
+import 'package:teofinance/features/lembrete/data/datasources/lembrete_local_data_source.dart';
+import 'package:teofinance/features/lembrete/data/repositories/lembrete_repository_impl.dart';
 import 'package:teofinance/features/budget/data/datasources/orcamento_local_datasource.dart';
 import 'package:teofinance/features/budget/data/repositories/orcamento_repository_impl.dart';
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
@@ -75,6 +83,10 @@ class _Aparelho {
       parcelamentoRepository: parcelamentoRepo,
       orcamentoRepository: (orcamento ?? OrcamentoRepositoryImpl.new)(orcamentos),
       contaRepository: ContaRepositoryImpl(contas),
+      categoriaRepository: CategoriaRepositoryImpl(CategoriaLocalDataSource(db)),
+      investimentoRepository: InvestimentoRepositoryImpl(InvestimentoLocalDataSource(db)),
+      lembreteRepository: LembreteRepositoryImpl(LembreteLocalDataSource(db)),
+      cartaoRepository: CartaoRepositoryImpl(CartaoLocalDataSource(db)),
     );
   }
 
@@ -377,6 +389,10 @@ void main() {
         parcelamentoRepository: a.parcelamentoRepo,
         orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
         contaRepository: ContaRepositoryImpl(a.contas),
+        categoriaRepository: CategoriaRepositoryImpl(CategoriaLocalDataSource(a.db)),
+        investimentoRepository: InvestimentoRepositoryImpl(InvestimentoLocalDataSource(a.db)),
+        lembreteRepository: LembreteRepositoryImpl(LembreteLocalDataSource(a.db)),
+        cartaoRepository: CartaoRepositoryImpl(CartaoLocalDataSource(a.db)),
       );
       await offline.sincronizarTudo();
       expect((await linhasMeta(a)).single.syncStatus, SyncStatus.pendingDelete);
@@ -538,6 +554,10 @@ void main() {
         parcelamentoRepository: a.parcelamentoRepo,
         orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
         contaRepository: ContaRepositoryImpl(a.contas),
+        categoriaRepository: CategoriaRepositoryImpl(CategoriaLocalDataSource(a.db)),
+        investimentoRepository: InvestimentoRepositoryImpl(InvestimentoLocalDataSource(a.db)),
+        lembreteRepository: LembreteRepositoryImpl(LembreteLocalDataSource(a.db)),
+        cartaoRepository: CartaoRepositoryImpl(CartaoLocalDataSource(a.db)),
       );
 
       await offline.sincronizarTudo();
@@ -562,6 +582,10 @@ void main() {
       parcelamentoRepository: a.parcelamentoRepo,
       orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
       contaRepository: ContaRepositoryImpl(a.contas),
+      categoriaRepository: CategoriaRepositoryImpl(CategoriaLocalDataSource(a.db)),
+      investimentoRepository: InvestimentoRepositoryImpl(InvestimentoLocalDataSource(a.db)),
+      lembreteRepository: LembreteRepositoryImpl(LembreteLocalDataSource(a.db)),
+      cartaoRepository: CartaoRepositoryImpl(CartaoLocalDataSource(a.db)),
       pausado: () async => true,
     );
 
@@ -594,6 +618,10 @@ void main() {
         parcelamentoRepository: a.parcelamentoRepo,
         orcamentoRepository: OrcamentoRepositoryImpl(a.orcamentos),
         contaRepository: ContaRepositoryImpl(a.contas),
+        categoriaRepository: CategoriaRepositoryImpl(CategoriaLocalDataSource(a.db)),
+        investimentoRepository: InvestimentoRepositoryImpl(InvestimentoLocalDataSource(a.db)),
+        lembreteRepository: LembreteRepositoryImpl(LembreteLocalDataSource(a.db)),
+        cartaoRepository: CartaoRepositoryImpl(CartaoLocalDataSource(a.db)),
       );
       await mesmoBanco.sincronizarTudo();
 

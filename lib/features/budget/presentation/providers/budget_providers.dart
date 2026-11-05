@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/providers/core_providers.dart';
@@ -7,6 +9,7 @@ import 'package:teofinance/features/budget/data/repositories/orcamento_repositor
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/domain/repositories/orcamento_repository.dart';
 import 'package:teofinance/features/budget/domain/services/calcular_envelopes.dart';
+import 'package:teofinance/features/budget/domain/usecases/avisar_limite_orcamento_usecase.dart';
 import 'package:teofinance/features/budget/domain/usecases/definir_limite_orcamento_usecase.dart';
 import 'package:teofinance/features/budget/domain/usecases/excluir_limite_orcamento_usecase.dart';
 import 'package:teofinance/features/transacao/presentation/providers/transacao_providers.dart';
@@ -45,6 +48,36 @@ final resumoOrcamentoProvider = Provider<AsyncValue<ResumoOrcamento>>((ref) {
     transacoes: transacoes.requireValue,
     mes: DateTime.now(),
   ));
+});
+
+final avisarLimiteOrcamentoUseCaseProvider = Provider((ref) {
+  return AvisarLimiteOrcamentoUseCase(ref.watch(notificacaoServiceProvider));
+});
+
+/// Avisa quando uma categoria chega a 80% do limite ou o estoura. Fica ligado
+/// pelo `SyncGate`; o que já foi avisado no mês é guardado no aparelho.
+final alertasOrcamentoProvider = Provider<void>((ref) {
+  Future<void> verificar(AsyncValue<ResumoOrcamento> resumo) async {
+    final dados = resumo.valueOrNull;
+    if (dados == null || dados.envelopes.isEmpty) return;
+    try {
+      final agora = DateTime.now();
+      final chave = 'orcamento_avisos_${agora.year}_${agora.month}';
+      final storage = ref.read(secureStorageProvider);
+      final salvo = await storage.read(key: chave);
+      final avisados = salvo == null
+          ? <String, int>{}
+          : (jsonDecode(salvo) as Map<String, dynamic>).map((k, v) => MapEntry(k, v as int));
+      final novos = await ref.read(avisarLimiteOrcamentoUseCaseProvider)(resumo: dados, avisados: avisados);
+      if (novos.length != avisados.length || novos.entries.any((e) => avisados[e.key] != e.value)) {
+        await storage.write(key: chave, value: jsonEncode(novos));
+      }
+    } catch (_) {
+      // sem armazenamento ou notificação (ex.: testes): o aviso é opcional.
+    }
+  }
+
+  ref.listen(resumoOrcamentoProvider, (_, atual) => verificar(atual), fireImmediately: true);
 });
 
 /// Cor do indicador: verde (<70%), âmbar (70–90%), vermelho (≥90%).

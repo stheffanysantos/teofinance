@@ -21,6 +21,7 @@ class Transacao {
     this.statusParcela,
     this.minhaParte,
     this.divididoCom = const [],
+    this.cartaoId,
   });
 
   final String id;
@@ -46,6 +47,50 @@ class Transacao {
   /// se a compra não foi dividida.
   final double? minhaParte;
   final List<String> divididoCom;
+
+  /// Cartão de crédito em que a compra foi feita; nulo = sem cartão.
+  final String? cartaoId;
+
+  /// O que entra no "Saldo total": o valor da transação, mas, numa compra
+  /// dividida, só a parte do usuário (o resto é de quem dividiu).
+  double get valorNoSaldo => ehDividida ? valorContabilizado : valor;
+
+  /// Marca, antes do nome em [divididoCom], de quem já devolveu a sua parte.
+  /// Fica na própria lista (que já sincroniza) para não precisar de outra coluna.
+  static const marcaReembolso = '✓ ';
+
+  static String _semMarca(String nome) => nome.startsWith(marcaReembolso) ? nome.substring(marcaReembolso.length) : nome;
+
+  /// Pessoas da divisão, sem a marca de reembolso.
+  List<String> get pessoasDaDivisao => divididoCom.map(_semMarca).toList();
+
+  /// Pessoas da divisão que ainda não devolveram a parte delas.
+  List<String> get pessoasPendentes => [
+    for (final n in divididoCom)
+      if (!n.startsWith(marcaReembolso)) n,
+  ];
+
+  bool jaPagou(String pessoa) => divididoCom.contains('$marcaReembolso$pessoa');
+
+  /// Quanto cada pessoa deve: o que não é a parte do usuário, dividido igualmente.
+  double get parteDeCadaPessoa {
+    if (!ehDividida || divididoCom.isEmpty) return 0;
+    return (valorCobrado.abs() - minhaParte!) / divididoCom.length;
+  }
+
+  /// Quanto ainda falta receber desta compra.
+  double get aReceber => parteDeCadaPessoa * pessoasPendentes.length;
+
+  /// Lista com [pessoa] marcada (ou desmarcada) como quem já pagou.
+  List<String> divisaoComReembolso(String pessoa, {required bool pago}) => [
+    for (final n in divididoCom)
+      if (_semMarca(n) != pessoa) n else (pago ? '$marcaReembolso$pessoa' : pessoa),
+  ];
+
+  /// Ao editar a divisão, mantém a marca de quem já pagou e continua na lista.
+  List<String> preservandoReembolsos(List<String> novasPessoas) => [
+    for (final p in novasPessoas) jaPagou(p) ? '$marcaReembolso$p' : p,
+  ];
 
   bool get precisaCategoria => categoria.trim().isEmpty;
   bool get isReceita => valor > 0;

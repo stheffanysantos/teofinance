@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/constants/categorias.dart';
+import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../cartao/presentation/providers/cartao_providers.dart';
+import '../../domain/entities/transacao.dart';
 import '../providers/transacao_providers.dart';
 
 /// Cadastro manual de transação — item 4 do MVP
 /// (`.claude/plans/MVP.md`), complementar à importação de extrato.
 class NovaTransacaoScreen extends ConsumerStatefulWidget {
-  const NovaTransacaoScreen({super.key});
+  const NovaTransacaoScreen({super.key, this.transacao});
+
+  /// Quando informada, a tela edita esta transação em vez de criar uma nova.
+  final Transacao? transacao;
 
   @override
   ConsumerState<NovaTransacaoScreen> createState() => _NovaTransacaoScreenState();
@@ -20,8 +25,25 @@ class _NovaTransacaoScreenState extends ConsumerState<NovaTransacaoScreen> {
   DateTime _data = DateTime.now();
   bool _isDespesa = true;
   String _categoria = '';
+  String? _cartaoId;
   bool _salvando = false;
   String? _erro;
+
+  bool get _editando => widget.transacao != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final t = widget.transacao;
+    if (t != null) {
+      _descricaoController.text = t.descricao;
+      _valorController.text = t.valor.abs().toStringAsFixed(2).replaceAll('.', ',');
+      _data = t.data;
+      _isDespesa = t.valor < 0;
+      _categoria = t.categoria;
+      _cartaoId = t.cartaoId;
+    }
+  }
 
   @override
   void dispose() {
@@ -43,13 +65,29 @@ class _NovaTransacaoScreenState extends ConsumerState<NovaTransacaoScreen> {
     });
 
     final valor = _isDespesa ? -valorDigitado.abs() : valorDigitado.abs();
-    final resultado = await ref.read(criarTransacaoUseCaseProvider).call(
-          descricao: _descricaoController.text,
-          valor: valor,
-          data: _data,
-          categoria: _categoria,
-        );
+    final cartaoId = _isDespesa ? _cartaoId : null;
+    final resultado = _editando
+        ? await ref.read(editarTransacaoUseCaseProvider).call(
+              id: widget.transacao!.id,
+              descricao: _descricaoController.text,
+              valor: valor,
+              data: _data,
+              categoria: _categoria,
+            )
+        : await ref.read(criarTransacaoUseCaseProvider).call(
+              descricao: _descricaoController.text,
+              valor: valor,
+              data: _data,
+              categoria: _categoria,
+            );
 
+    if (!mounted) return;
+    if (resultado.isRight()) {
+      final id = _editando ? widget.transacao!.id : resultado.fold((_) => null, (r) => r is Transacao ? r.id : null);
+      if (id != null && (cartaoId != null || widget.transacao?.cartaoId != null)) {
+        await ref.read(transacaoRepositoryProvider).definirCartao(id: id, cartaoId: cartaoId);
+      }
+    }
     if (!mounted) return;
     resultado.match(
       (falha) => setState(() {
@@ -73,14 +111,19 @@ class _NovaTransacaoScreenState extends ConsumerState<NovaTransacaoScreen> {
   @override
   Widget build(BuildContext context) {
     final t = context.tokens;
-    final categorias = kCategorias;
+    final todas = ref.watch(categoriasProvider);
+    final cartoes = ref.watch(cartoesProvider).valueOrNull ?? const [];
+    final categorias = [
+      ...todas,
+      if (_categoria.isNotEmpty && !todas.contains(_categoria)) _categoria,
+    ];
 
     return Scaffold(
       backgroundColor: t.bg,
       appBar: AppBar(
         backgroundColor: t.bg,
         elevation: 0,
-        title: Text('Nova transação', style: TextStyle(color: t.ink)),
+        title: Text(_editando ? 'Editar transação' : 'Nova transação', style: TextStyle(color: t.ink)),
         iconTheme: IconThemeData(color: t.ink),
       ),
       body: SafeArea(
@@ -134,6 +177,16 @@ class _NovaTransacaoScreenState extends ConsumerState<NovaTransacaoScreen> {
                 items: categorias.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                 onChanged: (v) => setState(() => _categoria = v ?? ''),
               ),
+              if (_isDespesa && cartoes.isNotEmpty)
+                DropdownButtonFormField<String?>(
+                  initialValue: cartoes.any((c) => c.id == _cartaoId) ? _cartaoId : null,
+                  decoration: const InputDecoration(labelText: 'Cartão (opcional)'),
+                  items: [
+                    const DropdownMenuItem<String?>(value: null, child: Text('Sem cartão')),
+                    for (final c in cartoes) DropdownMenuItem<String?>(value: c.id, child: Text(c.nome)),
+                  ],
+                  onChanged: (v) => setState(() => _cartaoId = v),
+                ),
               if (_erro != null)
                 Text(_erro!, style: TextStyle(color: t.neg, fontSize: 13, fontWeight: FontWeight.w600)),
               FilledButton(
@@ -143,7 +196,7 @@ class _NovaTransacaoScreenState extends ConsumerState<NovaTransacaoScreen> {
                   padding: const EdgeInsets.all(16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(_salvando ? 'Salvando...' : 'Salvar transação'),
+                child: Text(_salvando ? 'Salvando...' : (_editando ? 'Salvar alterações' : 'Salvar transação')),
               ),
             ],
           ),
