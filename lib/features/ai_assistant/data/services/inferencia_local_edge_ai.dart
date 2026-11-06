@@ -34,7 +34,9 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
     try {
       return await _verificarInstalacao();
     } catch (e) {
-      debugPrint('InferenciaLocalEdgeAi.estaPronta falhou: ${e.runtimeType}: $e');
+      debugPrint(
+        'InferenciaLocalEdgeAi.estaPronta falhou: ${e.runtimeType}: $e',
+      );
       return false;
     }
   }
@@ -61,7 +63,12 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
 /// suficiente para o resumo financeiro sem estourar a memória do aparelho.
 Future<String> _gerarComPlugin(String instrucoes, String mensagem) async {
   await garantirMotorEdgeAi();
-  final modelo = await FlutterEdgeAi.getActiveModel(maxTokens: 2048);
+  // CPU de propósito: no Galaxy S24 Ultra o delegado de GPU (OpenCL) derruba o app
+  // com SIGSEGV ao carregar o modelo, e um crash nativo não dá para capturar.
+  final modelo = await FlutterEdgeAi.getActiveModel(
+    maxTokens: 2048,
+    preferredBackend: PreferredBackend.cpu,
+  );
   final chat = await modelo.createChat(
     systemInstruction: instrucoes,
     maxOutputTokens: 512,

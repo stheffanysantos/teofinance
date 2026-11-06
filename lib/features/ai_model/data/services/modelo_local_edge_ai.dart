@@ -1,14 +1,15 @@
 import 'package:flutter_edge_ai/flutter_edge_ai.dart';
 import 'package:teofinance/core/services/edge_ai_motor.dart';
 
-/// Modelo de linguagem local usado pelo assistente: Qwen2.5 1.5B Instruct
-/// (q8, `.litertlm`), bem mais leve que o Gemma 4 E2B (≈1,6 GB contra 2,4 GB) e
-/// suficiente para perguntas curtas sobre o resumo financeiro. Repositório
-/// aberto no Hugging Face (não exige token nem aceite de licença).
-const kModeloLocalId = 'Qwen2.5-1.5B-Instruct_multi-prefill-seq_q8_ekv4096.litertlm';
+/// Modelo de linguagem local usado pelo assistente: Qwen3 0.6B (int4, `.litertlm`),
+/// bem pequeno (≈343 MB) para perguntas curtas sobre o resumo financeiro. O app
+/// já responde por regras quando o modelo não está instalado. Repositório aberto
+/// no Hugging Face (não exige token). Se a qualidade não bastar, a versão maior
+/// do mesmo repositório é `Qwen3-0.6B.litertlm` (≈614 MB).
+const kModeloLocalId = 'Qwen3-0.6B_dynamic_wi4b32_afp32.litertlm';
 const kModeloLocalUrl =
-    'https://huggingface.co/litert-community/Qwen2.5-1.5B-Instruct/resolve/main/$kModeloLocalId';
-const kModeloLocalTamanhoEmMb = 1524;
+    'https://huggingface.co/litert-community/Qwen3-0.6B/resolve/main/$kModeloLocalId';
+const kModeloLocalTamanhoEmMb = 343;
 
 /// Operações do plugin de IA local de que o download precisa. Existe para o
 /// gerenciador ser testável sem o plugin nativo.
@@ -34,7 +35,7 @@ class ModeloLocalEdgeAiPlugin implements ModeloLocalEdgeAi {
   Future<void> instalar(void Function(int percentual) aoProgredir) async {
     await garantirMotorEdgeAi();
     await FlutterEdgeAi.installModel(
-      modelType: ModelType.qwen,
+      modelType: ModelType.qwen3,
       fileType: ModelFileType.litertlm,
     ).fromNetwork(kModeloLocalUrl).withProgress(aoProgredir).install();
   }

@@ -119,3 +119,6 @@ flutter:
 dependency_overrides:
   # pdf limita archive a <4.1.0, e image >=4.11 exige um archive mais novo.
   image: 4.10.0
+  # A 2.5.x usa JNI e falha no build release ao ser chamada pelo plugin de IA local
+  # (NoSuchMethodError em SharedPreferencesApiRegistrar.getAll). A 2.4.x usa o canal clássico.
+  shared_preferences_android: 2.4.23
