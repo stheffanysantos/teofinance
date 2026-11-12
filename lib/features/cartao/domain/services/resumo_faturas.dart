@@ -54,17 +54,27 @@ List<ResumoFatura> resumirFaturas({
   return lista;
 }
 
-/// Soma das faturas ainda não pagas de todos os [cartoes]: o que já foi gasto no
-/// crédito mas o banco ainda não descontou da conta.
-double totalEmAbertoNosCartoes({
+/// Quanto o usuário já gastou no crédito e o banco ainda não descontou da conta:
+/// a parte dele nas compras de faturas em aberto de todos os [cartoes]. Usa a
+/// mesma regra do saldo (compra dividida = só a parte dele), por isso é o que
+/// separa "saldo na conta" de "saldo após faturas" sem sobrar nem faltar a
+/// parte de quem dividiu a compra.
+double parteEmAbertoNosCartoes({
   required List<Cartao> cartoes,
   required List<Transacao> transacoes,
   required List<FaturaPaga> pagamentos,
 }) {
   var total = 0.0;
   for (final c in cartoes) {
-    for (final f in resumirFaturas(cartao: c, transacoes: transacoes, pagamentos: pagamentos)) {
-      if (f.emAberto) total += f.total;
+    final abertas = {
+      for (final f in resumirFaturas(cartao: c, transacoes: transacoes, pagamentos: pagamentos))
+        if (f.emAberto) (ano: f.ano, mes: f.mes),
+    };
+    if (abertas.isEmpty) continue;
+    for (final t in transacoes) {
+      if (t.cartaoId != c.id) continue;
+      final fatura = faturaDaData(diaFechamento: c.diaFechamento, diaVencimento: c.diaVencimento, data: t.data);
+      if (abertas.contains(fatura)) total -= t.valorNoSaldo;
     }
   }
   return total;

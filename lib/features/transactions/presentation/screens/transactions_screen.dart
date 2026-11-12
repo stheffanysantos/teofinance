@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../cartao/domain/entities/cartao.dart';
+import '../../../cartao/presentation/providers/cartao_providers.dart';
 import '../../../categoria/presentation/providers/categoria_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../connect/presentation/screens/connect_screen.dart';
@@ -9,6 +11,7 @@ import '../../../reconciliation/presentation/screens/reconciliation_screen.dart'
 import '../../../transacao/presentation/screens/nova_transacao_screen.dart';
 import '../../../transacao/presentation/providers/transacao_providers.dart';
 import '../../../transacao/presentation/screens/dividir_transacao_screen.dart';
+import '../../../transacao/domain/entities/transacao.dart';
 import '../providers/transactions_view_providers.dart';
 import '../widgets/filter_chip_row.dart';
 import '../widgets/transaction_row.dart';
@@ -285,6 +288,8 @@ class TransactionsScreen extends ConsumerWidget {
     // Parcela e compra dividida têm valores derivados; editar o valor ali
     // deixaria o parcelamento/divisão inconsistente.
     final podeEditar = !transacao.ehParcela && !transacao.ehDividida;
+    final cartoes = ref.read(cartoesProvider).valueOrNull ?? const [];
+    final nomeCartao = cartoes.where((c) => c.id == transacao.cartaoId).firstOrNull?.nome;
 
     final acao = await showModalBottomSheet<String>(
       context: context,
@@ -303,6 +308,15 @@ class TransactionsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.credit_card),
                 title: const Text('Parcelar compra'),
                 onTap: () => Navigator.of(context).pop('parcelar'),
+              ),
+            if (ehDespesa && cartoes.isNotEmpty)
+              ListTile(
+                leading: const Icon(Icons.credit_card_outlined),
+                title: Text(nomeCartao == null ? 'Vincular a um cartão' : 'Cartão: $nomeCartao'),
+                subtitle: transacao.ehParcela
+                    ? const Text('Vale para todas as parcelas da compra')
+                    : null,
+                onTap: () => Navigator.of(context).pop('cartao'),
               ),
             if (ehDespesa)
               ListTile(
@@ -338,6 +352,8 @@ class TransactionsScreen extends ConsumerWidget {
             builder: (_) => NovaTransacaoScreen(transacao: transacao),
           ),
         );
+      case 'cartao':
+        await _escolherCartao(context, ref, transacao, cartoes);
       case 'excluir':
         final confirmou = await AppConfirmDialog.mostrar(
           context,
@@ -365,6 +381,49 @@ class TransactionsScreen extends ConsumerWidget {
       case 'remover':
         await ref.read(removerDivisaoUseCaseProvider).call(transacao.id);
     }
+  }
+
+  /// Escolhe o cartão da compra (ou nenhum). Numa compra parcelada vale para
+  /// todas as parcelas: o repositório muda o parcelamento inteiro.
+  Future<void> _escolherCartao(
+    BuildContext context,
+    WidgetRef ref,
+    Transacao transacao,
+    List<Cartao> cartoes,
+  ) async {
+    // '' = "sem cartão"; nulo fica reservado para fechar sem escolher.
+    final escolhido = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                transacao.ehParcela ? 'Cartão da compra parcelada' : 'Cartão da compra',
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+            ),
+            ListTile(
+              title: const Text('Sem cartão'),
+              selected: transacao.cartaoId == null,
+              onTap: () => Navigator.of(context).pop(''),
+            ),
+            for (final c in cartoes)
+              ListTile(
+                title: Text(c.nome),
+                selected: transacao.cartaoId == c.id,
+                onTap: () => Navigator.of(context).pop(c.id),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (escolhido == null) return;
+    await ref
+        .read(transacaoRepositoryProvider)
+        .definirCartao(id: transacao.id, cartaoId: escolhido.isEmpty ? null : escolhido);
   }
 
   Future<void> _escolherCategoria(

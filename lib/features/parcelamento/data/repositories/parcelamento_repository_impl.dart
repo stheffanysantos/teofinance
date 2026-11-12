@@ -54,6 +54,8 @@ class ParcelamentoRepositoryImpl implements ParcelamentoRepository {
         totalOriginal: transacaoOriginal.valor < 0 ? -totalOriginal : totalOriginal,
         numeroParcelas: numeroParcelas,
         dataPrimeira: dataPrimeira,
+        // As parcelas herdam o cartão da compra: sem isso elas caem no saldo como débito.
+        cartaoId: transacaoOriginal.cartaoId,
       );
 
       // As parcelas substituem a compra original; mantê-la contaria o valor duas vezes.

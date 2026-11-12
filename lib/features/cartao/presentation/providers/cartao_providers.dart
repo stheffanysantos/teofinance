@@ -40,7 +40,7 @@ final pagamentosFaturaProvider = FutureProvider<List<FaturaPaga>>((ref) async {
 final faturasEmAbertoTotalProvider = Provider<double?>((ref) {
   final cartoes = ref.watch(cartoesProvider).valueOrNull ?? const [];
   if (cartoes.isEmpty) return null;
-  return totalEmAbertoNosCartoes(
+  return parteEmAbertoNosCartoes(
     cartoes: cartoes,
     transacoes: ref.watch(transacoesStreamProvider).valueOrNull ?? const [],
     pagamentos: ref.watch(pagamentosFaturaProvider).valueOrNull ?? const [],

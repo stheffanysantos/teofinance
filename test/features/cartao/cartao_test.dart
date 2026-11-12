@@ -214,22 +214,33 @@ void main() {
     });
   });
 
-  test('total em aberto soma só as faturas não pagas de todos os cartões', () {
+  test('parte em aberto nos cartões soma só faturas não pagas e, na compra dividida, só a parte do usuário', () {
     const a = Cartao(id: 'a', nome: 'A', diaFechamento: 25, diaVencimento: 5);
     const b = Cartao(id: 'b', nome: 'B', diaFechamento: 25, diaVencimento: 5);
-    Transacao compra(String id, String cartao, DateTime d, double v) =>
+    Transacao compra(String id, String? cartao, DateTime d, double v) =>
         Transacao(id: id, descricao: id, categoria: '', valor: v, data: d, cartaoId: cartao);
 
-    final total = totalEmAbertoNosCartoes(
+    final total = parteEmAbertoNosCartoes(
       cartoes: [a, b],
       transacoes: [
         compra('1', 'a', DateTime(2026, 10, 10), -100), // fatura de nov, paga abaixo
         compra('2', 'a', DateTime(2026, 10, 30), -70), // fatura de dez, em aberto
         compra('3', 'b', DateTime(2026, 10, 10), -50), // em aberto
+        Transacao(
+          id: '4',
+          descricao: 'dividida',
+          categoria: '',
+          valor: -78,
+          data: DateTime(2026, 10, 12),
+          cartaoId: 'b',
+          minhaParte: 39,
+          divididoCom: const ['Mãe'],
+        ), // o banco cobra 78, mas só 39 é do usuário
+        compra('5', null, DateTime(2026, 10, 12), -999), // sem cartão: não entra
       ],
       pagamentos: [FaturaPaga(cartaoId: 'a', ano: 2026, mes: 11, valor: 100, dataPagamento: DateTime(2026, 11, 5))],
     );
 
-    expect(total, 120);
+    expect(total, 159); // 70 + 50 + 39
   });
 }

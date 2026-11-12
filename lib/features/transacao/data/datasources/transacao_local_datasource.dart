@@ -83,8 +83,23 @@ class TransacaoLocalDataSource {
     );
   }
 
-  Future<void> definirCartao({required String id, String? cartaoId}) {
-    return (_db.update(_db.transactionsTable)..where((t) => t.id.equals(id))).write(
+  /// Define (ou tira, com [cartaoId] nulo) o cartão de uma compra. Numa compra
+  /// parcelada o cartão é da compra, não de cada parcela: todas as parcelas do
+  /// mesmo parcelamento mudam juntas, senão sobraria parcela caindo no saldo como
+  /// se fosse débito. Parcela já excluída (aguardando sincronizar) fica de fora.
+  Future<void> definirCartao({required String id, String? cartaoId}) async {
+    final linha = await (_db.select(_db.transactionsTable)..where((t) => t.id.equals(id))).getSingleOrNull();
+    if (linha == null) return;
+
+    final parcelamentoId = linha.parcelamentoId;
+    final alvo = _db.update(_db.transactionsTable)
+      ..where((t) {
+        final mesmaCompra = parcelamentoId == null
+            ? t.id.equals(id)
+            : (t.id.equals(id) | t.parcelamentoId.equals(parcelamentoId));
+        return mesmaCompra & t.syncStatus.equalsValue(SyncStatus.pendingDelete).not();
+      });
+    await alvo.write(
       TransactionsTableCompanion(
         cartaoId: Value(cartaoId),
         syncStatus: const Value(SyncStatus.pendingUpdate),
@@ -255,6 +270,7 @@ class TransacaoLocalDataSource {
     required double totalOriginal,
     required int numeroParcelas,
     required DateTime dataPrimeira,
+    String? cartaoId,
   }) async {
     final valores = valoresDasParcelas(totalOriginal, numeroParcelas);
     final parcelas = <Transacao>[];
@@ -277,6 +293,7 @@ class TransacaoLocalDataSource {
               ehParcela: const Value(true),
               statusParcela: const Value('pendente'),
               needsCategory: Value(categoria.trim().isEmpty),
+              cartaoId: Value(cartaoId),
             ),
           );
 
@@ -293,6 +310,7 @@ class TransacaoLocalDataSource {
           valorParcela: valorParcela,
           ehParcela: true,
           statusParcela: 'pendente',
+          cartaoId: cartaoId,
         ),
       );
     }
