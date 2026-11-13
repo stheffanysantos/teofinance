@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/core_providers.dart';
+import 'package:teofinance/features/auth/presentation/providers/auth_session_providers.dart';
 import '../../data/datasources/reconciliation_local_data_source.dart';
 import '../../data/repositories/reconciliation_repository_impl.dart';
 import '../../data/services/transacao_matcher_service.dart';
@@ -58,9 +59,10 @@ final reconciliationNotifierProvider =
 /// Status de reconciliação do mês corrente, para o card do dashboard.
 final statusReconciliacaoMesProvider = FutureProvider.autoDispose<ReconciliationStatus?>((ref) async {
   final agora = DateTime.now();
+  final usuario = await ref.watch(usuarioAtualProvider.future);
   final result = await ref.watch(obterStatusReconciliacaoUseCaseProvider)(
     ObterStatusReconciliacaoParams(
-      userId: ref.watch(firebaseAuthProvider).currentUser?.uid ?? '',
+      userId: usuario?.uid ?? '',
       dataInicio: DateTime(agora.year, agora.month),
       dataFim: DateTime(agora.year, agora.month + 1).subtract(const Duration(milliseconds: 1)),
     ),

@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../sync/sync_status.dart';
+import 'conexao/conexao.dart';
 import 'package:teofinance/core/database/tabelas_locais.dart';
 
 part 'app_database.g.dart';
@@ -231,7 +227,7 @@ class ContaTable extends Table {
   ContaTable,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  AppDatabase() : super(abrirConexao());
   AppDatabase.forTesting(super.executor);
 
   @override
@@ -323,10 +319,3 @@ class AppDatabase extends _$AppDatabase {
   }
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'teofinance.sqlite'));
-    return NativeDatabase.createInBackground(file);
-  });
-}

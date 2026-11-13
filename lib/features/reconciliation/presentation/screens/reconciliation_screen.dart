@@ -2,7 +2,7 @@ import 'package:teofinance/core/widgets/app_help_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/core_providers.dart';
+import 'package:teofinance/features/auth/presentation/providers/auth_session_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 import 'package:teofinance/features/transacao/domain/entities/transacao.dart';
@@ -37,10 +37,12 @@ class _ReconciliationScreenState extends ConsumerState<ReconciliationScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) => _executar());
   }
 
-  Future<void> _executar() {
+  Future<void> _executar() async {
     final inicio = DateTime(_mes.year, _mes.month);
     final fim = DateTime(_mes.year, _mes.month + 1).subtract(const Duration(milliseconds: 1));
-    final uid = ref.read(firebaseAuthProvider).currentUser?.uid ?? '';
+    // Espera a sessão: sem o uid o matching não roda.
+    final uid = (await ref.read(usuarioAtualProvider.future))?.uid ?? '';
+    if (!mounted) return;
     return ref.read(reconciliationNotifierProvider.notifier).fazerReconciliacao(
           userId: uid,
           dataInicio: inicio,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
+import 'package:teofinance/demo/modo_demo.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/estado_modelo.dart';
 import 'package:teofinance/features/ai_assistant/presentation/providers/ai_assistant_providers.dart';
 
@@ -31,6 +32,10 @@ class ModeloIaBanner extends ConsumerWidget {
           rotuloAcao: 'Tentar de novo',
           onAcao: gerenciador.baixar,
           erro: true,
+        ),
+      ModeloIndisponivel() when kModoDemo => const _Faixa(
+          mensagem: 'Na versão web o modelo de IA não roda (ele precisa do celular). '
+              'O assistente responde por regras, usando os dados da demonstração.',
         ),
       _ => const SizedBox.shrink(),
     };

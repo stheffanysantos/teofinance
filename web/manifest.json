@@ -1,11 +1,11 @@
 {
-    "name": "teofinance",
-    "short_name": "teofinance",
+    "name": "TeoFinance",
+    "short_name": "TeoFinance",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#082227",
+    "theme_color": "#082227",
+    "description": "Controle financeiro pessoal. Demonstração com dados fictícios.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
