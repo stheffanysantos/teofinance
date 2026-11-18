@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:teofinance/core/widgets/app_back_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
 import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
@@ -35,7 +36,9 @@ class BudgetScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: t.bg,
       body: SafeArea(
-        child: resumo.when(
+        child: Stack(
+          children: [
+        resumo.when(
           loading: () => Center(child: CircularProgressIndicator(color: t.pos)),
           error: (_, _) => Center(
             child: Text('Não foi possível carregar o orçamento.', style: TextStyle(color: t.sub)),
@@ -49,6 +52,9 @@ class BudgetScreen extends ConsumerWidget {
               onEditar: (o) => _abrirSheet(context, categoriasLivres: const [], existente: o),
             );
           },
+        ),
+            const Positioned(top: 4, left: 12, child: AppBackButton()),
+          ],
         ),
       ),
     );
@@ -70,7 +76,7 @@ class _Conteudo extends StatelessWidget {
     final temEnvelopes = resumo.envelopes.isNotEmpty;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 18,

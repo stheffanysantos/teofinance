@@ -1,3 +1,12 @@
+import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
+import 'package:teofinance/features/investimento/domain/entities/investimento.dart';
+import 'package:teofinance/features/cartao/domain/entities/cartao.dart';
+import 'package:teofinance/features/cartao/domain/repositories/cartao_repository.dart';
+import 'package:teofinance/features/cartao/presentation/providers/cartao_providers.dart';
+import 'package:teofinance/features/contas/domain/repositories/conta_repository.dart';
+import 'package:teofinance/features/contas/presentation/providers/conta_providers.dart';
+import 'package:teofinance/features/investimento/domain/repositories/investimento_repository.dart';
+import 'package:teofinance/features/investimento/presentation/providers/investimento_providers.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -230,6 +239,33 @@ class _FakeMetaRepository implements MetaRepository {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class _FakeCartaoRepository implements CartaoRepository {
+  @override
+  Future<Either<Failure, List<Cartao>>> listarCartoes() async => const Right([]);
+
+  @override
+  Future<Either<Failure, List<FaturaPaga>>> listarPagamentos() async => const Right([]);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeContaRepository implements ContaRepository {
+  @override
+  Stream<List<ContaAPagar>> observarTodas() => Stream.value(const []);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeInvestimentoRepository implements InvestimentoRepository {
+  @override
+  Future<Either<Failure, List<Investimento>>> listar() async => const Right([]);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 ProviderScope _pumpApp({
   TransacaoRepository? transacaoRepository,
   bool discreto = false,
@@ -240,6 +276,9 @@ ProviderScope _pumpApp({
       syncEngineProvider.overrideWithValue(null),
       orcamentoRepositoryProvider.overrideWithValue(_FakeOrcamentoRepository()),
       metaRepositoryProvider.overrideWithValue(_FakeMetaRepository()),
+      cartaoRepositoryProvider.overrideWithValue(_FakeCartaoRepository()),
+      contaRepositoryProvider.overrideWithValue(_FakeContaRepository()),
+      investimentoRepositoryProvider.overrideWithValue(_FakeInvestimentoRepository()),
       inferenciaLocalProvider.overrideWithValue(
         const InferenciaLocalIndisponivel(),
       ),

@@ -1,5 +1,6 @@
 import 'package:teofinance/features/meta/presentation/screens/aporte_meta_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:teofinance/core/widgets/app_back_button.dart';
 import 'package:teofinance/core/widgets/app_help_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,6 +33,7 @@ class GoalsScreen extends ConsumerWidget {
       body: SafeArea(
         child: Stack(
           children: [
+            const Positioned(top: 4, left: 12, child: AppBackButton()),
             const Positioned(
               top: 0,
               right: 8,
@@ -54,7 +56,7 @@ class GoalsScreen extends ConsumerWidget {
                     ),
                   )
                 : SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 90),
+                    padding: const EdgeInsets.fromLTRB(20, 56, 20, 90),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       spacing: 18,

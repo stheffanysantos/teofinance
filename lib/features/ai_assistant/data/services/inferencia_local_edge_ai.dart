@@ -59,19 +59,24 @@ class InferenciaLocalEdgeAi implements InferenciaLocal {
   }
 }
 
-/// Contexto de 2048 tokens (prompt + resposta) e resposta limitada a 512: o
-/// suficiente para o resumo financeiro sem estourar a memória do aparelho.
+/// Contexto de 4096 tokens (prompt + resposta) e resposta limitada a 256: cabe o
+/// resumo financeiro completo (cartões, contas, reembolsos, investimentos) sem
+/// estourar a memória do aparelho. Temperatura baixa para ele ler os números do
+/// resumo em vez de inventar.
 Future<String> _gerarComPlugin(String instrucoes, String mensagem) async {
   await garantirMotorEdgeAi();
   // CPU de propósito: no Galaxy S24 Ultra o delegado de GPU (OpenCL) derruba o app
   // com SIGSEGV ao carregar o modelo, e um crash nativo não dá para capturar.
   final modelo = await FlutterEdgeAi.getActiveModel(
-    maxTokens: 2048,
+    maxTokens: 4096,
     preferredBackend: PreferredBackend.cpu,
   );
   final chat = await modelo.createChat(
     systemInstruction: instrucoes,
-    maxOutputTokens: 512,
+    maxOutputTokens: 256,
+    temperature: 0.2,
+    topK: 20,
+    topP: 0.9,
   );
   try {
     await chat.addQueryChunk(Message.text(text: mensagem, isUser: true));
