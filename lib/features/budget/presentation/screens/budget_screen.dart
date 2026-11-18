@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:teofinance/core/widgets/app_back_button.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:teofinance/core/theme/app_theme.dart';
 import 'package:teofinance/features/categoria/presentation/providers/categoria_providers.dart';
@@ -32,10 +33,26 @@ class BudgetScreen extends ConsumerWidget {
     final t = context.tokens;
     final resumo = ref.watch(resumoOrcamentoProvider);
 
+    final dados = resumo.valueOrNull;
+    List<String> livresDe(ResumoOrcamento r) {
+      final usadas = r.envelopes.map((e) => e.categoria).toSet();
+      return DefinirLimiteScreen.categoriasOrcaveis(ref.watch(categoriasProvider)).where((c) => !usadas.contains(c)).toList();
+    }
+
     return Scaffold(
       backgroundColor: t.bg,
+      floatingActionButton: dados == null
+          ? null
+          : FloatingActionButton(
+              backgroundColor: t.accent,
+              foregroundColor: t.accentInk,
+              onPressed: () => _abrirSheet(context, categoriasLivres: livresDe(dados)),
+              child: const Icon(Icons.add),
+            ),
       body: SafeArea(
-        child: resumo.when(
+        child: Stack(
+          children: [
+        resumo.when(
           loading: () => Center(child: CircularProgressIndicator(color: t.pos)),
           error: (_, _) => Center(
             child: Text('Não foi possível carregar o orçamento.', style: TextStyle(color: t.sub)),
@@ -49,6 +66,9 @@ class BudgetScreen extends ConsumerWidget {
               onEditar: (o) => _abrirSheet(context, categoriasLivres: const [], existente: o),
             );
           },
+        ),
+            const Positioned(top: 4, left: 12, child: AppBackButton()),
+          ],
         ),
       ),
     );
@@ -70,7 +90,7 @@ class _Conteudo extends StatelessWidget {
     final temEnvelopes = resumo.envelopes.isNotEmpty;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+      padding: const EdgeInsets.fromLTRB(20, 56, 20, 88),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 18,
@@ -90,16 +110,6 @@ class _Conteudo extends StatelessWidget {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -.5, color: t.ink),
                   ),
                 ],
-              ),
-              GestureDetector(
-                onTap: onNovo,
-                child: Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(color: t.accent, borderRadius: BorderRadius.circular(12)),
-                  alignment: Alignment.center,
-                  child: Icon(Icons.add, size: 24, color: t.accentInk),
-                ),
               ),
             ],
           ),

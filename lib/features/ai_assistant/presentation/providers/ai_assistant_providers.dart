@@ -10,6 +10,9 @@ import 'package:teofinance/features/ai_assistant/domain/usecases/responder_pergu
 import 'package:teofinance/features/ai_model/data/services/gerenciador_modelo_edge_ai.dart';
 import 'package:teofinance/features/ai_model/data/services/modelo_local_edge_ai.dart';
 import 'package:teofinance/features/budget/presentation/providers/budget_providers.dart';
+import 'package:teofinance/features/cartao/presentation/providers/cartao_providers.dart';
+import 'package:teofinance/features/contas/presentation/providers/conta_providers.dart';
+import 'package:teofinance/features/investimento/presentation/providers/investimento_providers.dart';
 import 'package:teofinance/features/meta/presentation/providers/meta_providers.dart';
 import 'package:teofinance/features/transacao/presentation/providers/transacao_providers.dart';
 
@@ -41,6 +44,9 @@ final responderPerguntaUseCaseProvider = Provider((ref) {
     transacoes: ref.watch(transacaoRepositoryProvider),
     metas: ref.watch(metaRepositoryProvider),
     orcamentos: ref.watch(orcamentoRepositoryProvider),
+    cartoes: ref.watch(cartaoRepositoryProvider),
+    contas: ref.watch(contaRepositoryProvider),
+    investimentos: ref.watch(investimentoRepositoryProvider),
     motor: ref.watch(motorRespostaProvider),
   );
 });

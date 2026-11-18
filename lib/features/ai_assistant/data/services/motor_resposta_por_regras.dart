@@ -5,6 +5,8 @@ import 'package:teofinance/core/utils/currency_format.dart';
 import 'package:teofinance/core/utils/date_label.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/contexto_financeiro.dart';
 import 'package:teofinance/features/ai_assistant/domain/services/motor_resposta.dart';
+import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
+import 'package:teofinance/features/investimento/domain/entities/investimento.dart';
 
 /// Responde por regras determinísticas sobre o [ContextoFinanceiro] — sem
 /// modelo e sem rede. Serve de motor padrão e de fallback quando o Gemma local
@@ -19,6 +21,27 @@ class MotorRespostaPorRegras implements MotorResposta {
   }) async {
     final q = _normalizar(pergunta);
     final mes = kMesesPorExtenso[contexto.mes.month - 1];
+
+    // Assuntos além do mês corrente vêm primeiro: "fatura" ou "investimento"
+    // não podem cair numa categoria de mesmo nome criada pelo usuário.
+    final pessoa = contexto.reembolsos.keys.where((p) => q.contains(_normalizar(p))).firstOrNull;
+    if (pessoa != null || _citaAlgum(q, ['reembols', 'me deve', 'devendo', 'a receber', 'dividi'])) {
+      return Right(_sobreReembolsos(contexto, pessoa));
+    }
+    final cartao = contexto.cartoes.where((c) => q.contains(_normalizar(c.nome))).firstOrNull;
+    if (cartao != null || _citaAlgum(q, ['fatura', 'cartao', 'cartoes', 'limite do cartao'])) {
+      return Right(_sobreCartoes(contexto, cartao));
+    }
+    if (_citaAlgum(q, ['invest', 'rendimento', 'aplicacao', 'aplicado', 'tesouro', 'cdb', 'poupanca'])) {
+      return Right(_sobreInvestimentos(contexto));
+    }
+    if (_citaAlgum(q, ['parcela', 'parcelad'])) return Right(_sobreParcelas(contexto));
+    if (_citaAlgum(q, ['conta a pagar', 'contas a pagar', 'contas', 'boleto', 'vence', 'vencer', 'atrasad'])) {
+      return Right(_sobreContas(contexto));
+    }
+    if (_citaAlgum(q, ['mes passado', 'mes anterior', 'meses anteriores', 'comparad', 'evolu', 'historico'])) {
+      return Right(_sobreHistorico(contexto, mes));
+    }
 
     final categoria = _categoriaCitada(q, contexto);
     if (categoria != null) return Right(_sobreCategoria(categoria, contexto, mes));
@@ -105,6 +128,78 @@ class MotorRespostaPorRegras implements MotorResposta {
       if (maior != null) 'A maior despesa foi ${maior.key}, com ${formatCurrency(maior.value)}.',
     ].join(' ');
   }
+
+  String _sobreReembolsos(ContextoFinanceiro c, String? pessoa) {
+    if (c.reembolsos.isEmpty) return 'Ninguém te deve nada nas compras divididas.';
+    if (pessoa != null) {
+      return '$pessoa ainda te deve ${formatCurrency(c.reembolsos[pessoa] ?? 0)} pelas compras divididas.';
+    }
+    final lista = c.reembolsos.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final detalhe = lista.map((e) => '${e.key} (${formatCurrency(e.value)})').join(', ');
+    return 'Você tem ${formatCurrency(c.totalAReceber)} a receber das compras divididas: $detalhe.';
+  }
+
+  String _sobreCartoes(ContextoFinanceiro c, CartaoResumoIa? cartao) {
+    if (c.cartoes.isEmpty) return 'Você ainda não cadastrou cartões. Crie um na tela de Cartões.';
+    String linha(CartaoResumoIa x) {
+      if (x.faturaAberta <= 0) return '${x.nome}: sem fatura em aberto.';
+      final venc = x.vencimento == null ? '' : ', vence em ${_dia(x.vencimento!)}${x.vencida ? ' (vencida)' : ''}';
+      final limite = x.limite == null ? '' : ' (limite ${formatCurrency(x.limite!)})';
+      return '${x.nome}: fatura em aberto de ${formatCurrency(x.faturaAberta)}$venc$limite.';
+    }
+
+    if (cartao != null) return linha(cartao);
+    final total = c.totalFaturasAbertas;
+    final linhas = c.cartoes.map(linha).join(' ');
+    return total > 0 ? 'Faturas em aberto somam ${formatCurrency(total)}. $linhas' : 'Nenhuma fatura em aberto. $linhas';
+  }
+
+  String _sobreInvestimentos(ContextoFinanceiro c) {
+    if (c.investimentos.isEmpty) return 'Você ainda não registrou investimentos. Cadastre na tela de Investimentos.';
+    final resultado = c.totalInvestimentosAtual - c.totalInvestido;
+    final sinal = resultado >= 0 ? 'ganho' : 'perda';
+    final porTipo = <TipoInvestimento, double>{};
+    for (final i in c.investimentos) {
+      porTipo.update(i.tipo, (v) => v + i.valorAtual, ifAbsent: () => i.valorAtual);
+    }
+    final tipos = porTipo.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+    final maior = tipos.first;
+    return 'Você aplicou ${formatCurrency(c.totalInvestido)} e hoje tem ${formatCurrency(c.totalInvestimentosAtual)} '
+        '($sinal de ${formatCurrency(resultado.abs())}). A maior parte está em ${maior.key.rotulo}, '
+        'com ${formatCurrency(maior.value)}.';
+  }
+
+  String _sobreParcelas(ContextoFinanceiro c) {
+    if (c.parcelasFuturas == 0) return 'Você não tem parcelas futuras de compras parceladas.';
+    return 'Faltam ${c.parcelasFuturas} parcelas de compras parceladas, ${formatCurrency(c.valorParcelasFuturas)} no total.';
+  }
+
+  String _sobreContas(ContextoFinanceiro c) {
+    if (c.contasAPagar.isEmpty) return 'Você não tem contas a pagar em aberto.';
+    final hoje = c.hoje;
+    final atrasadas = hoje == null ? <ContaAPagar>[] : c.contasAPagar.where((x) => x.statusEm(hoje) == StatusConta.atrasada).toList();
+    final proximas = c.contasAPagar.take(3).map((x) => '${x.descricao} (${formatCurrency(x.valor)}, ${_dia(x.vencimento)})').join(', ');
+    final total = c.contasAPagar.fold(0.0, (a, x) => a + x.valor);
+    return [
+      'Você tem ${c.contasAPagar.length} contas em aberto, somando ${formatCurrency(total)}.',
+      if (atrasadas.isNotEmpty) '${atrasadas.length} atrasada(s).',
+      'Próximas: $proximas.',
+    ].join(' ');
+  }
+
+  String _sobreHistorico(ContextoFinanceiro c, String mes) {
+    if (c.historico.isEmpty) return 'Ainda não tenho meses anteriores para comparar com $mes.';
+    final anterior = c.historico.first;
+    final nome = kMesesPorExtenso[anterior.mes.month - 1];
+    final diferenca = c.despesas - anterior.despesas;
+    final comparacao = diferenca == 0
+        ? 'o mesmo valor'
+        : '${formatCurrency(diferenca.abs())} ${diferenca > 0 ? 'a mais' : 'a menos'}';
+    return 'Em $mes você gastou ${formatCurrency(c.despesas)}, $comparacao que em $nome (${formatCurrency(anterior.despesas)}). '
+        'As receitas foram ${formatCurrency(c.receitas)} contra ${formatCurrency(anterior.receitas)}.';
+  }
+
+  String _dia(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toString().padLeft(2, '0')}';
 
   bool _citaAlgum(String q, List<String> termos) => termos.any(q.contains);
 
