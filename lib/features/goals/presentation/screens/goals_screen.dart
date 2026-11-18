@@ -11,8 +11,18 @@ import '../../../meta/presentation/screens/nova_meta_screen.dart';
 import 'package:teofinance/core/widgets/app_amount_text.dart';
 
 const _meses = [
-  'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
-  'jul', 'ago', 'set', 'out', 'nov', 'dez',
+  'jan',
+  'fev',
+  'mar',
+  'abr',
+  'mai',
+  'jun',
+  'jul',
+  'ago',
+  'set',
+  'out',
+  'nov',
+  'dez',
 ];
 
 /// Tela de Metas — implementação fiel a Goals.dc.html, agora com dados
@@ -26,27 +36,24 @@ class GoalsScreen extends ConsumerWidget {
     final t = context.tokens;
     final metas = ref.watch(metasStreamProvider).valueOrNull ?? [];
     final total = metas.fold<double>(0, (acc, m) => acc + m.valorAtual);
-    final aporteSugerido = metas.fold<double>(0, (acc, m) => acc + m.aporteMensalSugerido);
+    final aporteSugerido = metas.fold<double>(
+      0,
+      (acc, m) => acc + m.aporteMensalSugerido,
+    );
 
     return Scaffold(
       backgroundColor: t.bg,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: t.accent,
+        foregroundColor: t.accentInk,
+        onPressed: () => Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const NovaMetaScreen())),
+        child: const Icon(Icons.add),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
-            const Positioned(top: 4, left: 12, child: AppBackButton()),
-            const Positioned(
-              top: 0,
-              right: 8,
-              child: AppHelpButton(
-                titulo: 'Como funcionam as metas',
-                paragrafos: [
-                  'Meta é um objetivo com valor e prazo: reserva de emergência, viagem, entrada de um carro.',
-                  'Meta ativa é a que ainda não foi concluída. O anel mostra quanto já foi guardado em relação ao valor-alvo.',
-                  'Quando você registra um aporte, o valor atual da meta sobe e o percentual avança.',
-                  'O "aporte mensal sugerido" é quanto guardar por mês para chegar no valor até o prazo; o total das metas aparece somado no topo da tela.',
-                ],
-              ),
-            ),
             metas.isEmpty
                 ? Center(
                     child: Text(
@@ -66,7 +73,11 @@ class GoalsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '${metas.length} metas ativas',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: t.sub),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: t.sub,
+                              ),
                             ),
                             Text(
                               'Metas',
@@ -82,14 +93,20 @@ class GoalsScreen extends ConsumerWidget {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(color: t.hero, borderRadius: BorderRadius.circular(12)),
+                          decoration: BoxDecoration(
+                            color: t.hero,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             spacing: 6,
                             children: [
                               Text(
                                 'Total guardado',
-                                style: TextStyle(color: Colors.white.withValues(alpha: .8), fontSize: 13),
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: .8),
+                                  fontSize: 13,
+                                ),
                               ),
                               AppAmountText(
                                 'R\$ ${total.toStringAsFixed(0)}',
@@ -122,26 +139,18 @@ class GoalsScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-            Positioned(
-              right: 16,
-              bottom: 16,
-              child: GestureDetector(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const NovaMetaScreen()),
-                ),
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: t.accent,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black.withValues(alpha: .22), blurRadius: 20, offset: const Offset(0, 8)),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Icon(Icons.add, size: 28, color: t.accentInk),
-                ),
+            const Positioned(top: 4, left: 12, child: AppBackButton()),
+            const Positioned(
+              top: 0,
+              right: 8,
+              child: AppHelpButton(
+                titulo: 'Como funcionam as metas',
+                paragrafos: [
+                  'Meta é um objetivo com valor e prazo: reserva de emergência, viagem, entrada de um carro.',
+                  'Meta ativa é a que ainda não foi concluída. O anel mostra quanto já foi guardado em relação ao valor-alvo.',
+                  'Quando você registra um aporte, o valor atual da meta sobe e o percentual avança.',
+                  'O "aporte mensal sugerido" é quanto guardar por mês para chegar no valor até o prazo; o total das metas aparece somado no topo da tela.',
+                ],
               ),
             ),
           ],
@@ -157,16 +166,18 @@ class _MetaCard extends ConsumerWidget {
   final Meta meta;
 
   Future<void> _aportar(BuildContext context, WidgetRef ref) {
-    return Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => AporteMetaScreen(meta: meta)),
-    );
+    return Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => AporteMetaScreen(meta: meta)));
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final t = context.tokens;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final ringColor = meta.progresso >= .8 ? t.pos : (isDark ? t.accent : t.hero);
+    final ringColor = meta.progresso >= .8
+        ? t.pos
+        : (isDark ? t.accent : t.hero);
     final eta = '${_meses[meta.prazo.month - 1]} ${meta.prazo.year}';
 
     return GestureDetector(
@@ -188,28 +199,58 @@ class _MetaCard extends ConsumerWidget {
                 Container(
                   width: 40,
                   height: 40,
-                  decoration: BoxDecoration(color: t.track, borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(
+                    color: t.track,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                   alignment: Alignment.center,
                   child: Text(
-                    meta.nome.isNotEmpty ? meta.nome.substring(0, 1).toUpperCase() : '?',
-                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: t.ink),
+                    meta.nome.isNotEmpty
+                        ? meta.nome.substring(0, 1).toUpperCase()
+                        : '?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: t.ink,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(meta.nome, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: t.ink)),
+                      Text(
+                        meta.nome,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: t.ink,
+                        ),
+                      ),
                       if (meta.banco != null)
-                        Text(meta.banco!, style: TextStyle(fontSize: 12, color: t.sub)),
+                        Text(
+                          meta.banco!,
+                          style: TextStyle(fontSize: 12, color: t.sub),
+                        ),
                       Text(
                         'Prazo estimado · $eta',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: t.sub),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: t.sub,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                Text('${meta.percentual}%', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: t.ink)),
+                Text(
+                  '${meta.percentual}%',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                    color: t.ink,
+                  ),
+                ),
               ],
             ),
             ClipRRect(

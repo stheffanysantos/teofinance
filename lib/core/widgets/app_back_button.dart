@@ -14,10 +14,11 @@ class AppBackButton extends StatelessWidget {
       button: true,
       label: 'Voltar',
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).maybePop(),
         child: Container(
-          width: 44,
-          height: 44,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: t.card,
             border: Border.all(color: t.line),
