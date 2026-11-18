@@ -2,6 +2,9 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:teofinance/core/database/app_database.dart';
 import 'package:teofinance/demo/dados_demo.dart';
+import 'package:teofinance/features/ai_assistant/data/services/motor_resposta_por_regras.dart';
+import 'package:teofinance/features/ai_assistant/domain/services/construir_contexto.dart';
+import 'package:teofinance/features/ai_assistant/domain/services/montar_prompt.dart';
 import 'package:teofinance/features/cartao/data/datasources/cartao_local_data_source.dart';
 import 'package:teofinance/features/cartao/domain/services/resumo_faturas.dart';
 import 'package:teofinance/features/contas/data/datasources/conta_local_datasource.dart';
@@ -70,5 +73,41 @@ void main() {
     // Reembolsos: há pendentes e já pagos.
     expect(transacoes.where((t) => t.ehDividida && t.aReceber > 0), isNotEmpty);
     expect(transacoes.where((t) => t.ehDividida && t.aReceber == 0), isNotEmpty);
+  });
+
+  test('o assistente enxerga os dados da demonstração e responde com eles', () async {
+    await semearDadosDemo(db);
+    final contexto = construirContexto(
+      mes: DateTime.now(),
+      limites: const [],
+      metas: await MetaLocalDataSource(db).observarTodas().first,
+      transacoes: await TransacaoLocalDataSource(db).observarTodas().first,
+      cartoes: await CartaoLocalDataSource(db).listarCartoes(),
+      pagamentos: await CartaoLocalDataSource(db).listarPagamentos(),
+      contas: await ContaLocalDataSource(db).observarTodas().first,
+      investimentos: await InvestimentoLocalDataSource(db).listar(),
+    );
+
+    expect(contexto.cartoes, hasLength(2));
+    expect(contexto.reembolsos, isNotEmpty);
+    expect(contexto.contasAPagar, isNotEmpty);
+    expect(contexto.investimentos, hasLength(6));
+    expect(contexto.historico, isNotEmpty);
+
+    const motor = MotorRespostaPorRegras();
+    for (final q in [
+      'quanto minha mãe me deve?',
+      'como estão as faturas dos cartões?',
+      'quais contas vencem?',
+      'como estão meus investimentos?',
+      'gastei mais que no mês passado?',
+    ]) {
+      final r = (await motor.responder(pergunta: q, contexto: contexto)).getOrElse((_) => '');
+      // ignore: avoid_print
+      print('P: $q -> R: $r');
+      expect(r, isNotEmpty);
+    }
+    // ignore: avoid_print
+    print(montarPrompt(pergunta: 'oi', contexto: contexto).mensagem);
   });
 }

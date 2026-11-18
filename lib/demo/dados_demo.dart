@@ -229,7 +229,8 @@ Future<void> semearDadosDemo(AppDatabase db) async {
   for (final e in totais.entries) {
     final (cartaoId, ano, mes) = e.key;
     final venc = DateTime(ano, mes, cartaoPorId[cartaoId]!.diaVencimento);
-    if (venc.isBefore(dia(1, 0))) {
+    // Toda fatura que já venceu foi paga: a demo não mostra cartão atrasado.
+    if (!venc.isAfter(hojeDia)) {
       await cartoes.registrarPagamento(
         FaturaPaga(cartaoId: cartaoId, ano: ano, mes: mes, valor: _centavos(e.value), dataPagamento: venc),
       );
