@@ -19,6 +19,7 @@ const _maxCategorias = 8;
 const _maxEnvelopes = 10;
 const _maxMetas = 5;
 const _maxCartoes = 4;
+const _maxMesesDeFatura = 6;
 const _maxReembolsos = 5;
 const _maxContas = 6;
 const _maxTiposInvestimento = 6;
@@ -91,6 +92,13 @@ PromptAssistente montarPrompt({
       final venc = c.vencimento == null ? '' : ', vence em ${_data(c.vencimento!)}${c.vencida ? ' (vencida)' : ''}';
       final limite = c.limite == null ? '' : ', limite ${formatCurrency(c.limite!)}';
       b.writeln('- ${c.nome}: ${formatCurrency(c.faturaAberta)}$venc$limite');
+    }
+  }
+
+  if (contexto.faturasPorMes.length > 1) {
+    b.writeln('Faturas por mês de vencimento (todos os cartões, o que o banco cobra):');
+    for (final m in contexto.faturasPorMes.take(_maxMesesDeFatura)) {
+      b.writeln('- ${kMesesPorExtenso[m.mes - 1]} de ${m.ano}: ${formatCurrency(m.total)}');
     }
   }
 

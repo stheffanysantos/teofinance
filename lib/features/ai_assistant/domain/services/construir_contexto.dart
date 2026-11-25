@@ -3,6 +3,7 @@ import 'package:teofinance/features/ai_assistant/domain/entities/contexto_financ
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
 import 'package:teofinance/features/budget/domain/services/calcular_envelopes.dart';
 import 'package:teofinance/features/cartao/domain/entities/cartao.dart';
+import 'package:teofinance/features/cartao/domain/services/projecao_faturas.dart';
 import 'package:teofinance/features/cartao/domain/services/resumo_faturas.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/investimento/domain/entities/investimento.dart';
@@ -96,6 +97,7 @@ ContextoFinanceiro construirContexto({
     metas: metas,
     historico: historico,
     cartoes: resumoCartoes,
+    faturasPorMes: projetarFaturasPorMes(cartoes: cartoes, transacoes: transacoes, pagamentos: pagamentos, hoje: hoje),
     reembolsos: reembolsos,
     contasAPagar: emAberto,
     investimentos: investimentos,

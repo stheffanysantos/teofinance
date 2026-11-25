@@ -12,6 +12,7 @@ import 'package:teofinance/features/cartao/domain/entities/cartao.dart';
 import 'package:teofinance/features/cartao/presentation/providers/cartao_providers.dart';
 import 'package:teofinance/features/cartao/presentation/screens/cartao_form_screen.dart';
 import 'package:teofinance/features/cartao/presentation/screens/fatura_screen.dart';
+import 'package:teofinance/features/cartao/presentation/widgets/proximas_faturas_secao.dart';
 import 'package:teofinance/features/lembrete/presentation/providers/lembrete_providers.dart';
 
 /// Lista de cartões, com acesso à fatura de cada um.
@@ -103,6 +104,7 @@ class CartoesScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const ProximasFaturasSecao(),
                   for (final c in cartoes)
                     ListTile(
                       leading: const Icon(Icons.credit_card),

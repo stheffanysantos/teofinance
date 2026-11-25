@@ -5,6 +5,7 @@ import 'package:teofinance/features/cartao/data/datasources/cartao_local_data_so
 import 'package:teofinance/features/cartao/data/repositories/cartao_repository_impl.dart';
 import 'package:teofinance/features/cartao/domain/entities/cartao.dart';
 import 'package:teofinance/features/cartao/domain/repositories/cartao_repository.dart';
+import 'package:teofinance/features/cartao/domain/services/projecao_faturas.dart';
 import 'package:teofinance/features/cartao/domain/services/resumo_faturas.dart';
 import 'package:teofinance/features/cartao/domain/usecases/pagamento_fatura_usecases.dart';
 import 'package:teofinance/features/cartao/domain/usecases/salvar_cartao_usecase.dart';
@@ -44,5 +45,18 @@ final faturasEmAbertoTotalProvider = Provider<double?>((ref) {
     cartoes: cartoes,
     transacoes: ref.watch(transacoesStreamProvider).valueOrNull ?? const [],
     pagamentos: ref.watch(pagamentosFaturaProvider).valueOrNull ?? const [],
+  );
+});
+
+/// Faturas em aberto separadas pelo mês de vencimento, de todos os cartões.
+/// Vazio se não há cartão ou fatura em aberto.
+final proximasFaturasProvider = Provider<List<MesDeFaturas>>((ref) {
+  final cartoes = ref.watch(cartoesProvider).valueOrNull ?? const [];
+  if (cartoes.isEmpty) return const [];
+  return projetarFaturasPorMes(
+    cartoes: cartoes,
+    transacoes: ref.watch(transacoesStreamProvider).valueOrNull ?? const [],
+    pagamentos: ref.watch(pagamentosFaturaProvider).valueOrNull ?? const [],
+    hoje: DateTime.now(),
   );
 });
