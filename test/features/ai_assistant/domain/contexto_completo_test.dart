@@ -72,6 +72,7 @@ void main() {
     expect(c.cartoes.single.faturaAberta, greaterThan(150), reason: 'o banco cobra os 156, não só a parte do usuário');
     expect(c.contasAPagar.map((x) => x.descricao), ['Internet', 'Aluguel'], reason: 'só abertas, a mais próxima primeiro');
     expect(c.totalInvestimentosAtual, 1100);
+    expect(c.faturasPorMes.map((m) => m.mes), [12, 1], reason: 'dezembro e janeiro, por mês de vencimento');
     expect(c.parcelasFuturas, 1);
     expect(c.valorParcelasFuturas, 50);
   });
@@ -88,6 +89,9 @@ void main() {
     expect(p.mensagem, contains('Contas a pagar em aberto'));
     expect(p.mensagem, contains('Internet'));
     expect(p.mensagem, contains('Investimentos: aplicado'));
+    expect(p.mensagem, contains('Faturas por mês de vencimento'));
+    expect(p.mensagem, contains('dezembro de 2026'));
+    expect(p.mensagem, contains('janeiro de 2027'));
     expect(p.mensagem, contains('Parcelas futuras'));
     expect(p.instrucoes, contains('Exemplos'));
     expect(p.instrucoes, contains('exatamente como estão'));
@@ -130,6 +134,13 @@ void main() {
       final r = await perguntar('Quanto está a fatura do Nubank?');
       expect(r, contains('Nubank'));
       expect(r, contains('fatura em aberto'));
+    });
+
+    test('faturas por mês e de um mês específico', () async {
+      final geral = await perguntar('Como ficam as faturas dos próximos meses?');
+      expect(geral, contains('dezembro'));
+      expect(geral, contains('janeiro'));
+      expect(await perguntar('Quanto vence de fatura em janeiro?'), contains('janeiro de 2027'));
     });
 
     test('investimentos', () async {

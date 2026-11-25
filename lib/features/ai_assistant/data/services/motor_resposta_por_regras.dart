@@ -5,6 +5,7 @@ import 'package:teofinance/core/utils/currency_format.dart';
 import 'package:teofinance/core/utils/date_label.dart';
 import 'package:teofinance/features/ai_assistant/domain/entities/contexto_financeiro.dart';
 import 'package:teofinance/features/ai_assistant/domain/services/motor_resposta.dart';
+import 'package:teofinance/features/cartao/domain/services/projecao_faturas.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/investimento/domain/entities/investimento.dart';
 
@@ -30,6 +31,11 @@ class MotorRespostaPorRegras implements MotorResposta {
     }
     final cartao = contexto.cartoes.where((c) => q.contains(_normalizar(c.nome))).firstOrNull;
     if (cartao != null || _citaAlgum(q, ['fatura', 'cartao', 'cartoes', 'limite do cartao'])) {
+      final mesCitado = _mesDeFaturaCitado(q, contexto);
+      if (mesCitado != null) return Right(_sobreFaturaDoMes(mesCitado));
+      if (_citaAlgum(q, ['proximo', 'proxima', 'mes que vem', 'por mes', 'meses'])) {
+        return Right(_sobreFaturasPorMes(contexto));
+      }
       return Right(_sobreCartoes(contexto, cartao));
     }
     if (_citaAlgum(q, ['invest', 'rendimento', 'aplicacao', 'aplicado', 'tesouro', 'cdb', 'poupanca'])) {
@@ -152,6 +158,26 @@ class MotorRespostaPorRegras implements MotorResposta {
     final total = c.totalFaturasAbertas;
     final linhas = c.cartoes.map(linha).join(' ');
     return total > 0 ? 'Faturas em aberto somam ${formatCurrency(total)}. $linhas' : 'Nenhuma fatura em aberto. $linhas';
+  }
+
+  MesDeFaturas? _mesDeFaturaCitado(String q, ContextoFinanceiro c) {
+    for (final m in c.faturasPorMes) {
+      if (q.contains(_normalizar(kMesesPorExtenso[m.mes - 1]))) return m;
+    }
+    return null;
+  }
+
+  String _sobreFaturaDoMes(MesDeFaturas m) {
+    final nome = kMesesPorExtenso[m.mes - 1];
+    final porCartao = m.faturas.map((f) => '${f.cartao.nome} (${formatCurrency(f.total)})').join(', ');
+    return 'Em $nome de ${m.ano} vencem ${formatCurrency(m.total)} em faturas: $porCartao.';
+  }
+
+  String _sobreFaturasPorMes(ContextoFinanceiro c) {
+    if (c.faturasPorMes.isEmpty) return 'Você não tem faturas em aberto nos próximos meses.';
+    final linhas = c.faturasPorMes.take(6).map((m) => '${kMesesPorExtenso[m.mes - 1]}: ${formatCurrency(m.total)}').join('; ');
+    final total = c.faturasPorMes.fold(0.0, (a, m) => a + m.total);
+    return 'Suas faturas em aberto somam ${formatCurrency(total)}, por mês de vencimento: $linhas.';
   }
 
   String _sobreInvestimentos(ContextoFinanceiro c) {

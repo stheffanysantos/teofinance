@@ -11,6 +11,7 @@ import '../../../contas/presentation/screens/notificacoes_screen.dart';
 import '../../../cartao/presentation/screens/cartoes_screen.dart';
 import '../../../categoria/presentation/screens/categorias_screen.dart';
 import '../../../investimento/presentation/screens/investimentos_screen.dart';
+import '../../../planejamento/presentation/screens/planejamento_screen.dart';
 import '../../../lembrete/presentation/screens/lembretes_screen.dart';
 import '../../../lgpd/presentation/screens/meus_dados_screen.dart';
 import '../../../relatorio/presentation/screens/relatorios_screen.dart';
@@ -117,6 +118,13 @@ class ProfileScreen extends ConsumerWidget {
                             title: 'Minhas rendas',
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(builder: (_) => const RendaScreen()),
+                            ),
+                          ),
+                          SettingsNavTile(
+                            icon: Icon(Icons.insights_outlined, size: 18, color: t.ink),
+                            title: 'Planejamento',
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const PlanejamentoScreen()),
                             ),
                           ),
                           SettingsNavTile(

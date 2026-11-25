@@ -1,4 +1,5 @@
 import 'package:teofinance/features/budget/domain/entities/orcamento.dart';
+import 'package:teofinance/features/cartao/domain/services/projecao_faturas.dart';
 import 'package:teofinance/features/contas/domain/entities/conta_a_pagar.dart';
 import 'package:teofinance/features/investimento/domain/entities/investimento.dart';
 import 'package:teofinance/features/meta/domain/entities/meta.dart';
@@ -58,6 +59,7 @@ class ContextoFinanceiro {
     this.hoje,
     this.historico = const [],
     this.cartoes = const [],
+    this.faturasPorMes = const [],
     this.reembolsos = const {},
     this.contasAPagar = const [],
     this.investimentos = const [],
@@ -80,6 +82,9 @@ class ContextoFinanceiro {
   /// Meses anteriores, do mais recente para o mais antigo.
   final List<MesResumo> historico;
   final List<CartaoResumoIa> cartoes;
+
+  /// Faturas em aberto por mês de vencimento, do mais próximo ao mais distante.
+  final List<MesDeFaturas> faturasPorMes;
 
   /// Quanto cada pessoa ainda deve ao usuário nas compras divididas.
   final Map<String, double> reembolsos;

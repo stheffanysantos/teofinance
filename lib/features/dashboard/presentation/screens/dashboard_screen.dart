@@ -18,6 +18,7 @@ import '../../../goals/presentation/screens/goals_screen.dart';
 import '../../../meta/presentation/providers/meta_providers.dart';
 import '../../../reconciliation/presentation/providers/reconciliation_providers.dart';
 import '../../../reconciliation/presentation/screens/reconciliation_screen.dart';
+import 'package:teofinance/features/planejamento/presentation/providers/planejamento_providers.dart';
 import '../providers/dashboard_view_providers.dart';
 import '../providers/dashboard_summary_provider.dart';
 import '../widgets/balance_hero_card.dart';
@@ -47,6 +48,7 @@ class DashboardScreen extends ConsumerWidget {
     // fatura é paga); o saldo depois das faturas fica numa linha abaixo.
     final saldoNaConta = summary.saldoTotal + (faturasEmAberto ?? 0);
     final saldoFormatado = formatCurrency(saldoNaConta).split(',');
+    final aPagar = ref.watch(aPagarNoProximoMesProvider);
 
     return SafeArea(
       bottom: false,
@@ -64,6 +66,8 @@ class DashboardScreen extends ConsumerWidget {
               titulo: faturasEmAberto == null ? 'Saldo total' : 'Saldo na conta',
               faturasEmAberto: faturasEmAberto == null ? null : formatCurrency(faturasEmAberto),
               saldoAposFaturas: faturasEmAberto == null ? null : formatCurrency(summary.saldoTotal),
+              aPagarProximoMes: aPagar.total > 0 ? formatCurrency(aPagar.total) : null,
+              rotuloAPagar: 'A pagar em ${kMesesPorExtenso[aPagar.mes - 1]}',
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const AjustarSaldoScreen()),
               ),
@@ -316,31 +320,6 @@ class _TopBar extends ConsumerWidget {
         Row(
           spacing: 10,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: t.accent,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 7,
-                children: [
-                  Transform.rotate(
-                    angle: 0.785398,
-                    child: Container(width: 8, height: 8, color: t.accentInk),
-                  ),
-                  Text(
-                    '7 dias',
-                    style: TextStyle(
-                      color: t.accentInk,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
             InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () => Navigator.of(

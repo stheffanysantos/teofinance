@@ -19,16 +19,19 @@ String _data(DateTime d) => '${d.day.toString().padLeft(2, '0')}/${d.month.toStr
 
 /// Fatura de um cartão: período, vencimento, total, compras e situação.
 class FaturaScreen extends ConsumerStatefulWidget {
-  const FaturaScreen({required this.cartaoId, super.key});
+  const FaturaScreen({required this.cartaoId, this.faturaInicial, super.key});
 
   final String cartaoId;
+
+  /// Fatura (mês e ano do vencimento) que já abre selecionada; sem ela, abre a fatura corrente.
+  final ({int ano, int mes})? faturaInicial;
 
   @override
   ConsumerState<FaturaScreen> createState() => _FaturaScreenState();
 }
 
 class _FaturaScreenState extends ConsumerState<FaturaScreen> {
-  ({int ano, int mes})? _ref;
+  late ({int ano, int mes})? _ref = widget.faturaInicial;
 
   /// Tira o cartão das compras: elas voltam a "sem cartão" e podem ser
   /// corrigidas e vinculadas de novo.
