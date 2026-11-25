@@ -17,7 +17,13 @@ class BalanceHeroCard extends ConsumerWidget {
     this.titulo = 'Saldo total',
     this.faturasEmAberto,
     this.saldoAposFaturas,
+    this.aPagarProximoMes,
+    this.rotuloAPagar,
   });
+
+  /// Cartões (só a sua parte) e contas que vencem no mês seguinte.
+  final String? aPagarProximoMes;
+  final String? rotuloAPagar;
 
   final String integerPart;
   final String centsPart;
@@ -118,6 +124,10 @@ class BalanceHeroCard extends ConsumerWidget {
             if (faturasEmAberto != null && saldoAposFaturas != null) ...[
               const SizedBox(height: 12),
               _LinhaSaldo(rotulo: 'Faturas em aberto', valor: faturasEmAberto!),
+              if (aPagarProximoMes != null) ...[
+                const SizedBox(height: 4),
+                _LinhaSaldo(rotulo: rotuloAPagar ?? 'A pagar no mês que vem', valor: aPagarProximoMes!),
+              ],
               const SizedBox(height: 4),
               _LinhaSaldo(rotulo: 'Saldo após faturas', valor: saldoAposFaturas!),
             ],
